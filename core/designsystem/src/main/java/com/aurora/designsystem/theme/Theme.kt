@@ -1,4 +1,4 @@
-package com.aurora.travlog.ui.theme
+package com.aurora.designsystem.theme
 
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme

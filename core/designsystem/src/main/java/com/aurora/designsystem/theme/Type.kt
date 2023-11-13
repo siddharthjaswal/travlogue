@@ -1,4 +1,4 @@
-package com.aurora.travlog.ui.theme
+package com.aurora.designsystem.theme
 
 import androidx.compose.material3.Typography
 import androidx.compose.ui.text.TextStyle
