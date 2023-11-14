@@ -20,6 +20,7 @@ hiltExt = "1.1.0"
 androidxHiltNavigationCompose = "1.1.0"
 appcompat = "1.6.1"
 material = "1.10.0"
+kotlin_compiler_extension_version = "1.5.4"
 
 
 [libraries]
