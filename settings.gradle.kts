@@ -22,3 +22,4 @@ dependencyResolutionManagement {
 rootProject.name = "TravLog"
 include(":app")
 include(":core:designsystem")
+include(":feature:home")

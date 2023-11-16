@@ -4,7 +4,7 @@ plugins {
 }
 
 android {
-    namespace = "com.aurora.designsystem"
+    namespace = "com.aurora.home"
     compileSdk= libs.versions.compile.sdk.version.get().toInt()
 
     defaultConfig {
@@ -27,9 +27,6 @@ android {
         sourceCompatibility = JavaVersion.VERSION_1_8
         targetCompatibility = JavaVersion.VERSION_1_8
     }
-    buildFeatures {
-        compose = true
-    }
     composeOptions {
         kotlinCompilerExtensionVersion = libs.versions.kotlin.compiler.extension.version.get()
     }
@@ -39,7 +36,6 @@ android {
 }
 
 dependencies {
-
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)
 
