@@ -21,6 +21,8 @@ androidxHiltNavigationCompose = "1.1.0"
 appcompat = "1.6.1"
 material = "1.10.0"
 kotlin_compiler_extension_version = "1.5.4"
+navigationFragmentKtx = "2.7.5"
+navigationUiKtx = "2.7.5"
 
 
 [libraries]
@@ -47,6 +49,8 @@ hilt-ext-compiler = { group = "androidx.hilt", name = "hilt-compiler", version.r
 hilt-ext-work = { group = "androidx.hilt", name = "hilt-work", version.ref = "hiltExt" }
 androidx-appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "appcompat" }
 material = { group = "com.google.android.material", name = "material", version.ref = "material" }
+androidx-navigation-fragment-ktx = { group = "androidx.navigation", name = "navigation-fragment-ktx", version.ref = "navigationFragmentKtx" }
+androidx-navigation-ui-ktx = { group = "androidx.navigation", name = "navigation-ui-ktx", version.ref = "navigationUiKtx" }
 
 
 [plugins]
