@@ -1,4 +1,4 @@
-package com.aurora.travlog.navigation
+package com.aurora.travlogue.navigation
 
 import androidx.compose.runtime.Composable
 import androidx.navigation.NavGraph.Companion.findStartDestination

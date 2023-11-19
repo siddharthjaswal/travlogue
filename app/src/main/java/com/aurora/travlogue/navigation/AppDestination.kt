@@ -1,4 +1,4 @@
-package com.aurora.travlog.navigation
+package com.aurora.travlogue.navigation
 
 interface AppDestination {
     val route: String

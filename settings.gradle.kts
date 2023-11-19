@@ -19,7 +19,7 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "TravLog"
+rootProject.name = "Travlogue"
 include(":app")
 include(":core:designsystem")
 include(":feature:home")
