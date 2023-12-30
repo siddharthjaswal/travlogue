@@ -6,7 +6,7 @@ compile_sdk_version = "34"
 target_sdk_version = "34"
 min_sdk_version = "28"
 
-agp = "8.3.0-alpha14"
+agp = "8.4.0-alpha01"
 kotlin = "1.9.20"
 coreKtx = "1.12.0"
 junit = "4.13.2"
