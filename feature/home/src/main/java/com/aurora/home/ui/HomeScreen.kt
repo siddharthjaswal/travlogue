@@ -12,11 +12,13 @@ import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.aurora.designsystem.theme.AppTheme
 
 @Composable
 fun HomeScreen(
@@ -24,6 +26,7 @@ fun HomeScreen(
 ) {
     Scaffold(
         topBar = {
+            TopBarLayout()
         },
         bottomBar = {
         },
@@ -65,5 +68,12 @@ internal fun Fab(onClickCreate: () -> Unit = {}) {
 @Preview(name = "Dark Mode", uiMode = Configuration.UI_MODE_NIGHT_YES, showBackground = true)
 @Composable
 internal fun Preview() {
-    HomeScreen()
+    AppTheme {
+        Surface(
+            modifier = Modifier.fillMaxSize(),
+            color = MaterialTheme.colorScheme.background
+        ) {
+            HomeScreen()
+        }
+    }
 }
