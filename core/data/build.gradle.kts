@@ -5,10 +5,10 @@ plugins {
 
 android {
     namespace = "com.aurora.data"
-    compileSdk = 34
+    compileSdk= libs.versions.compile.sdk.version.get().toInt()
 
     defaultConfig {
-        minSdk = 22
+        minSdk = libs.versions.min.sdk.version.get().toInt()
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles("consumer-rules.pro")
