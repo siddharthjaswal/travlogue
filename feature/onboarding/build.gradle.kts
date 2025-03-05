@@ -42,6 +42,7 @@ android {
 dependencies {
 
     implementation(project(":core:designsystem"))
+    implementation(project(":core:widgets"))
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)
 

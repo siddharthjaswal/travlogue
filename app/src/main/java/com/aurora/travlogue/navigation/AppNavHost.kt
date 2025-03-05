@@ -24,7 +24,9 @@ fun AppNavHost(
             )
         }
         composable(route = Onboarding.route) {
-            OnboardingScreen()
+            OnboardingScreen(onBackPressed = {
+                navController.popBackStack()
+            })
         }
     }
 }

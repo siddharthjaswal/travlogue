@@ -30,7 +30,7 @@ fun TravLogue() {
             text = "Logue",
             fontFamily = dotoFamily,
             fontWeight = FontWeight.Black,
-            fontSize = 22.sp,
+            fontSize = 24.sp,
             color = MaterialTheme.colorScheme.primary
         )
     }

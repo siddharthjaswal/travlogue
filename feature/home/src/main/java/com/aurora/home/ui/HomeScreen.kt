@@ -31,17 +31,16 @@ fun HomeScreen(
         bottomBar = {
         },
         floatingActionButton = {
-            Fab(onClickCreate)
+            CreatePlan(onClickCreate)
         },
         containerColor = MaterialTheme.colorScheme.background
     ) { innerPadding ->
-        EmptyState()
         Column(
             modifier = Modifier
                 .padding(innerPadding),
             verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
-
+            EmptyState()
         }
 
     }
@@ -58,7 +57,7 @@ internal fun EmptyState() {
 }
 
 @Composable
-internal fun Fab(onClickCreate: () -> Unit = {}) {
+internal fun CreatePlan(onClickCreate: () -> Unit = {}) {
     FloatingActionButton(onClick = { onClickCreate() }) {
         Icon(Icons.Default.Add, contentDescription = "Add")
     }
