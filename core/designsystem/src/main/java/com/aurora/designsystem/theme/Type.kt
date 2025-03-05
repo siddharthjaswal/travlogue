@@ -42,3 +42,7 @@ val dotoFamily = FontFamily(
     Font(R.font.doto_medium, FontWeight.Medium),
     Font(R.font.doto_bold, FontWeight.Bold)
 )
+
+val pacificoFamily = FontFamily(
+    Font(R.font.pacifico_regular, FontWeight.Light),
+)

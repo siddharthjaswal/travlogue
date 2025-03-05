@@ -2,17 +2,27 @@ package com.aurora.home.ui
 
 import android.content.res.Configuration
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.size
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Checklist
+import androidx.compose.material.icons.filled.Flight
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.aurora.designsystem.theme.AppTheme
 import com.aurora.designsystem.theme.dotoFamily
+import com.aurora.designsystem.theme.pacificoFamily
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -20,18 +30,19 @@ internal fun TopBarLayout() {
 
     TopAppBar(
         title = {
-            Row {
+            Row(modifier = Modifier, verticalAlignment = Alignment.CenterVertically) {
                 Text(
-                    text = "Trav ",
-                    fontWeight = FontWeight.Bold,
+                    text = "Trav",
+                    fontFamily = pacificoFamily,
                     fontSize = 20.sp,
                     color = MaterialTheme.colorScheme.primary
                 )
+                Spacer(Modifier.size(3.dp))
                 Text(
                     text = "Logue",
                     fontFamily = dotoFamily,
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 20.sp,
+                    fontWeight = FontWeight.Black,
+                    fontSize = 22.sp,
                     color = MaterialTheme.colorScheme.primary
                 )
             }
