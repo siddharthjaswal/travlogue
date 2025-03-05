@@ -23,6 +23,7 @@ import androidx.compose.ui.unit.sp
 import com.aurora.designsystem.theme.AppTheme
 import com.aurora.designsystem.theme.dotoFamily
 import com.aurora.designsystem.theme.pacificoFamily
+import com.aurora.widgets.TravLogue
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -30,22 +31,7 @@ internal fun TopBarLayout() {
 
     TopAppBar(
         title = {
-            Row(modifier = Modifier, verticalAlignment = Alignment.CenterVertically) {
-                Text(
-                    text = "Trav",
-                    fontFamily = pacificoFamily,
-                    fontSize = 20.sp,
-                    color = MaterialTheme.colorScheme.primary
-                )
-                Spacer(Modifier.size(3.dp))
-                Text(
-                    text = "Logue",
-                    fontFamily = dotoFamily,
-                    fontWeight = FontWeight.Black,
-                    fontSize = 22.sp,
-                    color = MaterialTheme.colorScheme.primary
-                )
-            }
+            TravLogue()
         },
         actions = {
 
