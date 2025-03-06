@@ -8,6 +8,6 @@ object Home : AppDestination {
     override val route = "home"
 }
 
-object Onboarding : AppDestination {
-    override val route = "onboarding"
+object Genesis : AppDestination {
+    override val route = "genesis"
 }

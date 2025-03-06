@@ -19,11 +19,11 @@ fun AppNavHost(
         composable(route = Home.route) {
             HomeScreen(
                 onClickCreate = {
-                    navController.navigateSingleTopTo(Onboarding.route)
+                    navController.navigateSingleTopTo(Genesis.route)
                 }
             )
         }
-        composable(route = Onboarding.route) {
+        composable(route = Genesis.route) {
             GenesisScreen(onBackPressed = {
                 navController.popBackStack()
             })
