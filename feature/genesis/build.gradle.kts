@@ -5,7 +5,7 @@ plugins {
 }
 
 android {
-    namespace = "com.aurora.onboarding"
+    namespace = "com.aurora.genesis"
     compileSdk= libs.versions.compile.sdk.version.get().toInt()
 
     defaultConfig {

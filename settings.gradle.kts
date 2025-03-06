@@ -23,6 +23,6 @@ rootProject.name = "Travlogue"
 include(":app")
 include(":core:designsystem")
 include(":feature:home")
-include(":feature:onboarding")
+include(":feature:genesis")
 include(":core:data")
 include(":core:widgets")

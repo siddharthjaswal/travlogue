@@ -1,4 +1,4 @@
-package com.aurora.onboarding.ui
+package com.aurora.genesis.ui
 
 import android.content.res.Configuration
 import androidx.compose.material.icons.Icons

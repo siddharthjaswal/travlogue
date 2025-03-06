@@ -6,7 +6,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import com.aurora.home.ui.HomeScreen
-import com.aurora.onboarding.ui.OnboardingScreen
+import com.aurora.genesis.ui.GenesisScreen
 
 @Composable
 fun AppNavHost(
@@ -24,7 +24,7 @@ fun AppNavHost(
             )
         }
         composable(route = Onboarding.route) {
-            OnboardingScreen(onBackPressed = {
+            GenesisScreen(onBackPressed = {
                 navController.popBackStack()
             })
         }

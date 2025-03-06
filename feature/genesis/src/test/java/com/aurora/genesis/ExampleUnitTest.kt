@@ -1,4 +1,4 @@
-package com.aurora.onboarding
+package com.aurora.genesis
 
 import org.junit.Test
 
