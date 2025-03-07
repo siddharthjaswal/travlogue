@@ -16,10 +16,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.aurora.designsystem.theme.AppTheme
+import com.aurora.genesis.domain.GenesisViewModel
+import androidx.hilt.navigation.compose.hiltViewModel
+
 
 
 @Composable
-fun GenesisScreen(onBackPressed: () -> Unit) {
+fun GenesisScreen(viewModel: GenesisViewModel = hiltViewModel(), onBackPressed: () -> Unit) {
+    viewModel.start()
     Scaffold(
         topBar = {
             TopBarLayout {
@@ -63,7 +67,7 @@ internal fun Preview() {
             modifier = Modifier.fillMaxSize(),
             color = MaterialTheme.colorScheme.background
         ) {
-            GenesisScreen {}
+            //GenesisScreen {}
         }
     }
 
