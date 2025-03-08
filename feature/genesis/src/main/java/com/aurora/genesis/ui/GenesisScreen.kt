@@ -4,9 +4,7 @@ import android.content.res.Configuration
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
@@ -15,15 +13,26 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.aurora.designsystem.theme.AppTheme
 import com.aurora.genesis.domain.GenesisViewModel
-import androidx.hilt.navigation.compose.hiltViewModel
-
+import com.aurora.genesis.domain.UiState
+import com.aurora.genesis.domain.UiState.EmptyState
+import timber.log.Timber
 
 
 @Composable
 fun GenesisScreen(viewModel: GenesisViewModel = hiltViewModel(), onBackPressed: () -> Unit) {
+
+    Timber.d("GenesisScreen")
+
     viewModel.start()
+
+    val state = viewModel.uiState.collectAsStateWithLifecycle()
+
+    Timber.d("State: $state")
+
     Scaffold(
         topBar = {
             TopBarLayout {
@@ -39,7 +48,10 @@ fun GenesisScreen(viewModel: GenesisViewModel = hiltViewModel(), onBackPressed: 
                 .padding(innerPadding),
             verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
-
+            when (state) {
+                EmptyState -> EmptyContent()
+                UiState.GetTimelinesState -> GetTimelineLayout()
+            }
         }
 
     }
@@ -48,13 +60,7 @@ fun GenesisScreen(viewModel: GenesisViewModel = hiltViewModel(), onBackPressed: 
 @Composable
 private fun EmptyContent() {
     Text(text = "Empty")
-}
-
-@Composable
-private fun StartContent() {
-    Button(modifier = Modifier.fillMaxWidth(), onClick = { }) {
-        Text("Start")
-    }
+    Timber.d("EmptyContent")
 }
 
 
