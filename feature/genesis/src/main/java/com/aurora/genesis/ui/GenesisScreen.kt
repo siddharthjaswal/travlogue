@@ -19,7 +19,6 @@ import com.aurora.designsystem.theme.AppTheme
 import com.aurora.genesis.domain.GenesisViewModel
 import com.aurora.genesis.domain.UiState
 import com.aurora.genesis.domain.UiState.EmptyState
-import timber.log.Timber
 
 
 @Composable
@@ -29,9 +28,9 @@ fun GenesisScreen(viewModel: GenesisViewModel = hiltViewModel(), onBackPressed: 
 
     Scaffold(
         topBar = {
-            TopBarLayout {
+            TopBarLayout(state = state, onBackPressed = {
                 onBackPressed()
-            }
+            })
         },
         bottomBar = {
         },
