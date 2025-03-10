@@ -10,12 +10,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.aurora.designsystem.theme.pacificoFamily
 import timber.log.Timber
 
 @Composable
 internal fun GetTimelineLayout() {
-    Timber.d("GetTimelineLayout")
     Column(
         modifier = Modifier
             .padding(16.dp)
@@ -23,7 +21,7 @@ internal fun GetTimelineLayout() {
         verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {
         Text(
-            text = "Let's get your dates sorted", fontFamily = pacificoFamily,
+            text = "Let's get your dates sorted",
             fontSize = 20.sp,
             color = MaterialTheme.colorScheme.primary
         )

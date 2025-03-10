@@ -25,11 +25,7 @@ import timber.log.Timber
 @Composable
 fun GenesisScreen(viewModel: GenesisViewModel = hiltViewModel(), onBackPressed: () -> Unit) {
 
-    viewModel.start()
-
-    val state = viewModel.uiState.collectAsStateWithLifecycle()
-
-    Timber.w("State: $state")
+    val state = viewModel.uiState.collectAsStateWithLifecycle().value
 
     Scaffold(
         topBar = {
@@ -48,13 +44,15 @@ fun GenesisScreen(viewModel: GenesisViewModel = hiltViewModel(), onBackPressed: 
         ) {
             when (state) {
                 EmptyState -> {
-                    Timber.d("EmptyContent")
                     EmptyContent()
                 }
 
                 UiState.GetTimelinesState -> {
-                    Timber.d("GetTimelineLayout")
                     GetTimelineLayout()
+                }
+
+                UiState.ModificationState -> {
+
                 }
             }
         }
@@ -65,7 +63,6 @@ fun GenesisScreen(viewModel: GenesisViewModel = hiltViewModel(), onBackPressed: 
 @Composable
 private fun EmptyContent() {
     Text(text = "Empty")
-    Timber.d("EmptyContent")
 }
 
 
