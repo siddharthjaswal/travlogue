@@ -1,14 +1,24 @@
 package com.aurora.genesis.ui
 
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.PressInteraction
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Button
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.CalendarToday
+import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material3.DatePicker
 import androidx.compose.material3.DatePickerDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberDatePickerState
@@ -20,7 +30,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -40,21 +49,18 @@ internal fun GetTimelineLayout() {
             .fillMaxSize(),
         verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {
-        Text(
-            text = "Let's get your dates sorted",
-            fontSize = 20.sp,
-            color = MaterialTheme.colorScheme.primary
-        )
 
-        // Start Date Picker
-        Button(onClick = { showStartDatePicker = true }) {
-            Text(text = if (startDate.isEmpty()) "Select Start Date" else "Start Date: $startDate")
-        }
+        StartDateLayout(startDate, showStartDatePicker = {
+            showStartDatePicker = it
+        }, clearStartDate = {
+            startDate = ""
+        })
 
-        // End Date Picker
-        Button(onClick = { showEndDatePicker = true }) {
-            Text(text = if (endDate.isEmpty()) "Select End Date" else "End Date: $endDate")
-        }
+        EndDateLayout(endDate, showEndDatePicker = {
+            showEndDatePicker = it
+        }, clearEndDate = {
+            endDate = ""
+        })
 
         // Start Date Picker Dialog
         if (showStartDatePicker) {
@@ -110,7 +116,128 @@ internal fun GetTimelineLayout() {
     }
 }
 
-// Helper function to format the date
+@Composable
+private fun StartDateLayout(
+    startDate: String,
+    showStartDatePicker: (Boolean) -> Unit,
+    clearStartDate: () -> Unit
+) {
+    Column(
+        modifier = Modifier
+            .padding(16.dp)
+    ) {
+        OutlinedTextField(
+            value = startDate,
+            colors = OutlinedTextFieldDefaults.colors()
+                .copy(
+                    focusedTextColor = MaterialTheme.colorScheme.primary,
+                    unfocusedTextColor = MaterialTheme.colorScheme.primary,
+                    unfocusedTrailingIconColor = MaterialTheme.colorScheme.primary,
+                    focusedTrailingIconColor = MaterialTheme.colorScheme.primary
+                ),
+            onValueChange = {},
+            label = { Text("Start Date", color = MaterialTheme.colorScheme.primary) },
+            readOnly = true,
+            interactionSource = remember { MutableInteractionSource() }
+                .also { interactionSource ->
+                    LaunchedEffect(interactionSource) {
+                        interactionSource.interactions.collect {
+                            if (it is PressInteraction.Release) {
+                                showStartDatePicker(true)
+                            }
+                        }
+                    }
+                },
+            trailingIcon = {
+                Row {
+                    if (startDate.isNotEmpty()) {
+                        IconButton(onClick = { clearStartDate() }) {
+                            Icon(
+                                imageVector = Icons.Default.Clear,
+                                contentDescription = "Clear Start Date"
+                            )
+                        }
+                    }
+                    IconButton(onClick = { showStartDatePicker(true) }) {
+                        Icon(
+                            imageVector = Icons.Default.CalendarToday,
+                            contentDescription = "Select Start Date"
+                        )
+                    }
+                }
+            },
+            modifier = Modifier.fillMaxWidth()
+        )
+        Text(
+            text = "Choose the day you want to start planning.",
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.primary.copy(alpha = 0.6f),
+            modifier = Modifier.padding(top = 8.dp)
+        )
+    }
+}
+
+@Composable
+private fun EndDateLayout(
+    endDate: String,
+    showEndDatePicker: (Boolean) -> Unit,
+    clearEndDate: () -> Unit
+) {
+    Column(
+        modifier = Modifier
+            .padding(16.dp)
+    ) {
+        OutlinedTextField(
+            value = endDate,
+            colors = OutlinedTextFieldDefaults.colors()
+                .copy(
+                    focusedTextColor = MaterialTheme.colorScheme.primary,
+                    unfocusedTextColor = MaterialTheme.colorScheme.primary,
+                    unfocusedTrailingIconColor = MaterialTheme.colorScheme.primary,
+                    focusedTrailingIconColor = MaterialTheme.colorScheme.primary
+                ),
+            onValueChange = {},
+            label = { Text("End Date", color = MaterialTheme.colorScheme.primary) },
+            readOnly = true,
+            interactionSource = remember { MutableInteractionSource() }
+                .also { interactionSource ->
+                    LaunchedEffect(interactionSource) {
+                        interactionSource.interactions.collect {
+                            if (it is PressInteraction.Release) {
+                                showEndDatePicker(true)
+                            }
+                        }
+                    }
+                },
+            trailingIcon = {
+                Row {
+                    if (endDate.isNotEmpty()) {
+                        IconButton(onClick = { clearEndDate() }) {
+                            Icon(
+                                imageVector = Icons.Default.Clear,
+                                contentDescription = "Clear End Date"
+                            )
+                        }
+                    }
+                    IconButton(onClick = { showEndDatePicker(true) }) {
+                        Icon(
+                            imageVector = Icons.Default.CalendarToday,
+                            contentDescription = "Select End Date"
+                        )
+                    }
+                }
+            },
+            modifier = Modifier.fillMaxWidth()
+        )
+        Text(
+            text = "Choose the day you want to end the trip!",
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.primary.copy(alpha = 0.6f),
+            modifier = Modifier.padding(top = 8.dp)
+        )
+    }
+}
+
 private fun Long.toFormattedDateString(): String {
     val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
     return dateFormat.format(Date(this))
