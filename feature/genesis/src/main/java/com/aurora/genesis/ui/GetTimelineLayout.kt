@@ -19,6 +19,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
+import androidx.compose.material3.SelectableDates
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberDatePickerState
@@ -31,6 +32,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import java.text.SimpleDateFormat
+import java.time.LocalDate
 import java.util.Calendar
 import java.util.Date
 import java.util.Locale
@@ -78,7 +80,9 @@ internal fun GetTimelineLayout() {
                     }
                 }
             ) {
-                val datePickerState = rememberDatePickerState()
+                val datePickerState = rememberDatePickerState(
+                    selectableDates = StartSelectableDates
+                )
                 DatePicker(state = datePickerState)
                 // Handle the selected date
                 LaunchedEffect(datePickerState.selectedDateMillis) {
@@ -104,7 +108,9 @@ internal fun GetTimelineLayout() {
                     }
                 }
             ) {
-                val datePickerState = rememberDatePickerState()
+                val datePickerState = rememberDatePickerState(
+                    selectableDates = EndSelectableDates(startDate.toDateMillis())
+                )
                 DatePicker(state = datePickerState)
                 // Handle the selected date
                 LaunchedEffect(datePickerState.selectedDateMillis) {
@@ -246,5 +252,34 @@ private fun String.toDateMillis(): Long {
         dateFormat.parse(this)?.time ?: 0L
     } catch (e: Exception) {
         0L // Return 0L if the date string is invalid
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+private object StartSelectableDates : SelectableDates {
+    override fun isSelectableDate(utcTimeMillis: Long): Boolean {
+        val oneDayInMillis = 24 * 60 * 60 * 1000L
+        return utcTimeMillis >= (System.currentTimeMillis() - oneDayInMillis)
+    }
+
+    override fun isSelectableYear(year: Int): Boolean {
+        return year >= LocalDate.now().year
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+private class EndSelectableDates(private val startDateMillis: Long?) : SelectableDates {
+    override fun isSelectableDate(utcTimeMillis: Long): Boolean {
+        // Allow dates greater than or equal to the start date
+        return startDateMillis?.let { utcTimeMillis >= it } != false
+    }
+
+    override fun isSelectableYear(year: Int): Boolean {
+        // Allow years greater than or equal to the start date's year
+        return startDateMillis?.let {
+            val calendar = Calendar.getInstance()
+            calendar.timeInMillis = it
+            year >= calendar.get(Calendar.YEAR)
+        } != false
     }
 }
