@@ -39,7 +39,6 @@ fun GenesisScreen(viewModel: GenesisViewModel = hiltViewModel(), onBackPressed: 
         Column(
             modifier = Modifier
                 .padding(innerPadding),
-            verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
             when (state) {
                 EmptyState -> {

@@ -26,6 +26,7 @@ import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -43,8 +44,8 @@ internal fun GetTimelineLayout() {
 
     var showStartDatePicker by remember { mutableStateOf(false) }
     var showEndDatePicker by remember { mutableStateOf(false) }
-    var startDate by remember { mutableStateOf("") }
-    var endDate by remember { mutableStateOf("") }
+    var startDate by remember { mutableLongStateOf(0L) }
+    var endDate by remember { mutableLongStateOf(0L) }
 
     Column(
         modifier = Modifier
@@ -52,17 +53,16 @@ internal fun GetTimelineLayout() {
             .fillMaxSize(),
         verticalArrangement = Arrangement.spacedBy(8.dp),
     ) {
-
         StartDateLayout(startDate, showStartDatePicker = {
             showStartDatePicker = it
         }, clearStartDate = {
-            startDate = ""
+            startDate = 0L
         })
 
         EndDateLayout(endDate, showEndDatePicker = {
             showEndDatePicker = it
         }, clearEndDate = {
-            endDate = ""
+            endDate = 0L
         })
 
         // Start Date Picker Dialog
@@ -87,7 +87,7 @@ internal fun GetTimelineLayout() {
                 // Handle the selected date
                 LaunchedEffect(datePickerState.selectedDateMillis) {
                     datePickerState.selectedDateMillis?.let { millis ->
-                        startDate = millis.toFormattedDateString()
+                        startDate = millis
                     }
                 }
             }
@@ -109,13 +109,13 @@ internal fun GetTimelineLayout() {
                 }
             ) {
                 val datePickerState = rememberDatePickerState(
-                    selectableDates = EndSelectableDates(startDate.toDateMillis())
+                    selectableDates = EndSelectableDates(startDate)
                 )
                 DatePicker(state = datePickerState)
                 // Handle the selected date
                 LaunchedEffect(datePickerState.selectedDateMillis) {
                     datePickerState.selectedDateMillis?.let { millis ->
-                        endDate = millis.toFormattedDateString()
+                        endDate = millis
                     }
                 }
             }
@@ -125,7 +125,7 @@ internal fun GetTimelineLayout() {
 
 @Composable
 private fun StartDateLayout(
-    startDate: String,
+    startDate: Long,
     showStartDatePicker: (Boolean) -> Unit,
     clearStartDate: () -> Unit
 ) {
@@ -134,7 +134,7 @@ private fun StartDateLayout(
             .padding(16.dp)
     ) {
         OutlinedTextField(
-            value = startDate,
+            value = startDate.toFormattedDateString(),
             colors = OutlinedTextFieldDefaults.colors()
                 .copy(
                     focusedTextColor = MaterialTheme.colorScheme.primary,
@@ -155,7 +155,7 @@ private fun StartDateLayout(
                 },
             trailingIcon = {
                 Row {
-                    if (startDate.isNotEmpty()) {
+                    if (startDate != 0L) {
                         IconButton(onClick = { clearStartDate() }) {
                             Icon(
                                 imageVector = Icons.Default.Clear,
@@ -184,7 +184,7 @@ private fun StartDateLayout(
 
 @Composable
 private fun EndDateLayout(
-    endDate: String,
+    endDate: Long,
     showEndDatePicker: (Boolean) -> Unit,
     clearEndDate: () -> Unit
 ) {
@@ -193,7 +193,7 @@ private fun EndDateLayout(
             .padding(16.dp)
     ) {
         OutlinedTextField(
-            value = endDate,
+            value = endDate.toFormattedDateString(),
             colors = OutlinedTextFieldDefaults.colors()
                 .copy(
                     focusedTextColor = MaterialTheme.colorScheme.primary,
@@ -214,7 +214,7 @@ private fun EndDateLayout(
                 },
             trailingIcon = {
                 Row {
-                    if (endDate.isNotEmpty()) {
+                    if (endDate != 0L) {
                         IconButton(onClick = { clearEndDate() }) {
                             Icon(
                                 imageVector = Icons.Default.Clear,
@@ -242,6 +242,7 @@ private fun EndDateLayout(
 }
 
 private fun Long.toFormattedDateString(): String {
+    if (this == 0L) return ""
     val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
     return dateFormat.format(Date(this))
 }
