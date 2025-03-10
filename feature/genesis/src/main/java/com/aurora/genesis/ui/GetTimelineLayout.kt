@@ -31,6 +31,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import java.text.SimpleDateFormat
+import java.util.Calendar
 import java.util.Date
 import java.util.Locale
 
@@ -47,7 +48,7 @@ internal fun GetTimelineLayout() {
         modifier = Modifier
             .padding(16.dp)
             .fillMaxSize(),
-        verticalArrangement = Arrangement.spacedBy(16.dp),
+        verticalArrangement = Arrangement.spacedBy(8.dp),
     ) {
 
         StartDateLayout(startDate, showStartDatePicker = {
@@ -131,8 +132,6 @@ private fun StartDateLayout(
             colors = OutlinedTextFieldDefaults.colors()
                 .copy(
                     focusedTextColor = MaterialTheme.colorScheme.primary,
-                    unfocusedTextColor = MaterialTheme.colorScheme.primary,
-                    unfocusedTrailingIconColor = MaterialTheme.colorScheme.primary,
                     focusedTrailingIconColor = MaterialTheme.colorScheme.primary
                 ),
             onValueChange = {},
@@ -192,8 +191,6 @@ private fun EndDateLayout(
             colors = OutlinedTextFieldDefaults.colors()
                 .copy(
                     focusedTextColor = MaterialTheme.colorScheme.primary,
-                    unfocusedTextColor = MaterialTheme.colorScheme.primary,
-                    unfocusedTrailingIconColor = MaterialTheme.colorScheme.primary,
                     focusedTrailingIconColor = MaterialTheme.colorScheme.primary
                 ),
             onValueChange = {},
@@ -241,4 +238,13 @@ private fun EndDateLayout(
 private fun Long.toFormattedDateString(): String {
     val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
     return dateFormat.format(Date(this))
+}
+
+private fun String.toDateMillis(): Long {
+    return try {
+        val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
+        dateFormat.parse(this)?.time ?: 0L
+    } catch (e: Exception) {
+        0L // Return 0L if the date string is invalid
+    }
 }
