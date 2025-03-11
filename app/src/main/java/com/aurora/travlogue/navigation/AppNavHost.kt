@@ -8,6 +8,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import com.aurora.genesis.domain.GenesisViewModel
 import com.aurora.genesis.ui.GenesisScreen
+import com.aurora.home.domain.HomeViewModel
 import com.aurora.home.ui.HomeScreen
 
 @Composable
@@ -20,6 +21,7 @@ fun AppNavHost(
     ) {
         composable(route = Home.route) {
             HomeScreen(
+                viewModel = hiltViewModel<HomeViewModel>(),
                 onClickCreate = {
                     navController.navigateSingleTopTo(Genesis.route)
                 }

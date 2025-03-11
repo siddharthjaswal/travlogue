@@ -8,14 +8,14 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.tooling.preview.Preview
 import com.aurora.designsystem.theme.AppTheme
-import com.aurora.widgets.Travlogue
+import com.aurora.widgets.TravlogueLayout
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 internal fun TopBarLayout() {
     TopAppBar(
         title = {
-            Travlogue()
+            TravlogueLayout()
         },
         actions = {
 

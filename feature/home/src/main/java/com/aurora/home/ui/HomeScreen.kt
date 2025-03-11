@@ -18,21 +18,21 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.aurora.designsystem.theme.AppTheme
+import com.aurora.home.domain.HomeViewModel
+import com.aurora.home.domain.UiState
 
 @Composable
 fun HomeScreen(
+    viewModel: HomeViewModel = hiltViewModel(),
     onClickCreate: () -> Unit = {}
 ) {
+
+    val state = viewModel.uiState.collectAsStateWithLifecycle().value
+
     Scaffold(
-        topBar = {
-            TopBarLayout()
-        },
-        bottomBar = {
-        },
-        floatingActionButton = {
-            CreatePlan(onClickCreate)
-        },
         containerColor = MaterialTheme.colorScheme.background
     ) { innerPadding ->
         Column(
@@ -40,7 +40,12 @@ fun HomeScreen(
                 .padding(innerPadding),
             verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
-            EmptyState()
+            when (state) {
+                UiState.EmptyState -> EmptyState()
+                UiState.HomeState -> {
+                    HomeLayout()
+                }
+            }
         }
 
     }
