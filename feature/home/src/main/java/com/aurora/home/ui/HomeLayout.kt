@@ -8,7 +8,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.aurora.widgets.SloganLayout
+import com.aurora.home.ui.components.LocationSearchLayout
+import com.aurora.home.ui.components.SloganLayout
 
 @Composable
 internal fun HomeLayout() {
@@ -23,6 +24,7 @@ internal fun HomeLayout() {
             verticalArrangement = Arrangement.spacedBy(8.dp),
         ) {
             SloganLayout()
+            LocationSearchLayout()
         }
     }
 }

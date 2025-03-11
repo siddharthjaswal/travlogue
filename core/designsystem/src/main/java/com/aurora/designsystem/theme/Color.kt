@@ -515,3 +515,5 @@ val md_blue_grey_600 = Color(0xFF546E7A)
 val md_blue_grey_700 = Color(0xFF455A64)
 val md_blue_grey_800 = Color(0xFF37474F)
 val md_blue_grey_900 = Color(0xFF263238)
+
+val md_transparent = Color(0x00000000)
