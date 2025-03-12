@@ -25,7 +25,7 @@ internal fun HomeLayout(viewModel: HomeViewModel) {
             verticalArrangement = Arrangement.spacedBy(8.dp),
         ) {
             SloganLayout()
-            LocationSearchLayout()
+            LocationSearchLayout(viewModel)
         }
     }
 }

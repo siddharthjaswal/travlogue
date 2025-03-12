@@ -43,7 +43,7 @@ fun HomeScreen(
             when (state) {
                 UiState.EmptyState -> EmptyState()
                 UiState.HomeState -> {
-                    HomeLayout()
+                    HomeLayout(viewModel)
                 }
             }
         }
