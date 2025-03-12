@@ -1,11 +1,14 @@
 package com.aurora.home.ui.components
 
+import android.content.res.Configuration
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
@@ -18,12 +21,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.aurora.designsystem.theme.md_grey_200
-import com.aurora.designsystem.theme.md_grey_700
-import com.aurora.designsystem.theme.md_grey_900
+import com.aurora.designsystem.theme.AppTheme
 import com.aurora.designsystem.theme.md_transparent
 
-@Preview
 @Composable
 internal fun LocationSearchLayout() {
 
@@ -45,13 +45,13 @@ internal fun LocationSearchLayout() {
                 Text(
                     text = "Where to?",
                     fontSize = 16.sp,
-                    color = md_grey_200
+                    color = MaterialTheme.colorScheme.onSurface
                 )
             },
             shape = RoundedCornerShape(56.dp),
             colors = TextFieldDefaults.colors(
-                focusedContainerColor = md_grey_900.copy(alpha = 0.7f),
-                unfocusedContainerColor = md_grey_700.copy(alpha = 0.4f),
+                focusedContainerColor = MaterialTheme.colorScheme.surfaceDim.copy(alpha = 0.5f),
+                unfocusedContainerColor = MaterialTheme.colorScheme.surfaceDim.copy(alpha = 0.4f),
                 focusedIndicatorColor = md_transparent,
                 unfocusedIndicatorColor = md_transparent
             ),
@@ -59,5 +59,18 @@ internal fun LocationSearchLayout() {
             keyboardActions = KeyboardActions(onSearch = { }),
             singleLine = true
         )
+    }
+}
+
+@Preview(name = "Light Mode", showBackground = true)
+@Preview(name = "Dark Mode", uiMode = Configuration.UI_MODE_NIGHT_YES, showBackground = true)
+@Composable
+internal fun Preview() {
+    AppTheme {
+        Surface(
+            color = MaterialTheme.colorScheme.background
+        ) {
+            LocationSearchLayout()
+        }
     }
 }
