@@ -7,6 +7,10 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Search
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -23,9 +27,10 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.aurora.designsystem.theme.AppTheme
 import com.aurora.designsystem.theme.md_transparent
+import com.aurora.home.domain.HomeViewModel
 
 @Composable
-internal fun LocationSearchLayout() {
+internal fun LocationSearchLayout(viewModel: HomeViewModel) {
 
     var locationSearchValue by remember { mutableStateOf("") }
 
@@ -47,6 +52,14 @@ internal fun LocationSearchLayout() {
                     fontSize = 16.sp,
                     color = MaterialTheme.colorScheme.onSurface
                 )
+            },
+            leadingIcon = {
+                IconButton(onClick = { }) {
+                    Icon(
+                        imageVector = Icons.Default.Search,
+                        contentDescription = "Search Places"
+                    )
+                }
             },
             shape = RoundedCornerShape(56.dp),
             colors = TextFieldDefaults.colors(
@@ -70,7 +83,7 @@ internal fun Preview() {
         Surface(
             color = MaterialTheme.colorScheme.background
         ) {
-            LocationSearchLayout()
+            //LocationSearchLayout()
         }
     }
 }
