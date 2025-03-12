@@ -28,6 +28,7 @@ uiToolingPreviewAndroid = "1.7.8"
 uiTooling = "1.7.8"
 timber = "5.0.1"
 lifecycle = "2.8.7"
+firebaseBom = "33.10.0"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -63,13 +64,16 @@ androidx-navigation-compose = { group = "androidx.navigation", name = "navigatio
 androidx-ui-tooling-preview-android = { group = "androidx.compose.ui", name = "ui-tooling-preview-android", version.ref = "uiToolingPreviewAndroid" }
 ui-tooling = { group = "androidx.compose.ui", name = "ui-tooling", version.ref = "uiTooling" }
 timber = { group = "com.jakewharton.timber", name = "timber", version.ref = "timber" }
+android-firebase-bom = { group = "com.google.firebase", name = "firebase-bom", version.ref = "firebaseBom" }
+android-firebase-config = { group = "com.google.firebase", name = "firebase-config", version.ref = "firebaseBom" }
+android-firebase-analytics = { group = "com.google.firebase", name = "firebase-analytics", version.ref = "firebaseBom" }
 
 
 
 
 [plugins]
 androidApplication = { id = "com.android.application", version.ref = "agp" }
-kotlinAndroidKsp = { id = "com.google.devtools.ksp", version.ref ="kspVersion" }
+kotlinAndroidKsp = { id = "com.google.devtools.ksp", version.ref = "kspVersion" }
 kotlinAndroid = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 hilt = { id = "com.google.dagger.hilt.android", version.ref = "hilt" }
 androidLibrary = { id = "com.android.library", version.ref = "agp" }

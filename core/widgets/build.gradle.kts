@@ -57,6 +57,9 @@ dependencies {
     implementation(libs.androidx.navigation.ui.ktx)
     implementation(libs.androidx.ui.tooling.preview.android)
     implementation(libs.timber)
+    implementation(platform(libs.android.firebase.bom))
+    implementation(libs.android.firebase.config)
+    implementation(libs.android.firebase.analytics)
 
 
     testImplementation(libs.junit)

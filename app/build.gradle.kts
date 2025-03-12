@@ -77,6 +77,9 @@ dependencies {
     ksp(libs.hilt.compiler)
     implementation(libs.androidx.navigation.compose)
     implementation(libs.timber)
+    implementation(platform(libs.android.firebase.bom))
+    implementation(libs.android.firebase.config)
+    implementation(libs.android.firebase.analytics)
 
 
     testImplementation(libs.junit)
