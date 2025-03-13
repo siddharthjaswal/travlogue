@@ -11,6 +11,8 @@ import androidx.compose.ui.unit.dp
 import com.aurora.home.domain.HomeViewModel
 import com.aurora.home.ui.components.LocationSearchLayout
 import com.aurora.home.ui.components.SloganLayout
+import com.google.firebase.remoteconfig.FirebaseRemoteConfig
+import timber.log.Timber
 
 @Composable
 internal fun HomeLayout(viewModel: HomeViewModel) {
@@ -27,5 +29,9 @@ internal fun HomeLayout(viewModel: HomeViewModel) {
             SloganLayout()
             LocationSearchLayout(viewModel)
         }
+    }
+
+    FirebaseRemoteConfig.getInstance().getString("TEST_KEY").let {
+        Timber.e("Firebase Remote Config: TEST_KEY: $it")
     }
 }
