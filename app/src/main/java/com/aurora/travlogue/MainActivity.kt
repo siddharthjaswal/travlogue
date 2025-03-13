@@ -10,7 +10,6 @@ import androidx.compose.runtime.Composable
 import androidx.navigation.compose.rememberNavController
 import com.aurora.designsystem.theme.AppTheme
 import com.aurora.travlogue.navigation.AppNavHost
-import com.google.firebase.FirebaseApp
 import com.google.firebase.ktx.Firebase
 import com.google.firebase.remoteconfig.FirebaseRemoteConfig
 import com.google.firebase.remoteconfig.ktx.remoteConfig
@@ -52,4 +51,6 @@ private fun setFirebaseRemoteFlag() {
         minimumFetchIntervalInSeconds = 3600
     }
     remoteConfig.setConfigSettingsAsync(configSettings)
+
+    remoteConfig.fetchAndActivate()
 }
