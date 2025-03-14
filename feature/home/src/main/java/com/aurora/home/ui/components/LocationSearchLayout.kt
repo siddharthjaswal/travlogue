@@ -22,6 +22,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -33,6 +34,7 @@ import com.aurora.home.domain.HomeViewModel
 internal fun LocationSearchLayout(viewModel: HomeViewModel) {
 
     var locationSearchValue by remember { mutableStateOf("") }
+    val context = LocalContext.current
 
     Column(
         modifier = Modifier
@@ -42,7 +44,10 @@ internal fun LocationSearchLayout(viewModel: HomeViewModel) {
         // Search TextField
         TextField(
             value = locationSearchValue,
-            onValueChange = { locationSearchValue = it },
+            onValueChange = {
+                locationSearchValue = it
+                viewModel.getSearchNearByPlacesByString(it, context)
+            },
             modifier = Modifier
                 .fillMaxWidth()
                 .height(56.dp),
