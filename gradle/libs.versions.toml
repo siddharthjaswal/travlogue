@@ -31,6 +31,9 @@ timber = "5.0.1"
 lifecycle = "2.8.7"
 firebaseBom = "33.10.0"
 firebaseConfigKtx = "22.1.0"
+mapsCompose = "6.5.0"
+places = "4.1.0"
+playServicesMaps = "19.1.0"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -70,6 +73,9 @@ android-firebase-bom = { group = "com.google.firebase", name = "firebase-bom", v
 android-firebase-config = { group = "com.google.firebase", name = "firebase-config" }
 android-firebase-analytics = { group = "com.google.firebase", name = "firebase-analytics" }
 firebase-config-ktx = { group = "com.google.firebase", name = "firebase-config-ktx" }
+maps-compose = { module = "com.google.maps.android:maps-compose", version.ref = "mapsCompose" }
+places = { module = "com.google.android.libraries.places:places", version.ref = "places" }
+play-services-maps = { module = "com.google.android.gms:play-services-maps", version.ref = "playServicesMaps" }
 
 
 [plugins]

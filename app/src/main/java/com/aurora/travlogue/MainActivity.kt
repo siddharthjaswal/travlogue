@@ -10,10 +10,6 @@ import androidx.compose.runtime.Composable
 import androidx.navigation.compose.rememberNavController
 import com.aurora.designsystem.theme.AppTheme
 import com.aurora.travlogue.navigation.AppNavHost
-import com.google.firebase.ktx.Firebase
-import com.google.firebase.remoteconfig.FirebaseRemoteConfig
-import com.google.firebase.remoteconfig.ktx.remoteConfig
-import com.google.firebase.remoteconfig.remoteConfigSettings
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
@@ -40,17 +36,5 @@ fun MainApp() {
     val context = LocalActivity.current as ComponentActivity
     context.enableEdgeToEdge()
 
-    //Fetch remote config
-    setFirebaseRemoteFlag()
-}
 
-private fun setFirebaseRemoteFlag() {
-
-    val remoteConfig: FirebaseRemoteConfig = Firebase.remoteConfig
-    val configSettings = remoteConfigSettings {
-        minimumFetchIntervalInSeconds = 3600
-    }
-    remoteConfig.setConfigSettingsAsync(configSettings)
-
-    remoteConfig.fetchAndActivate()
 }

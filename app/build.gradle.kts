@@ -61,6 +61,7 @@ android {
 dependencies {
 
     implementation(project(":core:designsystem"))
+    implementation(project(":core:data"))
     implementation(project(":feature:home"))
     implementation(project(":feature:genesis"))
 
@@ -83,6 +84,8 @@ dependencies {
     implementation(libs.android.firebase.config)
     implementation(libs.firebase.config.ktx)
     implementation(libs.android.firebase.analytics)
+    implementation(libs.places)
+    implementation(libs.play.services.maps)
 
 
     testImplementation(libs.junit)
