@@ -4,9 +4,12 @@ import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.aurora.widgets.places.getSearchSuggestions
+import com.google.android.libraries.places.api.model.AutocompletePrediction
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import timber.log.Timber
 import javax.inject.Inject
@@ -15,6 +18,10 @@ import javax.inject.Inject
 class HomeViewModel @Inject constructor() : ViewModel() {
     internal var uiState = MutableStateFlow<UiState>(UiState.EmptyState)
         private set
+
+    // MutableStateFlow to hold the list of suggestions
+    private val _suggestions = MutableStateFlow<List<AutocompletePrediction>>(emptyList())
+    val suggestions: StateFlow<List<AutocompletePrediction>> get() = _suggestions.asStateFlow()
 
     init {
         start()
@@ -27,16 +34,10 @@ class HomeViewModel @Inject constructor() : ViewModel() {
     }
 
     internal fun getSearchNearByPlacesByString(inputString: String, context: Context) {
-        Timber.w("New Search for $inputString --------------------------------")
         viewModelScope.launch(Dispatchers.IO) {
             try {
                 val suggestions = getSearchSuggestions(inputString, context)
-                for (suggestion in suggestions) {
-                    val fullText = suggestion.getFullText(null).toString()
-                    val distanceMeters = suggestion.distanceMeters
-                    Timber.d("Place: $fullText, Distance: $distanceMeters meters")
-                }
-                Timber.w("End Search--------------------------------------------------")
+                _suggestions.value = suggestions
             } catch (e: Exception) {
                 Timber.d("Place not found: ${e.toString()}")
             }
