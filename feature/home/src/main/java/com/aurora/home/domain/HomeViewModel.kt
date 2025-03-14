@@ -3,8 +3,7 @@ package com.aurora.home.domain
 import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.google.android.libraries.places.api.Places
-import com.google.android.libraries.places.api.net.FindAutocompletePredictionsRequest
+import com.aurora.widgets.places.getSearchSuggestions
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -28,23 +27,19 @@ class HomeViewModel @Inject constructor() : ViewModel() {
     }
 
     internal fun getSearchNearByPlacesByString(inputString: String, context: Context) {
-        val placesClient = Places.createClient(context)
-
+        Timber.w("New Search for $inputString --------------------------------")
         viewModelScope.launch(Dispatchers.IO) {
-            val autocompletePlacesRequest: FindAutocompletePredictionsRequest =
-                FindAutocompletePredictionsRequest.builder()
-                    .setQuery("København H")
-                    .setRegionCode("ES")
-                    .build()
-
-            placesClient.findAutocompletePredictions(autocompletePlacesRequest)
-                .addOnSuccessListener { response ->
-                    val placeSuggestions = response.autocompletePredictions
-                    Timber.d("list of suggestions: $placeSuggestions")
-                }.addOnFailureListener { exception ->
-                    Timber.d("Place not found: ${exception.toString()}")
+            try {
+                val suggestions = getSearchSuggestions(inputString, context)
+                for (suggestion in suggestions) {
+                    val fullText = suggestion.getFullText(null).toString()
+                    val distanceMeters = suggestion.distanceMeters
+                    Timber.d("Place: $fullText, Distance: $distanceMeters meters")
                 }
+                Timber.w("End Search--------------------------------------------------")
+            } catch (e: Exception) {
+                Timber.d("Place not found: ${e.toString()}")
+            }
         }
-
     }
 }
