@@ -51,7 +51,6 @@ internal fun LocationSearchLayout(viewModel: HomeViewModel) {
         Box(
             modifier = Modifier.fillMaxWidth()
         ) {
-            // Search TextField
             TextField(
                 value = locationSearchValue,
                 onValueChange = {
@@ -84,12 +83,10 @@ internal fun LocationSearchLayout(viewModel: HomeViewModel) {
                     focusedIndicatorColor = md_transparent,
                     unfocusedIndicatorColor = md_transparent
                 ),
-                //keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
                 keyboardActions = KeyboardActions(onSearch = { }),
                 singleLine = true
             )
 
-            // Dropdown Menu for Suggestions
             if (isDropdownExpanded && suggestions.isNotEmpty()) {
                 DropdownMenu(
                     expanded = isDropdownExpanded,
