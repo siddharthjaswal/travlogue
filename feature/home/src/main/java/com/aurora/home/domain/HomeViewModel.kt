@@ -19,7 +19,6 @@ class HomeViewModel @Inject constructor() : ViewModel() {
     internal var uiState = MutableStateFlow<UiState>(UiState.EmptyState)
         private set
 
-    // MutableStateFlow to hold the list of suggestions
     private val _suggestions = MutableStateFlow<List<AutocompletePrediction>>(emptyList())
     val suggestions: StateFlow<List<AutocompletePrediction>> get() = _suggestions.asStateFlow()
 
