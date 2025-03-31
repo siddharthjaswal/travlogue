@@ -1,13 +1,23 @@
 package com.aurora.data.plan
 
 data class PlanData(
-    val date: String?,
-    val city: String?,
-    val stay: String?,
-    val transits: String?,
-    val details: String?,
-    val status: String?,
-    val expensesTravel: Double?,
-    val expensesStay: Double?,
-    val otherExpenses: String?
+    var date: String?,
+    var city: String?,
+    var stay: StayData?,
+    var transits: String?,
+    var details: String?,
+    var status: String?,
+    var expensesTravel: Double?,
+    var expensesStay: Double?,
+    var otherExpenses: String?
+)
+
+data class StayData(
+    var name: String?,
+    var latitude: Double?,
+    var longitude: Double?,
+    var checkIn: Double?,
+    var checkOut: Double?,
+    var notes: String?,
+    var price: Int?
 )
