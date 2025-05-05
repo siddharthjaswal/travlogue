@@ -38,7 +38,7 @@ class HomeViewModel @Inject constructor() : ViewModel() {
                 val suggestions = getSearchSuggestions(inputString, context)
                 _suggestions.value = suggestions
             } catch (e: Exception) {
-                //Timber.d("Place not found: ${e.toString()}")
+                Timber.d("Place not found: ${e.toString()}")
             }
         }
     }
