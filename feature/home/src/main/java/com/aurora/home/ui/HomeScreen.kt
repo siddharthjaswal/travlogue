@@ -6,10 +6,6 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
-import androidx.compose.material3.FloatingActionButton
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
@@ -41,30 +37,13 @@ fun HomeScreen(
             verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
             when (state) {
-                UiState.EmptyState -> EmptyState()
+                UiState.EmptyState -> EmptyLayout()
                 UiState.HomeState -> {
                     HomeLayout(viewModel)
                 }
             }
         }
 
-    }
-}
-
-@Composable
-internal fun EmptyState() {
-    Box(
-        Modifier.fillMaxSize(),
-        contentAlignment = Alignment.Center
-    ) {
-
-    }
-}
-
-@Composable
-internal fun CreatePlan(onClickCreate: () -> Unit = {}) {
-    FloatingActionButton(onClick = { onClickCreate() }) {
-        Icon(Icons.Default.Add, contentDescription = "Add")
     }
 }
 

@@ -9,8 +9,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.aurora.home.domain.HomeViewModel
-import com.aurora.home.ui.components.LocationSearchLayout
-import com.aurora.home.ui.components.SloganLayout
 
 @Composable
 internal fun HomeLayout(viewModel: HomeViewModel) {
@@ -24,8 +22,6 @@ internal fun HomeLayout(viewModel: HomeViewModel) {
                 .fillMaxSize(),
             verticalArrangement = Arrangement.spacedBy(8.dp),
         ) {
-            SloganLayout()
-            LocationSearchLayout(viewModel)
         }
     }
 }
