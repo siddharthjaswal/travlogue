@@ -65,7 +65,7 @@ dependencies {
     implementation(libs.androidx.lifecycle.livedata.ktx)
     implementation(libs.androidx.lifecycle.common.java8)
     implementation(libs.androidx.lifecycle.process)
-
+    implementation(libs.androidx.compose.runtime)
 
     implementation(libs.androidx.hilt.navigation.compose)
     implementation(libs.hilt.android)
