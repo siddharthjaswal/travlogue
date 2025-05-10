@@ -2,7 +2,6 @@ package com.aurora.home.ui
 
 import android.content.res.Configuration
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -10,7 +9,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -19,6 +17,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.aurora.designsystem.theme.AppTheme
 import com.aurora.home.domain.HomeViewModel
 import com.aurora.home.domain.UiState
+import com.aurora.home.ui.components.EmptyLayout
 
 @Composable
 fun HomeScreen(
@@ -29,6 +28,7 @@ fun HomeScreen(
     val state = viewModel.uiState.collectAsStateWithLifecycle().value
 
     Scaffold(
+        topBar = { TopBarLayout() },
         containerColor = MaterialTheme.colorScheme.background
     ) { innerPadding ->
         Column(
