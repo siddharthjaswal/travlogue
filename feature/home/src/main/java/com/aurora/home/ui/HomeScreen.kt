@@ -17,7 +17,9 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.aurora.designsystem.theme.AppTheme
 import com.aurora.home.domain.HomeViewModel
 import com.aurora.home.domain.UiState
+import com.aurora.home.ui.components.BottomBar
 import com.aurora.home.ui.components.EmptyLayout
+import com.aurora.home.ui.components.TopBarLayout
 
 @Composable
 fun HomeScreen(
@@ -29,7 +31,7 @@ fun HomeScreen(
 
     Scaffold(
         topBar = { TopBarLayout() },
-        containerColor = MaterialTheme.colorScheme.background
+        containerColor = MaterialTheme.colorScheme.background,
     ) { innerPadding ->
         Column(
             modifier = Modifier

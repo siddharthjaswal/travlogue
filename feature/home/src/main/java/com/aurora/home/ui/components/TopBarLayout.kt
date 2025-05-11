@@ -1,4 +1,4 @@
-package com.aurora.home.ui
+package com.aurora.home.ui.components
 
 import android.content.res.Configuration
 import androidx.compose.foundation.layout.Box
