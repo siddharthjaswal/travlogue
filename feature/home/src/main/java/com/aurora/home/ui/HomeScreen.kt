@@ -2,11 +2,9 @@ package com.aurora.home.ui
 
 import android.content.res.Configuration
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
@@ -21,7 +19,6 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.aurora.designsystem.theme.AppTheme
 import com.aurora.home.domain.HomeViewModel
 import com.aurora.home.domain.UiState
-import com.aurora.home.ui.components.BottomBar
 import com.aurora.home.ui.components.EmptyLayout
 import com.aurora.home.ui.components.TopBarLayout
 
@@ -35,32 +32,22 @@ fun HomeScreen(
     val state = viewModel.uiState.collectAsStateWithLifecycle().value
 
     Scaffold(
-        modifier = Modifier.fillMaxSize(),
         containerColor = MaterialTheme.colorScheme.background,
         topBar = { TopBarLayout() },
     ) { innerPadding ->
         Column(
             modifier = Modifier
+                .fillMaxSize()
                 .padding(innerPadding)
-                .padding(16.dp)
                 .imePadding(),
             verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
-            Box(
-                modifier = Modifier
-                    .weight(1f)
-                    .fillMaxWidth()
-            ) {
-                when (state) {
-                    UiState.EmptyState -> EmptyLayout()
-                    UiState.HomeState -> {
-                        HomeLayout(viewModel)
-                    }
+            when (state) {
+                UiState.EmptyState -> EmptyLayout()
+                UiState.HomeState -> {
+                    HomeLayout(viewModel)
                 }
             }
-            BottomBar(
-                modifier = Modifier.fillMaxWidth()
-            )
         }
 
     }
