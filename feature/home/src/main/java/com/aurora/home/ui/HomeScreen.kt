@@ -35,6 +35,7 @@ fun HomeScreen(
     val state = viewModel.uiState.collectAsStateWithLifecycle().value
 
     Scaffold(
+        modifier = Modifier.fillMaxSize(),
         containerColor = MaterialTheme.colorScheme.background,
         topBar = { TopBarLayout() },
     ) { innerPadding ->
