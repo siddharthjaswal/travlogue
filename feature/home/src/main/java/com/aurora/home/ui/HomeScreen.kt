@@ -2,8 +2,12 @@ package com.aurora.home.ui
 
 import android.content.res.Configuration
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -21,6 +25,7 @@ import com.aurora.home.ui.components.BottomBar
 import com.aurora.home.ui.components.EmptyLayout
 import com.aurora.home.ui.components.TopBarLayout
 
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun HomeScreen(
     viewModel: HomeViewModel = hiltViewModel(),
@@ -30,20 +35,31 @@ fun HomeScreen(
     val state = viewModel.uiState.collectAsStateWithLifecycle().value
 
     Scaffold(
-        topBar = { TopBarLayout() },
         containerColor = MaterialTheme.colorScheme.background,
+        topBar = { TopBarLayout() },
     ) { innerPadding ->
         Column(
             modifier = Modifier
-                .padding(innerPadding),
+                .padding(innerPadding)
+                .padding(16.dp)
+                .imePadding(),
             verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
-            when (state) {
-                UiState.EmptyState -> EmptyLayout()
-                UiState.HomeState -> {
-                    HomeLayout(viewModel)
+            Box(
+                modifier = Modifier
+                    .weight(1f)
+                    .fillMaxWidth()
+            ) {
+                when (state) {
+                    UiState.EmptyState -> EmptyLayout()
+                    UiState.HomeState -> {
+                        HomeLayout(viewModel)
+                    }
                 }
             }
+            BottomBar(
+                modifier = Modifier.fillMaxWidth()
+            )
         }
 
     }

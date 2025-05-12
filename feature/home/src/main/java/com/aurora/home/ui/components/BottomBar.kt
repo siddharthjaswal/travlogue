@@ -1,7 +1,5 @@
 package com.aurora.home.ui.components
 
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -13,7 +11,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
@@ -21,31 +18,23 @@ import androidx.compose.ui.unit.dp
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun BottomBar() {
+fun BottomBar(modifier: Modifier) {
     var textInput by remember { mutableStateOf("") }
 
-    Row(
-        modifier = Modifier
-            .padding(horizontal = 8.dp, vertical = 12.dp)
+    OutlinedTextField(
+        value = textInput,
+        onValueChange = { textInput = it },
+        placeholder = { Text("Help me plan: e.g., 'Paris for a week ? ", color = Color.Gray) },
+        modifier = modifier
+            .padding(vertical = 8.dp)
             .fillMaxWidth(),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.SpaceBetween
-    ) {
-        OutlinedTextField(
-            value = textInput,
-            onValueChange = { textInput = it },
-            placeholder = { Text("Help me plan: e.g., 'Paris for a week ? ", color = Color.Gray) },
-            modifier = Modifier
-                .weight(1f)
-                .padding(horizontal = 8.dp),
-            singleLine = true,
-            shape = RoundedCornerShape(percent = 50)
-        )
-    }
+        singleLine = true,
+        shape = RoundedCornerShape(percent = 50)
+    )
 }
 
 @Preview
 @Composable
 private fun BottomBarPreview() {
-    BottomBar()
+    BottomBar(modifier = Modifier)
 }

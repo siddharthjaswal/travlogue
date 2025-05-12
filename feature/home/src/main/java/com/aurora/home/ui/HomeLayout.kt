@@ -11,7 +11,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.aurora.home.domain.HomeViewModel
-import com.aurora.home.ui.components.BottomBar
 
 @Composable
 internal fun HomeLayout(viewModel: HomeViewModel) {
@@ -27,7 +26,7 @@ internal fun HomeLayout(viewModel: HomeViewModel) {
             verticalArrangement = Arrangement.spacedBy(8.dp),
         ) {
         }
-        BottomBar()
+
     }
 }
 
