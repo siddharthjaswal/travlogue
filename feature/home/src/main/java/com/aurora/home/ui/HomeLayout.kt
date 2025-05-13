@@ -14,30 +14,35 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.aurora.home.domain.HomeViewModel
 import com.aurora.home.ui.components.BottomBar
+import com.aurora.home.ui.components.TopBarLayout
 
 @Composable
 internal fun HomeLayout(viewModel: HomeViewModel) {
     Box(
-        modifier = Modifier.fillMaxSize() // Box takes up the maximum size available
+        modifier = Modifier.fillMaxSize()
     ) {
-        // Content that should occupy the remaining space goes here
-        // This Column will be positioned at the top by default in the Box
+
+        TopBarLayout(
+            modifier = Modifier
+                .fillMaxWidth()
+                .align(Alignment.TopCenter)
+                .padding(horizontal = 16.dp)
+        )
+
         Column(
             modifier = Modifier
-                .fillMaxSize() // Fill the size of the Box
-                .padding(horizontal = 16.dp), // Add some padding to the content
-            verticalArrangement = Arrangement.spacedBy(16.dp) // Add spacing between items
+                .fillMaxSize()
+                .padding(horizontal = 16.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            // Your main screen content here
-            // This content will be above the BottomBar
+
         }
 
-        // BottomBar fixed at the bottom
         BottomBar(
             modifier = Modifier
                 .fillMaxWidth()
                 .align(Alignment.BottomCenter)
-                .padding(horizontal = 16.dp)
+                .padding(start = 16.dp, end = 16.dp, bottom = 56.dp)
         )
     }
 }

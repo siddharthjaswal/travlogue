@@ -24,8 +24,9 @@ import com.aurora.designsystem.theme.AppTheme
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-internal fun TopBarLayout() {
+internal fun TopBarLayout(modifier: Modifier) {
     TopAppBar(
+        modifier = modifier,
         title = {
             Box(
                 modifier = Modifier.fillMaxWidth(),
@@ -68,7 +69,7 @@ internal fun TopBarLayoutPreview() {
         Surface(
             color = MaterialTheme.colorScheme.background
         ) {
-            TopBarLayout()
+            TopBarLayout(modifier = Modifier)
         }
     }
 }
