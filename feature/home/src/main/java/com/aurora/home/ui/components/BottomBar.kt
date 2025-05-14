@@ -26,7 +26,7 @@ fun BottomBar(modifier: Modifier) {
         onValueChange = { textInput = it },
         placeholder = { Text("Help me plan: e.g., 'Paris for a week ? ", color = Color.Gray) },
         modifier = modifier
-            .padding(vertical = 8.dp)
+            .padding(vertical = 16.dp)
             .fillMaxWidth(),
         singleLine = true,
         shape = RoundedCornerShape(percent = 50)
