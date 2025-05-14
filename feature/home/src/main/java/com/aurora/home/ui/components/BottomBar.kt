@@ -1,5 +1,7 @@
 package com.aurora.home.ui.components
 
+import androidx.compose.foundation.border
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -16,26 +18,33 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.aurora.designsystem.theme.md_grey_700
+import com.aurora.designsystem.theme.md_transparent
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun BottomBar(modifier: Modifier) {
     var textInput by remember { mutableStateOf("") }
 
-    OutlinedTextField(
-        value = textInput,
-        onValueChange = { textInput = it },
-        placeholder = { PlaceHolderText() },
+    Box(
         modifier = modifier
             .padding(vertical = 16.dp, horizontal = 8.dp)
-            .fillMaxWidth(),
-        singleLine = true,
-        shape = RoundedCornerShape(percent = 50),
-        colors = OutlinedTextFieldDefaults.colors(
-            focusedBorderColor = md_grey_700,
-            unfocusedBorderColor = md_grey_700
+            .fillMaxWidth()
+            .border(1.dp, md_grey_700, RoundedCornerShape(percent = 50))
+    ) {
+        OutlinedTextField(
+            value = textInput,
+            onValueChange = { textInput = it },
+            placeholder = { PlaceHolderText() },
+            modifier = modifier
+                .padding(vertical = 6.dp, horizontal = 12.dp)
+                .fillMaxWidth(),
+            shape = RoundedCornerShape(percent = 50),
+            colors = OutlinedTextFieldDefaults.colors(
+                focusedBorderColor = md_transparent,
+                unfocusedBorderColor = md_transparent
+            )
         )
-    )
+    }
 }
 
 @Composable
