@@ -20,6 +20,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.sp
 import com.aurora.designsystem.theme.AppTheme
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -33,7 +34,7 @@ internal fun TopBarLayout(modifier: Modifier) {
                 contentAlignment = Alignment.Center
             ) {
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    Text("Travlogue", fontWeight = FontWeight.Bold)
+                    Text("Travlogue", fontWeight = FontWeight.Normal, fontSize = 18.sp)
                 }
             }
         },
