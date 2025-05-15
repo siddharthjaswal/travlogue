@@ -1,6 +1,5 @@
-
-
 ### Trip
+
 - id: Long (Primary Key)
 - name: String
 - startDate: LocalDate
@@ -8,6 +7,7 @@
 - plans: List<Plan>
 
 ### Plan
+
 - id: Long (Primary Key)
 - tripId: Long (Foreign Key referencing Trip)
 - date: LocalDate
@@ -21,6 +21,7 @@
 - notes: String?
 
 ### Stay
+
 - id: Long (Primary Key)
 - name: String
 - latitude: Double
@@ -31,6 +32,7 @@
 - price: Double?
 
 ### TransitMode (Enum)
+
 - FLIGHT
 - TRAIN
 - BUS
@@ -38,20 +40,26 @@
 - OTHER
 
 ### Activity
+
 - id: Long (Primary Key)
 - planId: Long (Foreign Key referencing Plan)
 - name: String
 - time: LocalTime?
+- durationInMins
 - location: String?
+- latitude
+- longitude
 - notes: String?
 
 ### ChatSession
+
 - id: Long (Primary Key)
 - tripId: Long? (Foreign Key referencing Trip, nullable if session can exist without a trip)
 - startTime: Instant
 - endTime: Instant? (Optional)
 
 ### Message
+
 - id: Long (Primary Key)
 - sessionId: Long (Foreign Key referencing ChatSession)
 - sender: String (e.g., "User", "AI")

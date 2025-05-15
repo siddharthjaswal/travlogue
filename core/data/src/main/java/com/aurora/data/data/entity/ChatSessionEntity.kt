@@ -5,7 +5,7 @@ import androidx.room.Entity
 import androidx.room.PrimaryKey
 
 @Entity(tableName = "chat_sessions")
-data class ChatSession(
+data class ChatSessionEntity(
     @PrimaryKey(autoGenerate = true) @ColumnInfo(name = "id") val id: Long = 0,
     /**
      * Foreign key referencing the id of the Trip this chat session belongs to.

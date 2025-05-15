@@ -6,7 +6,7 @@ import androidx.room.PrimaryKey
 
 
 @Entity(tableName = "messages")
-data class Message(
+data class MessageEntity(
     @PrimaryKey(autoGenerate = true) @ColumnInfo(name = "id") val id: Long = 0,
     /**
      * Foreign key referencing the id of the ChatSession this message belongs to.
