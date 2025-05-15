@@ -10,11 +10,15 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.aurora.designsystem.theme.md_grey_700
@@ -24,6 +28,9 @@ import com.aurora.designsystem.theme.md_transparent
 @Composable
 fun BottomBar(modifier: Modifier) {
     var textInput by remember { mutableStateOf("") }
+    val focusRequester = remember { FocusRequester() }
+    val keyboardController = LocalSoftwareKeyboardController.current
+
 
     Box(
         modifier = modifier
@@ -37,13 +44,19 @@ fun BottomBar(modifier: Modifier) {
             placeholder = { PlaceHolderText() },
             modifier = modifier
                 .padding(vertical = 6.dp, horizontal = 12.dp)
-                .fillMaxWidth(),
+                .fillMaxWidth()
+                .focusRequester(focusRequester),
             shape = RoundedCornerShape(percent = 50),
             colors = OutlinedTextFieldDefaults.colors(
                 focusedBorderColor = md_transparent,
                 unfocusedBorderColor = md_transparent
             )
         )
+    }
+
+    LaunchedEffect(Unit) {
+        focusRequester.requestFocus()
+        keyboardController?.show()
     }
 }
 
