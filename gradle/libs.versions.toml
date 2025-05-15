@@ -31,6 +31,7 @@ firebaseConfigKtx = "22.1.0"
 mapsCompose = "6.6.0"
 places = "4.2.0"
 playServicesMaps = "19.2.0"
+roomVersion = "2.7.1"
 
 [libraries]
 
@@ -92,6 +93,13 @@ firebase-config-ktx = { group = "com.google.firebase", name = "firebase-config-k
 maps-compose = { module = "com.google.maps.android:maps-compose", version.ref = "mapsCompose" }
 places = { module = "com.google.android.libraries.places:places", version.ref = "places" }
 play-services-maps = { module = "com.google.android.gms:play-services-maps", version.ref = "playServicesMaps" }
+
+#Room
+androidx-room-runtime = { group = "androidx.room", name = "room-runtime", version.ref = "roomVersion" }
+androidx-room-compiler = { group = "androidx.room", name = "room-compiler", version.ref = "roomVersion" }
+androidx-room-ktx = { group = "androidx.room", name = "room-ktx", version.ref = "roomVersion" }
+androidx-room-paging = { group = "androidx.room", name = "room-paging", version.ref = "roomVersion" }
+androidx-room-testing = { group = "androidx.room", name = "room-testing", version.ref = "roomVersion" }
 
 #Test
 junit = { group = "junit", name = "junit", version.ref = "junit" }
