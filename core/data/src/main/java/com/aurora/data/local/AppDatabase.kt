@@ -2,9 +2,10 @@ package com.aurora.data.local
 
 import androidx.room.Database
 import androidx.room.RoomDatabase
-import androidx.room.TypeConverters
+import com.aurora.data.data.entity.ChatSession
+import com.aurora.data.data.entity.Message
 
-//@Database(entities = [], version = 1, exportSchema = false)
+@Database(entities = [Message::class, ChatSession::class], version = 1, exportSchema = false)
 //@TypeConverters()
 abstract class AppDatabase : RoomDatabase() {
 
