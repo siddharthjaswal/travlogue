@@ -44,3 +44,16 @@
 - time: LocalTime?
 - location: String?
 - notes: String?
+
+### ChatSession
+- id: Long (Primary Key)
+- tripId: Long? (Foreign Key referencing Trip, nullable if session can exist without a trip)
+- startTime: Instant
+- endTime: Instant? (Optional)
+
+### Message
+- id: Long (Primary Key)
+- sessionId: Long (Foreign Key referencing ChatSession)
+- sender: String (e.g., "User", "AI")
+- timestamp: Instant
+- content: String
