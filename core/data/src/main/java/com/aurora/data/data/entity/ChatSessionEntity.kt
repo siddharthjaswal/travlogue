@@ -4,7 +4,9 @@ import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 
-@Entity(tableName = "chat_sessions")
+const val CHATS_TABLE_NAME = "chat_sessions"
+
+@Entity(tableName = CHATS_TABLE_NAME)
 data class ChatSessionEntity(
     @PrimaryKey(autoGenerate = true) @ColumnInfo(name = "id") val id: Long = 0,
     /**

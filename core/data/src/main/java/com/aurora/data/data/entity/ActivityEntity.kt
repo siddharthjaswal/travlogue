@@ -4,13 +4,15 @@ import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 
-@Entity(tableName = "activities")
+const val ACTIVITIES_TABLE_NAME = "activities"
+
+@Entity(tableName = ACTIVITIES_TABLE_NAME)
 data class ActivityEntity(
     @PrimaryKey(autoGenerate = true) @ColumnInfo(name = "id") val id: Long = 0,
     /**
-     * Foreign key referencing the id of the Plan this activity belongs to.
+     * Foreign key referencing the id of the DayPlan this activity belongs to.
      */
-    @ColumnInfo(name = "plan_id") val planId: Long,
+    @ColumnInfo(name = "day_plan_id") val dayPlanId: Long,
     @ColumnInfo(name = "name") val name: String,
     @ColumnInfo(name = "time") val time: Long?,
     @ColumnInfo(name = "duration_in_mins") val durationInMins: Int?,
