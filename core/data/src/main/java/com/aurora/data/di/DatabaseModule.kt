@@ -2,6 +2,7 @@ package com.aurora.data.di
 
 import android.content.Context
 import androidx.room.Room
+import com.aurora.data.data.dao.MessageDao
 import com.aurora.data.local.AppDatabase
 import dagger.Module
 import dagger.Provides
@@ -26,5 +27,11 @@ object DatabaseModule {
         )
             .fallbackToDestructiveMigration(true)
             .build()
+    }
+
+    @Provides
+    @Singleton // Or @ViewModelScoped, @ActivityScoped, etc., depending on desired scope
+    fun provideMessageDao(appDatabase: AppDatabase): MessageDao {
+        return appDatabase.messageDao()
     }
 }
