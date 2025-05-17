@@ -2,6 +2,7 @@ package com.aurora.data.di
 
 import android.content.Context
 import androidx.room.Room
+import com.aurora.data.data.dao.ChatSessionDao
 import com.aurora.data.data.dao.MessageDao
 import com.aurora.data.local.AppDatabase
 import dagger.Module
@@ -30,8 +31,14 @@ object DatabaseModule {
     }
 
     @Provides
-    @Singleton // Or @ViewModelScoped, @ActivityScoped, etc., depending on desired scope
+    @Singleton
     fun provideMessageDao(appDatabase: AppDatabase): MessageDao {
         return appDatabase.messageDao()
+    }
+
+    @Provides
+    @Singleton
+    fun provideChatSessionDao(appDatabase: AppDatabase): ChatSessionDao {
+        return appDatabase.chatSessionDao()
     }
 }

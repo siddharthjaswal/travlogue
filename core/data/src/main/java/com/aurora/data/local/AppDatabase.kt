@@ -5,6 +5,7 @@ import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
 import com.aurora.data.data.converter.CurrencyConverter
 import com.aurora.data.data.converter.TransitModeConverter
+import com.aurora.data.data.dao.ChatSessionDao
 import com.aurora.data.data.dao.MessageDao
 import com.aurora.data.data.entity.ActivityEntity
 import com.aurora.data.data.entity.ChatSessionEntity
@@ -30,6 +31,7 @@ const val DB_NAME = "travlogue_db"
 abstract class AppDatabase : RoomDatabase() {
 
     abstract fun messageDao(): MessageDao
+    abstract fun chatSessionDao(): ChatSessionDao
 
     companion object {
         const val DATABASE_NAME = DB_NAME
