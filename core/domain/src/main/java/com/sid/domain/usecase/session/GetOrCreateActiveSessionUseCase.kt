@@ -11,7 +11,7 @@ import javax.inject.Inject
 class GetOrCreateActiveSessionUseCase @Inject constructor(
     private val chatRepository: ChatRepository
 ) {
-    suspend operator fun invoke(tripId: Long? = null): Long {
-        return chatRepository.getOrCreateActiveSession(tripId)
+    suspend operator fun invoke(): Long {
+        return chatRepository.getOrCreateActiveSession()
     }
 }

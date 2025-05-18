@@ -42,7 +42,7 @@ import com.aurora.designsystem.theme.md_transparent
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-internal fun MessageBar(
+internal fun MessageInputBar(
     modifier: Modifier,
     onSendMessage: (String) -> Unit
 ) {
@@ -107,7 +107,7 @@ private fun PlaceHolderText() {
 @Preview
 @Composable
 private fun MessageBarPreview() {
-    MessageBar(modifier = Modifier, onSendMessage = {
+    MessageInputBar(modifier = Modifier, onSendMessage = {
 
     })
 }

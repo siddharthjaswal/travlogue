@@ -7,7 +7,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 
 @Composable
-internal fun EmptyLayout() {
+internal fun NoMessage() {
     Box(
         Modifier.fillMaxSize(),
         contentAlignment = Alignment.Center

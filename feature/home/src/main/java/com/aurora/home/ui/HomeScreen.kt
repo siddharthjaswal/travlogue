@@ -20,11 +20,11 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.aurora.designsystem.theme.AppTheme
 import com.aurora.home.domain.HomeViewModel
-import com.aurora.home.domain.UiState
-import com.aurora.home.ui.components.EmptyLayout
-import com.aurora.home.ui.components.HomeLayout
-import com.aurora.home.ui.components.MessageBar
-import com.aurora.home.ui.components.TopBarLayout
+import com.aurora.home.domain.HomeUiState
+import com.aurora.home.ui.components.NoMessage
+import com.aurora.home.ui.components.MessageList
+import com.aurora.home.ui.components.MessageInputBar
+import com.aurora.home.ui.components.HomeTopBar
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
@@ -33,19 +33,19 @@ fun HomeScreen(
     onClickCreate: () -> Unit = {}
 ) {
 
-    val state = viewModel.uiState.collectAsStateWithLifecycle().value
+    val state = viewModel.homeUiState.collectAsStateWithLifecycle().value
 
     Scaffold(
         modifier = Modifier.navigationBarsPadding(),
         topBar = {
-            TopBarLayout(
+            HomeTopBar(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(horizontal = 16.dp)
             )
         },
         bottomBar = {
-            MessageBar(
+            MessageInputBar(
                 modifier = Modifier
                     .fillMaxWidth()
                     .imePadding()
@@ -61,12 +61,16 @@ fun HomeScreen(
                 .background(color = MaterialTheme.colorScheme.background),
         ) {
             when (state) {
-                UiState.Empty -> EmptyLayout()
-                UiState.Loading -> {
+                HomeUiState.Loading -> {
 
                 }
-                is UiState.HomeState -> {
-                    HomeLayout()
+                is HomeUiState.ChatMessages -> {
+                    MessageList(state.messages)
+                }
+
+                is HomeUiState.NoMessages -> NoMessage()
+                is HomeUiState.Error -> {
+
                 }
             }
         }

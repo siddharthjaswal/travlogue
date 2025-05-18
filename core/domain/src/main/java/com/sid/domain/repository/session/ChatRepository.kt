@@ -9,9 +9,9 @@ interface ChatRepository {
      */
     fun getAllSessions(): Flow<List<ChatSessionEntity>>
     fun getSessionById(sessionId: Long): Flow<ChatSessionEntity?>
-    suspend fun createNewSession(tripId: Long? = null): Long // Returns new session ID
+    suspend fun createNewSession(): Long // Returns new session ID
     suspend fun getLastActiveSession(): ChatSessionEntity?
-    suspend fun getOrCreateActiveSession(tripId: Long? = null): Long // Key method
+    suspend fun getOrCreateActiveSession(): Long // Key method
 
     // Potentially other methods like:
     // suspend fun updateSession(session: ChatSessionEntity)

@@ -31,6 +31,41 @@ interface ChatSessionDao {
     suspend fun updateSession(chatSession: ChatSessionEntity)
 
     /**
+     * Retrieves the latest chat session by start time.
+     *
+     * @return The latest chat session, or null if no sessions are found.
+     */
+    @Query("SELECT * FROM $CHATS_TABLE_NAME ORDER BY start_time DESC LIMIT 1")
+    suspend fun getAbsoluteLatestSession(): ChatSessionEntity?
+
+    /**
+     * Gets the most recent session.
+     * If tripId is provided, it gets the most recent session for that trip.
+     * If tripId is null, it gets the most recent session where tripId IS NULL.
+     */
+    @Query("""
+        SELECT * FROM $CHATS_TABLE_NAME 
+        WHERE (:tripId IS NULL AND trip_id IS NULL) OR (trip_id = :tripId)
+        ORDER BY start_time DESC 
+        LIMIT 1
+    """)
+    suspend fun getLatestSessionByTripId(tripId: Long?): ChatSessionEntity?
+
+
+    /**
+     * Retrieves the latest chat session by start time, associated with a specific trip ID.
+     * @param tripId The ID of the trip.
+     */
+    @Query("""
+        SELECT * FROM $CHATS_TABLE_NAME 
+        WHERE (:tripId IS NULL AND trip_id IS NULL) OR (trip_id = :tripId)
+        ORDER BY start_time DESC 
+        LIMIT 1
+    """)
+    fun getLatestSessionFlowByTripId(tripId: Long?): Flow<ChatSessionEntity?>
+
+
+    /**
      * Retrieves a specific chat session by its ID.
      *
      * @param sessionId The ID of the chat session.
