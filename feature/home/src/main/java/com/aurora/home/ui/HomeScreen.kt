@@ -21,9 +21,9 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.aurora.designsystem.theme.AppTheme
 import com.aurora.home.domain.HomeViewModel
 import com.aurora.home.domain.UiState
-import com.aurora.home.ui.components.BottomBar
 import com.aurora.home.ui.components.EmptyLayout
 import com.aurora.home.ui.components.HomeLayout
+import com.aurora.home.ui.components.MessageBar
 import com.aurora.home.ui.components.TopBarLayout
 
 @OptIn(ExperimentalLayoutApi::class)
@@ -45,11 +45,13 @@ fun HomeScreen(
             )
         },
         bottomBar = {
-            BottomBar(
+            MessageBar(
                 modifier = Modifier
                     .fillMaxWidth()
                     .imePadding()
-            )
+            ) {
+
+            }
         }
     ) { paddingValues ->
         Column(
