@@ -1,5 +1,7 @@
 package com.sid.domain.di
 
+import com.sid.domain.repository.gemini.GeminiRepository
+import com.sid.domain.repository.gemini.GeminiRepositoryImpl
 import com.sid.domain.repository.message.MessageRepository
 import com.sid.domain.repository.message.MessageRepositoryImpl
 import com.sid.domain.repository.session.ChatRepository
@@ -24,4 +26,10 @@ abstract class RepositoryModule {
     abstract fun bindMessageRepository(
         messageRepositoryImpl: MessageRepositoryImpl
     ): MessageRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindGeminiRepository(
+        geminiRepositoryImpl: GeminiRepositoryImpl
+    ): GeminiRepository
 }

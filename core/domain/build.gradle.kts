@@ -53,8 +53,14 @@ dependencies {
     implementation(libs.androidx.room.testing)
     ksp(libs.androidx.room.compiler)
 
+    implementation(libs.timber)
+
     implementation(libs.hilt.android)
     ksp(libs.hilt.compiler)
+
+    implementation(platform(libs.android.firebase.bom))
+    implementation(libs.vertexai)
+
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)

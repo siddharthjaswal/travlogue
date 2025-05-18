@@ -3,6 +3,7 @@ package com.aurora.home.domain
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.aurora.data.data.entity.MessageEntity
+import com.sid.domain.usecase.gemini.GenerateGeminiResponseUseCase
 import com.sid.domain.usecase.message.GetMessagesForSessionUseCase
 import com.sid.domain.usecase.message.SendMessageUseCase
 import com.sid.domain.usecase.session.GetOrCreateActiveSessionUseCase
@@ -12,13 +13,19 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.launch
+import timber.log.Timber
 import javax.inject.Inject
+
+const val SENDER_AI = "ai"
+const val SENDER_USER = "user"
+
 
 @HiltViewModel
 class HomeViewModel @Inject constructor(
     private val getOrCreateActiveSessionUseCase: GetOrCreateActiveSessionUseCase,
     private val getMessagesForSessionUseCase: GetMessagesForSessionUseCase,
-    private val sendMessageUseCase: SendMessageUseCase
+    private val sendMessageUseCase: SendMessageUseCase,
+    private val generateGeminiResponseUseCase: GenerateGeminiResponseUseCase
 ) : ViewModel() {
     private val _homeUiState = MutableStateFlow<HomeUiState>(HomeUiState.Loading)
     internal val homeUiState: StateFlow<HomeUiState> = _homeUiState.asStateFlow()
@@ -69,22 +76,38 @@ class HomeViewModel @Inject constructor(
 
         if (sessionId == null) return
 
+        val userMessageEntity = MessageEntity(
+            sessionId = sessionId,
+            sender = SENDER_USER,
+            timestamp = System.currentTimeMillis(),
+            content = messageText.trim()
+        )
+
         viewModelScope.launch {
-            val messageEntity = MessageEntity(
-                sessionId = sessionId,
-                sender = "user",
-                timestamp = System.currentTimeMillis(),
-                content = messageText.trim()
-            )
+
+            val geminiResponseText = generateGeminiResponseUseCase(messageText.trim())
+            if (geminiResponseText != null) {
+                val aiMessageEntity = MessageEntity(
+                    sessionId = sessionId,
+                    sender = SENDER_AI,
+                    timestamp = System.currentTimeMillis(),
+                    content = geminiResponseText
+                )
+                sendMessageUseCase(aiMessageEntity)
+            } else {
+                val errorMessageEntity = MessageEntity(
+                    sessionId = sessionId,
+                    sender = SENDER_AI,
+                    timestamp = System.currentTimeMillis(),
+                    content = "Sorry, I couldn't get a response. Please try again."
+                )
+                sendMessageUseCase(errorMessageEntity)
+                Timber.w("Gemini response was null for prompt: $messageText")
+            }
+
             try {
-                sendMessageUseCase(messageEntity)
-                // The Flow collected in loadInitialSessionAndMessages should automatically update the messages list.
-                // No explicit UI state update here is needed if using Flows correctly from DAO -> Repo -> UseCase -> ViewModel.
+                sendMessageUseCase(userMessageEntity)
             } catch (e: Exception) {
-                // Handle potential errors from sendMessageUseCase (e.g., database write failure)
-                // You might want to provide feedback to the user, e.g., by temporarily adding
-                // the message to the UI with a "failed to send" status and a retry option.
-                // For now, just updating to a general error state.
                 _homeUiState.value =
                     HomeUiState.Error("Failed to send message: ${e.localizedMessage}")
             }
