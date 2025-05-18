@@ -84,6 +84,12 @@ class HomeViewModel @Inject constructor(
         )
 
         viewModelScope.launch {
+            try {
+                sendMessageUseCase(userMessageEntity)
+            } catch (e: Exception) {
+                _homeUiState.value =
+                    HomeUiState.Error("Failed to send message: ${e.localizedMessage}")
+            }
 
             val geminiResponseText = generateGeminiResponseUseCase(messageText.trim())
             if (geminiResponseText != null) {
@@ -105,12 +111,7 @@ class HomeViewModel @Inject constructor(
                 Timber.w("Gemini response was null for prompt: $messageText")
             }
 
-            try {
-                sendMessageUseCase(userMessageEntity)
-            } catch (e: Exception) {
-                _homeUiState.value =
-                    HomeUiState.Error("Failed to send message: ${e.localizedMessage}")
-            }
+
         }
     }
 
