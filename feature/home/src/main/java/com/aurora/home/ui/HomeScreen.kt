@@ -49,8 +49,8 @@ fun HomeScreen(
                 modifier = Modifier
                     .fillMaxWidth()
                     .imePadding()
-            ) {
-
+            ) { messageText ->
+                viewModel.sendMessage(messageText)
             }
         }
     ) { paddingValues ->
@@ -61,8 +61,11 @@ fun HomeScreen(
                 .background(color = MaterialTheme.colorScheme.background),
         ) {
             when (state) {
-                UiState.EmptyState -> EmptyLayout()
-                UiState.HomeState -> {
+                UiState.Empty -> EmptyLayout()
+                UiState.Loading -> {
+
+                }
+                is UiState.HomeState -> {
                     HomeLayout()
                 }
             }
