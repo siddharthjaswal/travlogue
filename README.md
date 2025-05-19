@@ -1,7 +1,7 @@
 Travlogue will be a comprehensive travel app that allows users to plan, track, and log their trips, including itinerary details, expenses, and memories.
 
 **Overall Structure (Navigation):**
-
+hello
 -   **Bottom Navigation Bar (Main Screens):**
     -   **Itinerary:** Where users can view, edit, and manage their trip plans.
     -   **Expenses:** Where users can track and categorize their travel expenses.

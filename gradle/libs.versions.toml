@@ -6,10 +6,10 @@ compile_sdk_version = "36"
 target_sdk_version = "36"
 min_sdk_version = "28"
 
+kotlin = "2.1.21"           # https://github.com/JetBrains/kotlin/releases
+ksp = "2.1.21-2.0.1"        # https://github.com/google/ksp
 agp = "8.10.0"
-googleServices = "4.4.2"
-kotlin = "2.1.20"
-kspVersion = "2.1.20-2.0.0"
+
 coreKtx = "1.16.0"
 junit = "4.13.2"
 junitVersion = "1.2.1"
@@ -26,6 +26,8 @@ navigationUiKtx = "2.9.0"
 uiTooling = "1.8.1"
 timber = "5.0.1"
 lifecycle = "2.9.0"
+#### Mine
+googleServices = "4.4.2"
 firebaseBom = "33.13.0"
 firebaseConfigKtx = "22.1.0"
 mapsCompose = "6.6.0"
@@ -111,7 +113,7 @@ androidx-espresso-core = { group = "androidx.test.espresso", name = "espresso-co
 [plugins]
 androidApplication = { id = "com.android.application", version.ref = "agp" }
 googleServices = { id = "com.google.gms.google-services", version.ref = "googleServices" }
-kotlinAndroidKsp = { id = "com.google.devtools.ksp", version.ref = "kspVersion" }
+ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
 kotlinAndroid = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 hilt = { id = "com.google.dagger.hilt.android", version.ref = "hilt" }
 androidLibrary = { id = "com.android.library", version.ref = "agp" }
