@@ -2,16 +2,25 @@ package com.aurora.home.ui.components
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AccountCircle
+import androidx.compose.material.icons.filled.Assistant
+import androidx.compose.material.icons.filled.AutoAwesome
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -26,6 +35,7 @@ import com.aurora.data.data.entity.MessageEntity
 import com.aurora.designsystem.theme.AppTheme
 
 const val SENDER_USER = "user"
+const val SENDER_AI = "ai"
 
 @Composable
 internal fun MessageList(messages: List<MessageEntity>) {
@@ -53,7 +63,9 @@ internal fun MessageList(messages: List<MessageEntity>) {
         contentPadding = PaddingValues(vertical = 8.dp),
         verticalArrangement = Arrangement.spacedBy(8.dp) // Spacing between message bubbles
     ) {
-        items(messages, key = { message -> message.id }) { message -> // Use a stable key if possible
+        items(
+            messages,
+            key = { message -> message.id }) { message -> // Use a stable key if possible
             MessageBubble(message = message)
         }
     }
@@ -63,33 +75,69 @@ internal fun MessageList(messages: List<MessageEntity>) {
 @Composable
 private fun MessageBubble(message: MessageEntity) {
     val isUserMessage = message.sender.equals(SENDER_USER, ignoreCase = true)
+    val alignment = if (isUserMessage) Alignment.CenterEnd else Alignment.CenterStart
+    val bubbleColor = if (isUserMessage) MaterialTheme.colorScheme.primaryContainer
+    else MaterialTheme.colorScheme.secondaryContainer
+    val textColor = if (isUserMessage) MaterialTheme.colorScheme.onPrimaryContainer
+    else MaterialTheme.colorScheme.onSecondaryContainer
+    val bubbleShape = RoundedCornerShape(
+        topStart = if (isUserMessage) 16.dp else 0.dp,
+        topEnd = if (isUserMessage) 0.dp else 16.dp,
+        bottomStart = 16.dp,
+        bottomEnd = 16.dp
+    )
+    val icon =
+        if (isUserMessage) Icons.Filled.AccountCircle else Icons.Filled.AutoAwesome // Or any other AI icon
+    val iconTint =
+        if (isUserMessage) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.secondary
 
-    Box(
-        modifier = Modifier.fillMaxWidth()
+    Row( // Use Row to place icon and bubble side-by-side
+        modifier = Modifier.fillMaxWidth(),
+        verticalAlignment = Alignment.Bottom, // Align items to the bottom
+        horizontalArrangement = if (isUserMessage) Arrangement.End else Arrangement.Start
     ) {
-        Column( // Using Column to allow potential timestamp or sender name later
+        if (!isUserMessage) {
+            Icon(
+                imageVector = icon,
+                contentDescription = "AI Icon",
+                modifier = Modifier
+                    .size(32.dp) // Adjust size as needed
+                    .clip(CircleShape)
+                    .background(MaterialTheme.colorScheme.surfaceVariant) // Optional background for icon
+                    .padding(4.dp),
+                tint = iconTint
+            )
+            Spacer(modifier = Modifier.width(8.dp))
+        }
+
+        Column(
             modifier = Modifier
-                .align(if (isUserMessage) Alignment.CenterEnd else Alignment.CenterStart)
-                .clip(
-                    RoundedCornerShape(
-                        topStart = if (isUserMessage) 16.dp else 0.dp,
-                        topEnd = if (isUserMessage) 0.dp else 16.dp,
-                        bottomStart = 16.dp,
-                        bottomEnd = 16.dp
-                    )
-                )
-                .background(
-                    if (isUserMessage) MaterialTheme.colorScheme.primaryContainer
-                    else MaterialTheme.colorScheme.secondaryContainer
-                )
+                // .align(alignment) // This is now handled by the Row's horizontalArrangement
+                .weight(
+                    1f,
+                    fill = false
+                ) // Allow bubble to take necessary space but not push icon away for long messages
+                .clip(bubbleShape)
+                .background(bubbleColor)
                 .padding(horizontal = 12.dp, vertical = 8.dp)
         ) {
             Text(
                 text = message.content,
-                color = if (isUserMessage) MaterialTheme.colorScheme.onPrimaryContainer
-                else MaterialTheme.colorScheme.onSecondaryContainer,
-                // Optional: Add more styling like fontWeight if needed
-                // fontWeight = if (isUserMessage) FontWeight.SemiBold else FontWeight.Normal
+                color = textColor,
+            )
+        }
+
+        if (isUserMessage) {
+            Spacer(modifier = Modifier.width(8.dp))
+            Icon(
+                imageVector = icon,
+                contentDescription = "User Icon",
+                modifier = Modifier
+                    .size(32.dp) // Adjust size as needed
+                    .clip(CircleShape)
+                    .background(MaterialTheme.colorScheme.surfaceVariant) // Optional background for icon
+                    .padding(4.dp),
+                tint = iconTint
             )
         }
     }
@@ -99,10 +147,34 @@ private fun MessageBubble(message: MessageEntity) {
 @Composable
 private fun MessageListPreview() {
     val sampleMessages = listOf(
-        MessageEntity(id = 1, sessionId = 1, sender = "ai", timestamp = System.currentTimeMillis() - 20000, content = "Hello! How can I help you plan your trip today?"),
-        MessageEntity(id = 2, sessionId = 1, sender = SENDER_USER, timestamp = System.currentTimeMillis() - 10000, content = "Hi! I want to go to Paris for a week."),
-        MessageEntity(id = 3, sessionId = 1, sender = "ai", timestamp = System.currentTimeMillis() - 5000, content = "Paris for a week, great choice! When are you planning to go?"),
-        MessageEntity(id = 4, sessionId = 1, sender = SENDER_USER, timestamp = System.currentTimeMillis(), content = "Around next spring. Maybe April?")
+        MessageEntity(
+            id = 1,
+            sessionId = 1,
+            sender = SENDER_AI,
+            timestamp = System.currentTimeMillis() - 20000,
+            content = "Hello! How can I help you plan your trip today?"
+        ),
+        MessageEntity(
+            id = 2,
+            sessionId = 1,
+            sender = SENDER_USER,
+            timestamp = System.currentTimeMillis() - 10000,
+            content = "Hi! I want to go to Paris for a week."
+        ),
+        MessageEntity(
+            id = 3,
+            sessionId = 1,
+            sender = SENDER_AI,
+            timestamp = System.currentTimeMillis() - 5000,
+            content = "Paris for a week, great choice! When are you planning to go?"
+        ),
+        MessageEntity(
+            id = 4,
+            sessionId = 1,
+            sender = SENDER_USER,
+            timestamp = System.currentTimeMillis(),
+            content = "Around next spring. Maybe April?"
+        )
     )
     AppTheme { // Use your app's theme for accurate preview
         Surface(modifier = Modifier.fillMaxSize()) {
@@ -126,9 +198,17 @@ private fun MessageListEmptyPreview() {
 private fun SingleUserMessagePreview() {
     AppTheme {
         Surface(modifier = Modifier.fillMaxSize()) {
-            MessageList(messages = listOf(
-                MessageEntity(id = 1, sessionId = 1, sender = SENDER_USER, timestamp = System.currentTimeMillis(), content = "This is a user message.")
-            ))
+            MessageList(
+                messages = listOf(
+                    MessageEntity(
+                        id = 1,
+                        sessionId = 1,
+                        sender = SENDER_USER,
+                        timestamp = System.currentTimeMillis(),
+                        content = "This is a user message."
+                    )
+                )
+            )
         }
     }
 }
@@ -138,9 +218,17 @@ private fun SingleUserMessagePreview() {
 private fun SingleAiMessagePreview() {
     AppTheme {
         Surface(modifier = Modifier.fillMaxSize()) {
-            MessageList(messages = listOf(
-                MessageEntity(id = 1, sessionId = 1, sender = "ai", timestamp = System.currentTimeMillis(), content = "This is an AI message.")
-            ))
+            MessageList(
+                messages = listOf(
+                    MessageEntity(
+                        id = 1,
+                        sessionId = 1,
+                        sender = SENDER_AI,
+                        timestamp = System.currentTimeMillis(),
+                        content = "This is an AI message."
+                    )
+                )
+            )
         }
     }
 }
