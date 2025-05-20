@@ -7,7 +7,7 @@ plugins {
 }
 
 android {
-    namespace = "com.aurora.genesis"
+    namespace = "com.aurora.travlogue.genesis"
     compileSdk= libs.versions.compile.sdk.version.get().toInt()
 
     defaultConfig {

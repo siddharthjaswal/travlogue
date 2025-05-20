@@ -6,7 +6,7 @@ plugins {
 }
 
 android {
-    namespace = "com.aurora.data"
+    namespace = "com.aurora.travlogue.core.data"
     compileSdk= libs.versions.compile.sdk.version.get().toInt()
 
     defaultConfig {

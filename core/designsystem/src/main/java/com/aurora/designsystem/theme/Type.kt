@@ -4,7 +4,7 @@ import androidx.compose.material3.Typography
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
-import com.aurora.designsystem.R
+import com.aurora.travlogue.core.designsystem.R
 
 val AppTypography = Typography()
 

@@ -7,7 +7,7 @@ plugins {
 }
 
 android {
-    namespace = "com.aurora.home"
+    namespace = "com.aurora.travlogue.home"
     compileSdk= libs.versions.compile.sdk.version.get().toInt()
 
     defaultConfig {

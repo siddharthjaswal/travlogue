@@ -7,7 +7,7 @@ plugins {
 }
 
 android {
-    namespace = "com.aurora.widgets"
+    namespace = "com.aurora.travlogue.core.widgets"
     compileSdk= libs.versions.compile.sdk.version.get().toInt()
 
     defaultConfig {
