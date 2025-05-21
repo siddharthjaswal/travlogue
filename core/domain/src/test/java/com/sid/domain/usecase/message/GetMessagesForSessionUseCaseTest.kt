@@ -28,21 +28,39 @@ class GetMessagesForSessionUseCaseTest {
     }
 
     @Test
-    fun `testGetMessagesForSession returns messages from repository`() = runBlocking {
-        // Arrange
-        val sessionId = 123L
-        val expectedMessages = listOf(
-            MessageEntity(id = 1L, sessionId = sessionId, sender = "user", timestamp = 1000L, content = "Hello"),
-            MessageEntity(id = 2L, sessionId = sessionId, sender = "bot", timestamp = 1001L, content = "Hi there")
-        )
-        `when`(mockMessageRepository.getMessagesForSession(sessionId)).thenReturn(flowOf(expectedMessages))
+    fun `testGetMessagesForSession returns messages from repository`()  {
+        runBlocking {
+            // Arrange
+            val sessionId = 123L
+            val expectedMessages = listOf(
+                MessageEntity(
+                    id = 1L,
+                    sessionId = sessionId,
+                    sender = "user",
+                    timestamp = 1000L,
+                    content = "Hello"
+                ),
+                MessageEntity(
+                    id = 2L,
+                    sessionId = sessionId,
+                    sender = "bot",
+                    timestamp = 1001L,
+                    content = "Hi there"
+                )
+            )
+            `when`(mockMessageRepository.getMessagesForSession(sessionId)).thenReturn(
+                flowOf(
+                    expectedMessages
+                )
+            )
 
-        // Act
-        val resultFlow = getMessagesForSessionUseCase(sessionId)
-        val actualMessages = resultFlow.firstOrNull()
+            // Act
+            val resultFlow = getMessagesForSessionUseCase(sessionId)
+            val actualMessages = resultFlow.firstOrNull()
 
-        // Assert
-        assertEquals(expectedMessages, actualMessages)
-        verify(mockMessageRepository).getMessagesForSession(sessionId)
+            // Assert
+            assertEquals(expectedMessages, actualMessages)
+            verify(mockMessageRepository).getMessagesForSession(sessionId)
+        }
     }
 }

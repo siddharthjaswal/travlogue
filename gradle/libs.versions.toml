@@ -32,6 +32,7 @@ mapsCompose = "6.6.0"
 places = "4.2.0"
 playServicesMaps = "19.2.0"
 roomVersion = "2.7.1"
+mockito = "4.8.0"
 
 [libraries]
 
@@ -107,6 +108,9 @@ junit = { group = "junit", name = "junit", version.ref = "junit" }
 androidx-junit = { group = "androidx.test.ext", name = "junit", version.ref = "junitVersion" }
 androidx-espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "espressoCore" }
 
+#Mockito
+mockito-core = { group = "org.mockito", name = "mockito-core", version.ref = "mockito" }
+mockito-inline = { group = "org.mockito", name = "mockito-inline", version.ref = "mockito" } # If you need to mock final classes/methods
 
 [plugins]
 androidApplication = { id = "com.android.application", version.ref = "agp" }
