@@ -73,6 +73,8 @@ dependencies {
     implementation(libs.maps.compose)
     implementation(libs.androidx.compose.runtime)
 
+    testImplementation(libs.mockito.core)
+    testImplementation(libs.mockito.inline)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)

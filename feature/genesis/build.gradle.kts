@@ -72,6 +72,8 @@ dependencies {
 
     implementation(libs.timber)
 
+    testImplementation(libs.mockito.core)
+    testImplementation(libs.mockito.inline)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
