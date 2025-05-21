@@ -32,7 +32,7 @@ mapsCompose = "6.6.0"
 places = "4.2.0"
 playServicesMaps = "19.2.0"
 roomVersion = "2.7.1"
-mockito = "4.8.0"
+mockito = "5.18.0"
 
 [libraries]
 
