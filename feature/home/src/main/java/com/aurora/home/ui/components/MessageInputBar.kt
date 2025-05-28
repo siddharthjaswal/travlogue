@@ -40,10 +40,9 @@ import com.aurora.designsystem.theme.md_transparent
  * @param modifier The modifier to be applied to this component.
  * @param onSendMessage Callback invoked when the user submits their message. (Consider adding this)
  */
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 internal fun MessageInputBar(
-    modifier: Modifier,
+    modifier: Modifier = Modifier, // Added default modifier
     onSendMessage: (String) -> Unit
 ) {
     var textInput by remember { mutableStateOf("") }
@@ -54,6 +53,8 @@ internal fun MessageInputBar(
         if (textInput.isNotBlank()) {
             onSendMessage(textInput)
             textInput = ""
+            // Optionally, you might want to hide the keyboard here as well
+            // keyboardController?.hide()
         }
     }
 
@@ -63,51 +64,103 @@ internal fun MessageInputBar(
             .fillMaxWidth()
             .border(1.dp, md_grey_700, RoundedCornerShape(percent = 50))
     ) {
-        OutlinedTextField(
-            value = textInput,
-            onValueChange = { textInput = it },
-            placeholder = { PlaceHolderText() },
-            modifier = modifier
+        MessageTextField(
+            textInput = textInput,
+            onTextInputChange = { textInput = it },
+            onSendMessage = sendMessageAction,
+            focusRequester = focusRequester,
+            modifier = Modifier // Pass a new Modifier instance or adjust as needed
                 .padding(vertical = 6.dp, horizontal = 12.dp)
                 .fillMaxWidth()
-                .focusRequester(focusRequester),
-            shape = RoundedCornerShape(percent = 50),
-            colors = OutlinedTextFieldDefaults.colors(
-                focusedBorderColor = md_transparent,
-                unfocusedBorderColor = md_transparent
-            ),
-            keyboardActions = KeyboardActions(onSend = { sendMessageAction() }),
-            trailingIcon = {
-                IconButton(
-                    onClick = { sendMessageAction() },
-                    enabled = textInput.isNotBlank()
-                ) {
-                    Icon(
-                        imageVector = Icons.AutoMirrored.Rounded.Send,
-                        contentDescription = "Send message",
-                        tint = if (textInput.isNotBlank()) md_grey_300 else md_grey_300.copy(alpha = 0.2f)
-                    )
-                }
-            },
         )
     }
 
+    // Request focus and show keyboard when the composable enters the composition
     LaunchedEffect(Unit) {
         focusRequester.requestFocus()
         keyboardController?.show()
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun PlaceHolderText() {
-    val placeHolderText = "Help me plan: e.g., 'Paris for a week ? "
-    Text(placeHolderText, color = md_grey_700)
+private fun MessageTextField(
+    textInput: String,
+    onTextInputChange: (String) -> Unit,
+    onSendMessage: () -> Unit,
+    focusRequester: FocusRequester,
+    modifier: Modifier = Modifier
+) {
+    OutlinedTextField(
+        value = textInput,
+        onValueChange = onTextInputChange,
+        placeholder = { MessagePlaceholderText() },
+        modifier = modifier.focusRequester(focusRequester),
+        shape = RoundedCornerShape(percent = 50),
+        colors = OutlinedTextFieldDefaults.colors(
+            focusedBorderColor = md_transparent,
+            unfocusedBorderColor = md_transparent,
+            cursorColor = md_grey_300 // Added for better visibility
+        ),
+        keyboardActions = KeyboardActions(onSend = { onSendMessage() }),
+        trailingIcon = {
+            SendButton(
+                onClick = onSendMessage,
+                enabled = textInput.isNotBlank()
+            )
+        },
+        singleLine = true // Often desired for input bars
+    )
+}
+
+@Composable
+private fun MessagePlaceholderText() {
+    val placeholderText = "Help me plan: e.g., 'Paris for a week ? "
+    Text(placeholderText, color = md_grey_700)
+}
+
+@Composable
+private fun SendButton(
+    onClick: () -> Unit,
+    enabled: Boolean
+) {
+    IconButton(
+        onClick = onClick,
+        enabled = enabled
+    ) {
+        Icon(
+            imageVector = Icons.AutoMirrored.Rounded.Send,
+            contentDescription = "Send message",
+            tint = if (enabled) md_grey_300 else md_grey_300.copy(alpha = 0.4f) // Adjusted alpha for disabled state
+        )
+    }
 }
 
 @Preview
 @Composable
-private fun MessageBarPreview() {
-    MessageInputBar(modifier = Modifier, onSendMessage = {
+private fun MessageInputBarPreview() {
+    MessageInputBar(onSendMessage = {})
+}
 
-    })
+@Preview
+@Composable
+private fun MessageTextFieldPreview() {
+    MessageTextField(
+        textInput = "Preview text",
+        onTextInputChange = {},
+        onSendMessage = {},
+        focusRequester = remember { FocusRequester() }
+    )
+}
+
+@Preview
+@Composable
+private fun SendButtonPreview() {
+    SendButton(onClick = {}, enabled = true)
+}
+
+@Preview
+@Composable
+private fun SendButtonDisabledPreview() {
+    SendButton(onClick = {}, enabled = false)
 }
