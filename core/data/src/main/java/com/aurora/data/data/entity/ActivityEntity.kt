@@ -4,8 +4,24 @@ import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 
+/**
+ * Name of the table for activities.
+ */
 const val ACTIVITIES_TABLE_NAME = "activities"
 
+/**
+ * Represents an activity within a day plan.
+ *
+ * @property id Unique identifier for the activity.
+ * @property dayPlanId Foreign key referencing the id of the DayPlan this activity belongs to.
+ * @property name Name of the activity.
+ * @property time Time of the activity in milliseconds since epoch.
+ * @property durationInMins Duration of the activity in minutes.
+ * @property location Location of the activity.
+ * @property latitude Latitude of the activity's location.
+ * @property longitude Longitude of the activity's location.
+ * @property notes Additional notes for the activity.
+ */
 @Entity(tableName = ACTIVITIES_TABLE_NAME)
 data class ActivityEntity(
     @PrimaryKey(autoGenerate = true) @ColumnInfo(name = "id") val id: Long = 0,
