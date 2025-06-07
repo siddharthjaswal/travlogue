@@ -14,6 +14,9 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 
+private const val sampleMessage =
+    "Ready to plan your next adventure?\nAsk me anything, like \"Best beaches in Thailand\" or \"Weekend trip to Rome\""
+
 /**
  * A composable function that displays a message, typically used when there is
  * no data or content to show in a particular section of the UI.
@@ -27,22 +30,18 @@ import androidx.compose.ui.unit.dp
 @Composable
 internal fun NoMessage(
     modifier: Modifier = Modifier,
-    message: String = "Let's plan your next adventure! 🚀🌍"
+    message: String = sampleMessage
 ) {
     Box(
         modifier = modifier
-            .fillMaxSize() // Occupy all available space
-            .padding(16.dp), // Add some padding around the content
-        contentAlignment = Alignment.Center // Center the content within the Box
+            .fillMaxSize()
+            .padding(16.dp),
+        contentAlignment = Alignment.Center
     ) {
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
-            // You can add an icon here if desired, e.g., an empty state icon
-            // Icon(imageVector = Icons.Default.Inbox, contentDescription = null)
-            // Spacer(modifier = Modifier.height(8.dp))
-
             Text(
                 text = message,
                 style = MaterialTheme.typography.titleMedium, // Use a predefined text style
@@ -56,15 +55,7 @@ internal fun NoMessage(
 @Preview(showBackground = true, name = "NoMessage Preview")
 @Composable
 private fun NoMessagePreview() {
-    MaterialTheme { // Wrap with MaterialTheme for previews to see theming
-        NoMessage()
-    }
-}
-
-@Preview(showBackground = true, name = "NoMessage Custom Text Preview")
-@Composable
-private fun NoMessageCustomTextPreview() {
     MaterialTheme {
-        NoMessage(message = "It looks like your trip session is empty!")
+        NoMessage()
     }
 }

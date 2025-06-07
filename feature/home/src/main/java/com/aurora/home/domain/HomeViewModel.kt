@@ -64,12 +64,8 @@ class HomeViewModel @Inject constructor(
             is HomeUiState.ChatMessages -> currentLoadedState.currentSessionId
             is HomeUiState.NoMessages -> currentLoadedState.currentSessionId
             else -> {
-                // Not in a state where we have a session ID (e.g., Loading, Error)
-                // Or, if this happens, it indicates a logic flaw or unexpected state transition.
                 _homeUiState.value =
                     HomeUiState.Error("Cannot send message: No active session loaded.")
-                // Optionally, try to re-initialize session or guide user
-                // loadInitialSessionAndMessages(null) // Attempt to re-establish a session
                 return
             }
         }
