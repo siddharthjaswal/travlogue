@@ -21,13 +21,13 @@ import androidx.compose.ui.unit.dp
  * It centers a text message within the available space.
  *
  * @param modifier Optional [Modifier] to be applied to the layout.
- * @param message The text message to be displayed. Defaults to a generic "No messages available."
+ * @param message The text message to be displayed. Defaults to a fun, inviting message.
  *                It's recommended to use string resources for localization.
  */
 @Composable
 internal fun NoMessage(
     modifier: Modifier = Modifier,
-    message: String = "No messages available." // Consider using stringResource(R.string.no_messages_available)
+    message: String = "Let's plan your next adventure! 🚀🌍"
 ) {
     Box(
         modifier = modifier
