@@ -2,6 +2,7 @@ package com.aurora.data.data.entity
 
 import androidx.room.Embedded
 import androidx.room.Relation
+import com.aurora.data.data.entity.trip.TripEntity
 
 data class TripWithDayPlans(
     @Embedded

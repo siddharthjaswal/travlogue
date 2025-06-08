@@ -1,4 +1,4 @@
-package com.aurora.data.data.entity
+package com.aurora.data.data.entity.trip
 
 import androidx.room.ColumnInfo
 import androidx.room.Entity
@@ -10,6 +10,7 @@ const val TRIPS_TABLE_NAME = "trips"
 data class TripEntity(
     @PrimaryKey(autoGenerate = true) @ColumnInfo(name = "id") val id: Long = 0,
     @ColumnInfo(name = "name") val name: String,
-    @ColumnInfo(name = "start_date") val startDate: Long,
-    @ColumnInfo(name = "end_date") val endDate: Long
+    @ColumnInfo(name = "start_date") val startDate: Long? = null,
+    @ColumnInfo(name = "end_date") val endDate: Long? = null,
+    @ColumnInfo(name = "last_updated") val lastUpdated: Long
 )

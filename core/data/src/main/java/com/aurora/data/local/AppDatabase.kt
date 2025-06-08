@@ -13,7 +13,7 @@ import com.aurora.data.data.entity.DayPlanEntity
 import com.aurora.data.data.entity.DayPlanStayJunction
 import com.aurora.data.data.entity.MessageEntity
 import com.aurora.data.data.entity.StayEntity
-import com.aurora.data.data.entity.TripEntity
+import com.aurora.data.data.entity.trip.TripEntity
 
 const val DB_NAME = "travlogue_db"
 

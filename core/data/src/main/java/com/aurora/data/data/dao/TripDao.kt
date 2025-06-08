@@ -6,8 +6,8 @@ import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import androidx.room.Update
-import com.aurora.data.data.entity.TRIPS_TABLE_NAME
-import com.aurora.data.data.entity.TripEntity
+import com.aurora.data.data.entity.trip.TRIPS_TABLE_NAME
+import com.aurora.data.data.entity.trip.TripEntity
 import kotlinx.coroutines.flow.Flow
 
 @Dao

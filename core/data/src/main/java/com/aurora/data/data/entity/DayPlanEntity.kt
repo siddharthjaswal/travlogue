@@ -4,6 +4,7 @@ import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.ForeignKey
 import androidx.room.PrimaryKey
+import com.aurora.data.data.entity.trip.TripEntity
 import com.aurora.data.data.model.TransitMode
 
 /**
@@ -14,10 +15,10 @@ const val DAY_PLANS_TABLE_NAME = "day_plans"
 /**
  * Represents a single day's plan within a trip.
  * This entity is stored in the [DAY_PLANS_TABLE_NAME] table.
- * It has a foreign key relationship with the [TripEntity] table.
+ * It has a foreign key relationship with the [com.aurora.data.data.entity.trip.TripEntity] table.
  *
  * @property id Unique identifier for the day plan, auto-generated.
- * @property tripId Identifier of the [TripEntity] this day plan belongs to. Indexed for faster queries.
+ * @property tripId Identifier of the [com.aurora.data.data.entity.trip.TripEntity] this day plan belongs to. Indexed for faster queries.
  * @property date The specific date of this plan, stored as a Long (e.g., timestamp).
  * @property arrivalTime Optional arrival time for the planned activity/place, stored as a Long.
  * @property departureTime Optional departure time from the planned activity/place, stored as a Long.
