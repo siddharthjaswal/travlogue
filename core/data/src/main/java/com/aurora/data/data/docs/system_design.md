@@ -63,17 +63,10 @@
 - longitude: Double?
 - notes: String?
 
-### ChatSession
-
-- id: Long (Primary Key)
-- tripId: Long? (Foreign Key referencing Trip, nullable if session can exist without a trip)
-- startTime: Long
-- endTime: Long? (Optional)
-
 ### Message
 
 - id: Long (Primary Key)
-- sessionId: Long (Foreign Key referencing ChatSession)
+- tripId: Long (Foreign Key referencing Trip)
 - sender: String (e.g., "User", "AI")
 - timestamp: Long
 - content: String

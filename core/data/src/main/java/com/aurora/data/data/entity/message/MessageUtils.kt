@@ -1,5 +1,12 @@
 package com.aurora.data.data.entity.message
 
+private const val initPromptMessage =
+    "Ready to plan your next adventure?\nAsk me anything, like \"Best beaches in Thailand\" or \"Weekend trip to Rome\""
+
+fun getInitialMessage(): String{
+    return initPromptMessage
+}
+
 fun createSenderMessage(tripId: Long, messageText: String): MessageEntity {
     return MessageEntity(
         tripId = tripId,

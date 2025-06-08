@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.aurora.data.data.entity.message.createAiMessage
 import com.aurora.data.data.entity.message.createSenderMessage
 import com.aurora.data.data.entity.message.createSystemMessage
+import com.aurora.data.data.entity.message.getInitialMessage
 import com.aurora.data.data.entity.trip.createNewTripEntity
 import com.sid.domain.usecase.gemini.GenerateGeminiResponseUseCase
 import com.sid.domain.usecase.message.GetMessagesForSessionUseCase
@@ -64,6 +65,8 @@ class HomeViewModel @Inject constructor(
     private suspend fun createTripAndReturnId(): Long {
         val trip = createNewTripEntity("Initialize Trip ✨")
         val tripId = createTripUseCase(trip)
+        val initMessage = createSystemMessage(tripId, getInitialMessage())
+        sendMessageUseCase(initMessage)
         return tripId
     }
 

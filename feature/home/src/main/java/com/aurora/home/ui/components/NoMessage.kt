@@ -13,9 +13,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.aurora.data.data.entity.message.getInitialMessage
 
-private const val sampleMessage =
-    "Ready to plan your next adventure?\nAsk me anything, like \"Best beaches in Thailand\" or \"Weekend trip to Rome\""
 
 /**
  * A composable function that displays a message, typically used when there is
@@ -30,7 +29,7 @@ private const val sampleMessage =
 @Composable
 internal fun NoMessage(
     modifier: Modifier = Modifier,
-    message: String = sampleMessage
+    message: String = getInitialMessage()
 ) {
     Box(
         modifier = modifier
