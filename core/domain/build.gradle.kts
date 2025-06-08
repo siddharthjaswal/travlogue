@@ -59,7 +59,7 @@ dependencies {
     ksp(libs.hilt.compiler)
 
     implementation(platform(libs.android.firebase.bom))
-    implementation(libs.vertexai)
+    implementation(libs.firebase.ai)
 
 
     testImplementation(libs.junit)

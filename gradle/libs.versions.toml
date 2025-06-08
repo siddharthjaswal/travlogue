@@ -89,7 +89,7 @@ android-firebase-bom = { group = "com.google.firebase", name = "firebase-bom", v
 android-firebase-config = { group = "com.google.firebase", name = "firebase-config" }
 android-firebase-analytics = { group = "com.google.firebase", name = "firebase-analytics" }
 firebase-config-ktx = { group = "com.google.firebase", name = "firebase-config-ktx" }
-vertexai = { group = "com.google.firebase", name = "firebase-vertexai" }
+firebase-ai = { group = "com.google.firebase", name = "firebase-ai" }
 
 #Maps and Places
 maps-compose = { module = "com.google.maps.android:maps-compose", version.ref = "mapsCompose" }

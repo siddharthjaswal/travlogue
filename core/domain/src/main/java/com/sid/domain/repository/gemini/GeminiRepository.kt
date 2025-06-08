@@ -1,7 +1,9 @@
 package com.sid.domain.repository.gemini
 
 import com.google.firebase.Firebase
-import com.google.firebase.vertexai.vertexAI
+import com.google.firebase.ai.ai
+import com.google.firebase.ai.type.GenerationConfig
+import com.google.firebase.ai.type.GenerativeBackend
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import timber.log.Timber
@@ -19,14 +21,18 @@ interface GeminiRepository {
 
 class GeminiRepositoryImpl @Inject constructor() : GeminiRepository {
 
-    private val generativeModel =
-        Firebase.vertexAI.generativeModel("gemini-2.0-flash") // "gemini-1.5-flash-latest" "gemini-pro"
+    private val firebaseGenerationConfig = GenerationConfig.Builder()
+        .setMaxOutputTokens(100)
+        .build()
+
+    val model = Firebase.ai(backend = GenerativeBackend.googleAI())
+        .generativeModel("gemini-2.0-flash")
 
     override suspend fun generateContent(prompt: String): String? {
         return withContext(Dispatchers.IO) {
             try {
                 Timber.d("Sending prompt to Gemini: $prompt")
-                val response = generativeModel.generateContent(prompt)
+                val response = model.generateContent(prompt)
                 Timber.d("Received response from Gemini: ${response.text}")
                 response.text
             } catch (e: Exception) {

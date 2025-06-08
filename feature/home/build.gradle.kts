@@ -67,7 +67,6 @@ dependencies {
     implementation(platform(libs.android.firebase.bom))
     implementation(libs.android.firebase.config)
     implementation(libs.android.firebase.analytics)
-    implementation(libs.vertexai)
     implementation(libs.places)
     implementation(libs.play.services.maps)
     implementation(libs.maps.compose)
