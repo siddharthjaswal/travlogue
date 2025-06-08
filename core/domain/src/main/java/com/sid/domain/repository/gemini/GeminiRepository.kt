@@ -26,7 +26,10 @@ class GeminiRepositoryImpl @Inject constructor() : GeminiRepository {
         .build()
 
     val model = Firebase.ai(backend = GenerativeBackend.googleAI())
-        .generativeModel("gemini-2.0-flash")
+        .generativeModel(
+            modelName = "gemini-2.0-flash",
+            generationConfig = firebaseGenerationConfig
+        )
 
     override suspend fun generateContent(prompt: String): String? {
         return withContext(Dispatchers.IO) {
