@@ -2,33 +2,38 @@ package com.aurora.home.domain
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.aurora.data.data.entity.MessageEntity
+import com.aurora.data.data.entity.message.createAiMessage
+import com.aurora.data.data.entity.message.createSenderMessage
+import com.aurora.data.data.entity.message.createSystemMessage
+import com.aurora.data.data.entity.trip.createNewTripEntity
 import com.sid.domain.usecase.gemini.GenerateGeminiResponseUseCase
 import com.sid.domain.usecase.message.GetMessagesForSessionUseCase
 import com.sid.domain.usecase.message.SendMessageUseCase
-import com.sid.domain.usecase.session.GetOrCreateActiveSessionUseCase
+import com.sid.domain.usecase.trip.CreateTripUseCase
+import com.sid.domain.usecase.trip.GetLatestTripUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.launch
 import timber.log.Timber
 import javax.inject.Inject
 
-const val SENDER_AI = "ai"
-const val SENDER_USER = "user"
-
 
 @HiltViewModel
 class HomeViewModel @Inject constructor(
-    private val getOrCreateActiveSessionUseCase: GetOrCreateActiveSessionUseCase,
     private val getMessagesForSessionUseCase: GetMessagesForSessionUseCase,
     private val sendMessageUseCase: SendMessageUseCase,
-    private val generateGeminiResponseUseCase: GenerateGeminiResponseUseCase
+    private val generateGeminiResponseUseCase: GenerateGeminiResponseUseCase,
+    private val createTripUseCase: CreateTripUseCase,
+    private val getLatestTripUseCase: GetLatestTripUseCase
 ) : ViewModel() {
     private val _homeUiState = MutableStateFlow<HomeUiState>(HomeUiState.Loading)
     internal val homeUiState: StateFlow<HomeUiState> = _homeUiState.asStateFlow()
+
+    internal var latestTripId: Long? = null
 
     init {
         loadInitialSessionAndMessages()
@@ -37,32 +42,37 @@ class HomeViewModel @Inject constructor(
     private fun loadInitialSessionAndMessages() {
         viewModelScope.launch {
             _homeUiState.value = HomeUiState.Loading
-            val sessionId = getOrCreateActiveSessionUseCase()
-            getMessagesForSessionUseCase(sessionId)
-                .catch { e ->
-                    _homeUiState.value =
-                        HomeUiState.Error("Failed to load messages: ${e.localizedMessage}")
-                }
-                .collect { messages ->
-                    if (messages.isEmpty()) {
-                        _homeUiState.value = HomeUiState.NoMessages(currentSessionId = sessionId)
-                    } else {
-                        _homeUiState.value = HomeUiState.ChatMessages(
-                            messages = messages,
-                            currentSessionId = sessionId
-                        )
-                    }
-                }
 
+            val tripId = fetchLatestTrip() ?: createTripAndReturnId()
+
+            getMessagesForSessionUseCase(tripId).catch { e ->
+                _homeUiState.value =
+                    HomeUiState.Error("Failed to load messages: ${e.localizedMessage}")
+            }.collect { messages ->
+                if (messages.isEmpty()) {
+                    _homeUiState.value = HomeUiState.NoMessages(tripId = tripId)
+                } else {
+                    _homeUiState.value = HomeUiState.ChatMessages(
+                        messages = messages,
+                        tripId = tripId
+                    )
+                }
+            }
         }
+    }
+
+    private suspend fun createTripAndReturnId(): Long {
+        val trip = createNewTripEntity("Initialize Trip ✨")
+        val tripId = createTripUseCase(trip)
+        return tripId
     }
 
     internal fun sendMessage(messageText: String) {
         val currentLoadedState = homeUiState.value
 
-        val sessionId: Long? = when (currentLoadedState) {
-            is HomeUiState.ChatMessages -> currentLoadedState.currentSessionId
-            is HomeUiState.NoMessages -> currentLoadedState.currentSessionId
+        val tripId: Long = when (currentLoadedState) {
+            is HomeUiState.ChatMessages -> currentLoadedState.tripId
+            is HomeUiState.NoMessages -> currentLoadedState.tripId
             else -> {
                 _homeUiState.value =
                     HomeUiState.Error("Cannot send message: No active session loaded.")
@@ -70,14 +80,7 @@ class HomeViewModel @Inject constructor(
             }
         }
 
-        if (sessionId == null) return
-
-        val userMessageEntity = MessageEntity(
-            sessionId = sessionId,
-            sender = SENDER_USER,
-            timestamp = System.currentTimeMillis(),
-            content = messageText.trim()
-        )
+        val userMessageEntity = createSenderMessage(tripId, messageText.trim())
 
         viewModelScope.launch {
             try {
@@ -89,38 +92,38 @@ class HomeViewModel @Inject constructor(
 
             val geminiResponseText = generateGeminiResponseUseCase(messageText.trim())
             if (geminiResponseText != null) {
-                val aiMessageEntity = MessageEntity(
-                    sessionId = sessionId,
-                    sender = SENDER_AI,
-                    timestamp = System.currentTimeMillis(),
-                    content = geminiResponseText
-                )
+                val aiMessageEntity = createAiMessage(tripId, geminiResponseText)
                 sendMessageUseCase(aiMessageEntity)
             } else {
-                val errorMessageEntity = MessageEntity(
-                    sessionId = sessionId,
-                    sender = SENDER_AI,
-                    timestamp = System.currentTimeMillis(),
-                    content = "Sorry, I couldn't get a response. Please try again."
+                val errorMessageEntity = createSystemMessage(
+                    tripId,
+                    "Sorry, I couldn't get a response. Please try again."
                 )
                 sendMessageUseCase(errorMessageEntity)
                 Timber.w("Gemini response was null for prompt: $messageText")
             }
-
-
         }
     }
 
     /**
-     * Call this if the user explicitly wants to start a new chat session,
-     * potentially associated with a specific trip in the future.
-     * For now, assuming it just reloads/re-establishes the general (null tripId) session
-     * or creates a new one if needed.
+     * Fetches the latest trip, updates [latestTripId], and returns its ID or null.
      */
-    internal fun startNewChatSession() {
-        // This will re-run the logic to get or create a session based on the tripId.
-        // If tripId is null, it will fetch/create the general session.
-        // If a new tripId is provided, it would create/fetch for that specific trip.
-        loadInitialSessionAndMessages()
+    private suspend fun fetchLatestTrip(): Long? {
+        return try {
+            val latestTripEntity = getLatestTripUseCase().firstOrNull()
+            if (latestTripEntity != null) {
+                this.latestTripId = latestTripEntity.id
+                Timber.d("Latest trip found: ${latestTripEntity.name}, ID: ${latestTripEntity.id}")
+                latestTripEntity.id
+            } else {
+                this.latestTripId = null
+                Timber.d("No latest trip found.")
+                null
+            }
+        } catch (e: Exception) {
+            Timber.e(e, "Error fetching latest trip")
+            this.latestTripId = null
+            null
+        }
     }
 }

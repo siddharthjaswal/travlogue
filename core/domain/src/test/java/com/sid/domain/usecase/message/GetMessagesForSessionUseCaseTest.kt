@@ -1,6 +1,6 @@
 package com.sid.domain.usecase.message
 
-import com.aurora.data.data.entity.MessageEntity
+import com.aurora.data.data.entity.message.MessageEntity
 import com.sid.domain.repository.message.MessageRepository
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.flowOf
@@ -35,14 +35,14 @@ class GetMessagesForSessionUseCaseTest {
             val expectedMessages = listOf(
                 MessageEntity(
                     id = 1L,
-                    sessionId = sessionId,
+                    tripId = sessionId,
                     sender = "user",
                     timestamp = 1000L,
                     content = "Hello"
                 ),
                 MessageEntity(
                     id = 2L,
-                    sessionId = sessionId,
+                    tripId = sessionId,
                     sender = "bot",
                     timestamp = 1001L,
                     content = "Hi there"

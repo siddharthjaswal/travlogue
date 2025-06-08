@@ -9,5 +9,5 @@ import javax.inject.Inject
 class GetMessagesForSessionUseCase @Inject constructor(
     private val messageRepository: MessageRepository
 ) {
-    operator fun invoke(sessionId: Long) = messageRepository.getMessagesForSession(sessionId)
+    operator fun invoke(tripId: Long) = messageRepository.getMessagesForSession(tripId)
 }

@@ -18,7 +18,6 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle
-import androidx.compose.material.icons.filled.Assistant
 import androidx.compose.material.icons.filled.AutoAwesome
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -31,7 +30,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.aurora.data.data.entity.MessageEntity
+import com.aurora.data.data.entity.message.MessageEntity
 import com.aurora.designsystem.theme.AppTheme
 
 const val SENDER_USER = "user"
@@ -149,28 +148,28 @@ private fun MessageListPreview() {
     val sampleMessages = listOf(
         MessageEntity(
             id = 1,
-            sessionId = 1,
+            tripId = 1,
             sender = SENDER_AI,
             timestamp = System.currentTimeMillis() - 20000,
             content = "Hello! How can I help you plan your trip today?"
         ),
         MessageEntity(
             id = 2,
-            sessionId = 1,
+            tripId = 1,
             sender = SENDER_USER,
             timestamp = System.currentTimeMillis() - 10000,
             content = "Hi! I want to go to Paris for a week."
         ),
         MessageEntity(
             id = 3,
-            sessionId = 1,
+            tripId = 1,
             sender = SENDER_AI,
             timestamp = System.currentTimeMillis() - 5000,
             content = "Paris for a week, great choice! When are you planning to go?"
         ),
         MessageEntity(
             id = 4,
-            sessionId = 1,
+            tripId = 1,
             sender = SENDER_USER,
             timestamp = System.currentTimeMillis(),
             content = "Around next spring. Maybe April?"
@@ -202,7 +201,7 @@ private fun SingleUserMessagePreview() {
                 messages = listOf(
                     MessageEntity(
                         id = 1,
-                        sessionId = 1,
+                        tripId = 1,
                         sender = SENDER_USER,
                         timestamp = System.currentTimeMillis(),
                         content = "This is a user message."
@@ -222,7 +221,7 @@ private fun SingleAiMessagePreview() {
                 messages = listOf(
                     MessageEntity(
                         id = 1,
-                        sessionId = 1,
+                        tripId = 1,
                         sender = SENDER_AI,
                         timestamp = System.currentTimeMillis(),
                         content = "This is an AI message."

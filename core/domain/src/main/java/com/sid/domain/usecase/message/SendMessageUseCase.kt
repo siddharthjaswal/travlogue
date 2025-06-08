@@ -1,6 +1,6 @@
 package com.sid.domain.usecase.message
 
-import com.aurora.data.data.entity.MessageEntity
+import com.aurora.data.data.entity.message.MessageEntity
 import com.sid.domain.repository.message.MessageRepository
 import javax.inject.Inject
 

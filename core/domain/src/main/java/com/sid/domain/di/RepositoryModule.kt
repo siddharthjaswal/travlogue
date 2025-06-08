@@ -4,8 +4,8 @@ import com.sid.domain.repository.gemini.GeminiRepository
 import com.sid.domain.repository.gemini.GeminiRepositoryImpl
 import com.sid.domain.repository.message.MessageRepository
 import com.sid.domain.repository.message.MessageRepositoryImpl
-import com.sid.domain.repository.session.ChatRepository
-import com.sid.domain.repository.session.ChatRepositoryImpl
+import com.sid.domain.repository.trip.TripRepository
+import com.sid.domain.repository.trip.TripRepositoryImpl
 import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn
@@ -15,11 +15,6 @@ import javax.inject.Singleton
 @Module
 @InstallIn(SingletonComponent::class)
 abstract class RepositoryModule {
-    @Binds
-    @Singleton
-    abstract fun bindChatRepository(
-        chatRepositoryImpl: ChatRepositoryImpl
-    ): ChatRepository
 
     @Binds
     @Singleton
@@ -32,4 +27,10 @@ abstract class RepositoryModule {
     abstract fun bindGeminiRepository(
         geminiRepositoryImpl: GeminiRepositoryImpl
     ): GeminiRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindTripRepository(
+        tripRepositoryImpl: TripRepositoryImpl
+    ): TripRepository
 }

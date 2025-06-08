@@ -1,6 +1,6 @@
 package com.aurora.home.domain
 
-import com.aurora.data.data.entity.MessageEntity
+import com.aurora.data.data.entity.message.MessageEntity
 
 /**
  * Represents the different states for the Home screen.
@@ -13,18 +13,18 @@ internal sealed interface HomeUiState {
 
     /**
      * Represents the state where there are no messages.
-     * @param currentSessionId The ID of the current chat session.
+     * @param tripId The ID of the current chat session.
      */
-    data class NoMessages(val currentSessionId: Long) : HomeUiState
+    data class NoMessages(val tripId: Long) : HomeUiState
 
     /**
      * Represents the state where chat messages are available.
      * @param messages The list of messages.
-     * @param currentSessionId The ID of the current chat session.
+     * @param tripId The ID of the current chat session.
      */
     data class ChatMessages(
         val messages: List<MessageEntity> = emptyList(),
-        val currentSessionId: Long? = null
+        val tripId: Long
     ) : HomeUiState
 
     /**
