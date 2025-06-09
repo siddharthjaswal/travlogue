@@ -47,8 +47,8 @@ class HomeViewModel @Inject constructor(
             val tripId = fetchLatestTrip() ?: createTripAndReturnId()
 
             getMessagesForSessionUseCase(tripId).catch { e ->
-                _homeUiState.value =
-                    HomeUiState.Error("Failed to load messages: ${e.localizedMessage}")
+                val errorMessage = "Failed to load messages: ${e.localizedMessage}"
+                _homeUiState.value = HomeUiState.Error(errorMessage)
             }.collect { messages ->
                 if (messages.isEmpty()) {
                     _homeUiState.value = HomeUiState.NoMessages(tripId = tripId)
@@ -77,8 +77,8 @@ class HomeViewModel @Inject constructor(
             is HomeUiState.ChatMessages -> currentLoadedState.tripId
             is HomeUiState.NoMessages -> currentLoadedState.tripId
             else -> {
-                _homeUiState.value =
-                    HomeUiState.Error("Cannot send message: No active session loaded.")
+                val errorMessage = "Cannot send message: No active session loaded."
+                _homeUiState.value = HomeUiState.Error(errorMessage)
                 return
             }
         }
@@ -89,8 +89,8 @@ class HomeViewModel @Inject constructor(
             try {
                 sendMessageUseCase(userMessageEntity)
             } catch (e: Exception) {
-                _homeUiState.value =
-                    HomeUiState.Error("Failed to send message: ${e.localizedMessage}")
+                val errorMessage = "Failed to send message: ${e.localizedMessage}"
+                _homeUiState.value = HomeUiState.Error(errorMessage)
             }
 
             val geminiResponseText = generateGeminiResponseUseCase(messageText.trim())
@@ -98,10 +98,8 @@ class HomeViewModel @Inject constructor(
                 val aiMessageEntity = createAiMessage(tripId, geminiResponseText)
                 sendMessageUseCase(aiMessageEntity)
             } else {
-                val errorMessageEntity = createSystemMessage(
-                    tripId,
-                    "Sorry, I couldn't get a response. Please try again."
-                )
+                val errorMessage = "Sorry, I couldn't get a response. Please try again."
+                val errorMessageEntity = createSystemMessage(tripId, errorMessage)
                 sendMessageUseCase(errorMessageEntity)
                 Timber.w("Gemini response was null for prompt: $messageText")
             }
