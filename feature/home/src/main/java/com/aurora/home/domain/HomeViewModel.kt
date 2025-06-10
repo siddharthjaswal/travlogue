@@ -126,7 +126,7 @@ class HomeViewModel @Inject constructor(
             }
 
             val geminiResponseText =
-                generateGeminiResponseUseCase("${messageText.trim()} $additionalPrompt")
+                generateGeminiResponseUseCase("${messageText.trim()}. ($additionalPrompt)")
             if (geminiResponseText != null) {
                 val aiMessageEntity = createAiMessage(tripId, geminiResponseText)
                 sendMessageUseCase(aiMessageEntity)
