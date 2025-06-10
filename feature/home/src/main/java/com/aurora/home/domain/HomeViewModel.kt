@@ -1,17 +1,26 @@
 package com.aurora.home.domain
 
+// ... other imports ...
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.aurora.data.data.entity.message.createAiMessage
 import com.aurora.data.data.entity.message.createSenderMessage
 import com.aurora.data.data.entity.message.createSystemMessage
 import com.aurora.data.data.entity.message.getInitialMessage
+import com.aurora.data.data.entity.trip.INIT_TRIP_NAME
+import com.aurora.data.data.entity.trip.PROMPT_AWAITING_DESTINATION
+import com.aurora.data.data.entity.trip.PROMPT_AWAITING_END_DATE
+import com.aurora.data.data.entity.trip.PROMPT_AWAITING_START_DATE
+import com.aurora.data.data.entity.trip.PROMPT_PLANNING_COMPLETE
+import com.aurora.data.data.entity.trip.TripPlanningStage
 import com.aurora.data.data.entity.trip.createNewTripEntity
 import com.sid.domain.usecase.gemini.GenerateGeminiResponseUseCase
 import com.sid.domain.usecase.message.GetMessagesForSessionUseCase
 import com.sid.domain.usecase.message.SendMessageUseCase
 import com.sid.domain.usecase.trip.CreateTripUseCase
 import com.sid.domain.usecase.trip.GetLatestTripUseCase
+import com.sid.domain.usecase.trip.GetTripByIdUseCase
+import com.sid.domain.usecase.trip.GetTripPlanningStageUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -29,7 +38,9 @@ class HomeViewModel @Inject constructor(
     private val sendMessageUseCase: SendMessageUseCase,
     private val generateGeminiResponseUseCase: GenerateGeminiResponseUseCase,
     private val createTripUseCase: CreateTripUseCase,
-    private val getLatestTripUseCase: GetLatestTripUseCase
+    private val getLatestTripUseCase: GetLatestTripUseCase,
+    private val getTripPlanningStageUseCase: GetTripPlanningStageUseCase,
+    private val getTripByIdUseCase: GetTripByIdUseCase
 ) : ViewModel() {
     private val _homeUiState = MutableStateFlow<HomeUiState>(HomeUiState.Loading)
     internal val homeUiState: StateFlow<HomeUiState> = _homeUiState.asStateFlow()
@@ -63,29 +74,50 @@ class HomeViewModel @Inject constructor(
     }
 
     private suspend fun createTripAndReturnId(): Long {
-        val trip = createNewTripEntity("Initialize Trip ✨")
+        val trip = createNewTripEntity(INIT_TRIP_NAME)
         val tripId = createTripUseCase(trip)
         val initMessage = createSystemMessage(tripId, getInitialMessage())
         sendMessageUseCase(initMessage)
         return tripId
     }
 
-    internal fun sendMessage(messageText: String) {
-        val currentLoadedState = homeUiState.value
-
-        val tripId: Long = when (currentLoadedState) {
-            is HomeUiState.ChatMessages -> currentLoadedState.tripId
-            is HomeUiState.NoMessages -> currentLoadedState.tripId
+    private fun getCurrentTripId(): Long? {
+        return when (val currentState = _homeUiState.value) {
+            is HomeUiState.ChatMessages -> currentState.tripId
+            is HomeUiState.NoMessages -> currentState.tripId
             else -> {
-                val errorMessage = "Cannot send message: No active session loaded."
+                val errorMessage = "Cannot perform action: No active session loaded."
                 _homeUiState.value = HomeUiState.Error(errorMessage)
-                return
+                Timber.e(errorMessage)
+                null
             }
         }
+    }
+
+    internal fun sendMessage(messageText: String) {
+        val tripId =
+            getCurrentTripId() ?: return
 
         val userMessageEntity = createSenderMessage(tripId, messageText.trim())
 
         viewModelScope.launch {
+            val tripEntity = getTripByIdUseCase(tripId)
+            if (tripEntity == null) {
+                val errorMessage = "Failed to retrieve trip details for ID: $tripId"
+                _homeUiState.value = HomeUiState.Error(errorMessage)
+                Timber.e(errorMessage)
+                return@launch
+            }
+
+            val planningStage = getTripPlanningStageUseCase(tripEntity)
+
+            val additionalPrompt = when (planningStage) {
+                TripPlanningStage.STAGE_AWAITING_DESTINATION -> PROMPT_AWAITING_DESTINATION
+                TripPlanningStage.STAGE_AWAITING_START_DATE -> PROMPT_AWAITING_START_DATE
+                TripPlanningStage.STAGE_AWAITING_END_DATE -> PROMPT_AWAITING_END_DATE
+                TripPlanningStage.STAGE_PLANNING_COMPLETE -> PROMPT_PLANNING_COMPLETE
+            }
+
             try {
                 sendMessageUseCase(userMessageEntity)
             } catch (e: Exception) {
@@ -93,7 +125,8 @@ class HomeViewModel @Inject constructor(
                 _homeUiState.value = HomeUiState.Error(errorMessage)
             }
 
-            val geminiResponseText = generateGeminiResponseUseCase(messageText.trim())
+            val geminiResponseText =
+                generateGeminiResponseUseCase("${messageText.trim()} $additionalPrompt")
             if (geminiResponseText != null) {
                 val aiMessageEntity = createAiMessage(tripId, geminiResponseText)
                 sendMessageUseCase(aiMessageEntity)

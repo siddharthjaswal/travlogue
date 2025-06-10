@@ -23,7 +23,10 @@ interface TripDao {
     suspend fun delete(trip: TripEntity)
 
     @Query("SELECT * FROM $TRIPS_TABLE_NAME WHERE id = :id")
-    fun getById(id: Long): Flow<TripEntity?>
+    fun getTripFlowById(id: Long): Flow<TripEntity?>
+
+    @Query("SELECT * FROM $TRIPS_TABLE_NAME WHERE id = :id")
+    suspend fun getTripById(id: Long?): TripEntity?
 
     @Query("SELECT * FROM $TRIPS_TABLE_NAME ORDER BY start_date DESC")
     fun getAll(): Flow<List<TripEntity>>
