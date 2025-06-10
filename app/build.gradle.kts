@@ -84,6 +84,9 @@ dependencies {
     implementation(libs.places)
     implementation(libs.play.services.maps)
 
+    implementation (libs.firebase.appcheck.playintegrity)
+    debugImplementation (libs.firebase.appcheck.debug)
+
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)

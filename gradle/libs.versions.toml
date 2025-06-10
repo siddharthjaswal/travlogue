@@ -33,6 +33,7 @@ places = "4.3.1"
 playServicesMaps = "19.2.0"
 roomVersion = "2.7.1"
 mockito = "5.18.0"
+firebase-appcheck = "17.1.1"
 
 [libraries]
 
@@ -90,6 +91,8 @@ android-firebase-config = { group = "com.google.firebase", name = "firebase-conf
 android-firebase-analytics = { group = "com.google.firebase", name = "firebase-analytics" }
 firebase-config-ktx = { group = "com.google.firebase", name = "firebase-config-ktx" }
 firebase-ai = { group = "com.google.firebase", name = "firebase-ai" }
+firebase-appcheck-playintegrity = { group = "com.google.firebase", name = "firebase-appcheck-playintegrity", version.ref = "firebase-appcheck" }
+firebase-appcheck-debug = { group = "com.google.firebase", name = "firebase-appcheck-debug", version.ref = "firebase-appcheck" }
 
 #Maps and Places
 maps-compose = { module = "com.google.maps.android:maps-compose", version.ref = "mapsCompose" }
@@ -110,7 +113,10 @@ androidx-espresso-core = { group = "androidx.test.espresso", name = "espresso-co
 
 #Mockito
 mockito-core = { group = "org.mockito", name = "mockito-core", version.ref = "mockito" }
-mockito-inline = { group = "org.mockito", name = "mockito-inline", version.ref = "mockito" } # If you need to mock final classes/methods
+mockito-inline = { group = "org.mockito", name = "mockito-inline", version.ref = "mockito" }
+
+[bundles]
+firebase-appcheck = ["firebase-appcheck-playintegrity", "firebase-appcheck-debug"]
 
 [plugins]
 androidApplication = { id = "com.android.application", version.ref = "agp" }

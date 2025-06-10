@@ -2,7 +2,6 @@ package com.sid.domain.repository.gemini
 
 import com.google.firebase.Firebase
 import com.google.firebase.ai.ai
-import com.google.firebase.ai.type.GenerationConfig
 import com.google.firebase.ai.type.GenerativeBackend
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -21,14 +20,10 @@ interface GeminiRepository {
 
 class GeminiRepositoryImpl @Inject constructor() : GeminiRepository {
 
-    private val firebaseGenerationConfig = GenerationConfig.Builder()
-        .setMaxOutputTokens(100)
-        .build()
 
     val model = Firebase.ai(backend = GenerativeBackend.googleAI())
         .generativeModel(
-            modelName = "gemini-2.0-flash",
-            generationConfig = firebaseGenerationConfig
+            modelName = "gemini-2.0-flash"
         )
 
     override suspend fun generateContent(prompt: String): String? {
