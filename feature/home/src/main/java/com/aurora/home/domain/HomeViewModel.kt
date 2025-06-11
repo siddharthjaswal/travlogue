@@ -11,6 +11,7 @@ import com.aurora.data.data.entity.message.getInitialMessage
 import com.aurora.data.data.entity.trip.INIT_TRIP_NAME
 import com.aurora.data.data.entity.trip.createNewTripEntity
 import com.sid.domain.usecase.gemini.GenerateGeminiResponseUseCase
+import com.sid.domain.usecase.gemini.GenerateTripJsonUseCase
 import com.sid.domain.usecase.message.GetMessagesFlowForTripIdUseCase
 import com.sid.domain.usecase.message.GetMessagesForTripIdUseCase
 import com.sid.domain.usecase.message.SendMessageUseCase
@@ -38,7 +39,8 @@ class HomeViewModel @Inject constructor(
     private val createTripUseCase: CreateTripUseCase,
     private val getLatestTripUseCase: GetLatestTripUseCase,
     private val getTripPlanningStageUseCase: GetTripPlanningStageUseCase,
-    private val getTripByIdUseCase: GetTripByIdUseCase
+    private val getTripByIdUseCase: GetTripByIdUseCase,
+    private val generateTripJsonUseCase: GenerateTripJsonUseCase
 ) : ViewModel() {
     private val _homeUiState = MutableStateFlow<HomeUiState>(HomeUiState.Loading)
     internal val homeUiState: StateFlow<HomeUiState> = _homeUiState.asStateFlow()

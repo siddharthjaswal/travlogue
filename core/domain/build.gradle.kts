@@ -60,7 +60,7 @@ dependencies {
 
     implementation(platform(libs.android.firebase.bom))
     implementation(libs.firebase.ai)
-
+    implementation(libs.gson)
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)

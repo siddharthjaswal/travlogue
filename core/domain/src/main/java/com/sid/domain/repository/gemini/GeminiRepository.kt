@@ -8,22 +8,43 @@ import com.google.firebase.Firebase
 import com.google.firebase.ai.ai
 import com.google.firebase.ai.type.Content
 import com.google.firebase.ai.type.GenerativeBackend
+import com.google.firebase.ai.type.SerializationException
 import com.google.firebase.ai.type.content
 import com.google.firebase.ai.type.generationConfig
+import com.google.gson.Gson
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import timber.log.Timber
 import javax.inject.Inject
 
+private const val LOG_BUILDING_HISTORY_GEMINI = "Building chat history for Gemini. History size: %d"
+private const val LOG_MAPPED_HISTORY_SIZE = "Mapped history size: %d"
+private const val LOG_STARTING_CHAT_WITH_HISTORY =
+    "Starting chat with history. Mapped history size: %d"
+private const val LOG_SENDING_PROMPT_GEMINI_STREAM = "Sending prompt to Gemini via stream: %s"
+
+// Constant for system instruction
+private const val SYS_INSTRUCTION_TRAVEL_ASSISTANT = "You are a travel assistant"
+
+private const val LOG_RECEIVED_TRIP_JSON_RESPONSE = "Received Trip JSON response from Gemini: %s"
+private const val LOG_PARSING_TRIP_JSON = "Attempting to parse Trip JSON"
+private const val LOG_PARSED_TRIP_JSON_SUCCESS = "Successfully parsed Trip JSON to TripEntity: %s"
+private const val LOG_PARSING_TRIP_JSON_ERROR = "Error parsing Trip JSON"
+private const val LOG_EMPTY_TRIP_JSON_RESPONSE =
+    "Received empty or null Trip JSON response from Gemini"
+
 interface GeminiRepository {
     fun generateContent(prompt: String, chatHistory: List<MessageEntity>): Flow<String>
 
-    fun generateTripJsonContent(prompt: String, chatHistory: List<MessageEntity>): Flow<String>
+    suspend fun generateTripJsonContent(
+        prompt: String,
+        chatHistory: List<MessageEntity>
+    ): TripEntity?
 }
 
 class GeminiRepositoryImpl @Inject constructor() : GeminiRepository {
     private fun mapChatHistoryToGeminiFormat(chatHistory: List<MessageEntity>): List<Content> {
-        Timber.d("Building chat history for Gemini. History size: ${chatHistory.size}")
+        Timber.d(LOG_BUILDING_HISTORY_GEMINI, chatHistory.size)
         return chatHistory.mapNotNull { message ->
             when (message.sender) {
                 SENDER_USER -> content(role = "user") { text(message.content) }
@@ -31,50 +52,74 @@ class GeminiRepositoryImpl @Inject constructor() : GeminiRepository {
                 else -> null
             }
         }.also { mappedHistory ->
-            Timber.d("Mapped history size: ${mappedHistory.size}")
+            Timber.d(LOG_MAPPED_HISTORY_SIZE, mappedHistory.size)
         }
     }
 
     val model = Firebase.ai(backend = GenerativeBackend.googleAI()).generativeModel(
         modelName = "gemini-1.5-flash",
-        systemInstruction = content { text("You are a travel assistant") }
+        systemInstruction = content { text(SYS_INSTRUCTION_TRAVEL_ASSISTANT) }
     )
 
     override fun generateContent(
         prompt: String,
         chatHistory: List<MessageEntity>
     ): Flow<String> {
-        Timber.d("Building chat history for Gemini. History size: ${chatHistory.size}")
         val history = mapChatHistoryToGeminiFormat(chatHistory)
 
-        Timber.d("Starting chat with history. Mapped history size: ${history.size}")
+        Timber.d(LOG_STARTING_CHAT_WITH_HISTORY, history.size)
         val chat = model.startChat(history = history)
 
-        Timber.d("Sending prompt to Gemini via stream: $prompt")
+        Timber.d(LOG_SENDING_PROMPT_GEMINI_STREAM, prompt)
         return chat.sendMessageStream(prompt).map { it.text ?: "" }
     }
 
     val tripModel = Firebase.ai(backend = GenerativeBackend.googleAI()).generativeModel(
         modelName = "gemini-1.5-flash",
-        systemInstruction = content { text("You are a travel assistant") },
+        systemInstruction = content { text(SYS_INSTRUCTION_TRAVEL_ASSISTANT) },
         generationConfig = generationConfig {
             responseMimeType = "application/json"
             responseSchema = TripEntity.tripJsonSchema
         }
     )
 
-    override fun generateTripJsonContent(
+    override suspend fun generateTripJsonContent(
         prompt: String,
         chatHistory: List<MessageEntity>
-    ): Flow<String> {
-
-        Timber.d("Building chat history for Gemini. History size: ${chatHistory.size}")
+    ): TripEntity? {
         val history = mapChatHistoryToGeminiFormat(chatHistory)
 
-        Timber.d("Starting chat with history. Mapped history size: ${history.size}")
+        Timber.d(LOG_STARTING_CHAT_WITH_HISTORY, history.size)
         val chat = tripModel.startChat(history = history)
 
-        Timber.d("Sending prompt to Gemini via stream: $prompt")
-        return chat.sendMessageStream(prompt).map { it.text ?: "" }
+        try {
+            Timber.d(LOG_SENDING_PROMPT_GEMINI_STREAM, prompt)
+            val response = chat.sendMessage(prompt)
+            val jsonString = response.text
+
+            if (jsonString.isNullOrBlank()) {
+                Timber.w(LOG_EMPTY_TRIP_JSON_RESPONSE)
+                return null
+            }
+
+            Timber.d(LOG_RECEIVED_TRIP_JSON_RESPONSE, jsonString)
+            Timber.d(LOG_PARSING_TRIP_JSON)
+
+            return try {
+                val tripEntity = Gson().fromJson(jsonString, TripEntity::class.java)
+                Timber.d(LOG_PARSED_TRIP_JSON_SUCCESS, tripEntity.toString())
+                tripEntity
+            } catch (e: SerializationException) {
+                Timber.e(e, LOG_PARSING_TRIP_JSON_ERROR)
+                null
+            } catch (e: Exception) {
+                Timber.e(e, "An unexpected error occurred during Trip JSON parsing")
+                null
+            }
+        } catch (e: Exception) {
+            Timber.e(e, "Error generating Trip JSON content from Gemini")
+            return null
+        }
+
     }
 }
