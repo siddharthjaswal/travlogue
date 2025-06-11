@@ -7,11 +7,11 @@ import com.aurora.data.data.entity.message.createSenderMessage
 import com.aurora.data.data.entity.message.createSystemMessage
 import com.aurora.data.data.entity.message.getInitialMessage
 import com.aurora.data.data.entity.trip.INIT_TRIP_NAME
-import com.aurora.data.data.entity.trip.PROMPT_AWAITING_DESTINATION // Added
-import com.aurora.data.data.entity.trip.PROMPT_AWAITING_END_DATE // Added
-import com.aurora.data.data.entity.trip.PROMPT_AWAITING_START_DATE // Added
-import com.aurora.data.data.entity.trip.PROMPT_PLANNING_COMPLETE // Added
-import com.aurora.data.data.entity.trip.TripPlanningStage // Added
+import com.aurora.data.data.entity.trip.PROMPT_AWAITING_DESTINATION
+import com.aurora.data.data.entity.trip.PROMPT_AWAITING_END_DATE
+import com.aurora.data.data.entity.trip.PROMPT_AWAITING_START_DATE
+import com.aurora.data.data.entity.trip.PROMPT_PLANNING_COMPLETE
+import com.aurora.data.data.entity.trip.TripPlanningStage
 import com.aurora.data.data.entity.trip.createNewTripEntity
 import com.sid.domain.usecase.gemini.GenerateGeminiResponseUseCase
 import com.sid.domain.usecase.gemini.GenerateTripJsonUseCase
@@ -107,8 +107,7 @@ class HomeViewModel @Inject constructor(
     }
 
     private suspend fun prepareFullPromptForGemini(
-        tripId: Long,
-        originalMessageText: String
+        tripId: Long, originalMessageText: String
     ): String? {
         val tripEntity = getTripByIdUseCase(tripId)
         if (tripEntity == null) {
@@ -116,8 +115,7 @@ class HomeViewModel @Inject constructor(
                 "Failed to retrieve trip details for ID: $tripId. Cannot determine planning stage."
             Timber.e(errorMessage)
             val errorSystemMessage = createSystemMessage(
-                tripId,
-                "Error: Could not retrieve trip details to assist further."
+                tripId, "Error: Could not retrieve trip details to assist further."
             )
             sendMessageUseCase(errorSystemMessage)
             _homeUiState.value = HomeUiState.Error(errorMessage)
@@ -139,18 +137,16 @@ class HomeViewModel @Inject constructor(
         val chatHistory = getMessagesForTripIdUseCase(tripId)
         val geminiResponseBuilder = StringBuilder()
 
-        generateGeminiResponseUseCase(fullPrompt, chatHistory)
-            .catch { e ->
-                Timber.e(e, "Error generating Gemini response stream")
-                val errorMessage =
-                    "Sorry, I encountered an issue while generating a response. Please try again."
-                val errorMessageEntity = createSystemMessage(tripId, errorMessage)
-                sendMessageUseCase(errorMessageEntity)
-            }
-            .collect { response ->
-                geminiResponseBuilder.append(response)
-                Timber.tag("Gemini").d("Received part of response from Gemini: $response")
-            }
+        generateGeminiResponseUseCase(fullPrompt, chatHistory).catch { e ->
+            Timber.e(e, "Error generating Gemini response stream")
+            val errorMessage =
+                "Sorry, I encountered an issue while generating a response. Please try again."
+            val errorMessageEntity = createSystemMessage(tripId, errorMessage)
+            sendMessageUseCase(errorMessageEntity)
+        }.collect { response ->
+            geminiResponseBuilder.append(response)
+            Timber.tag("Gemini").d("Received part of response from Gemini: $response")
+        }
 
         if (geminiResponseBuilder.isNotBlank()) {
             val finalAiText = geminiResponseBuilder.toString().trim()
@@ -176,6 +172,18 @@ class HomeViewModel @Inject constructor(
         }
     }
 
+    private suspend fun generateTripDataFromPrompt(tripId: Long, fullPrompt: String) {
+        val trip = getTripByIdUseCase(tripId)
+        val chatHistory = getMessagesForTripIdUseCase(tripId)
+        if (trip != null && trip.name != INIT_TRIP_NAME) {
+            val updatedTrip =
+                generateTripJsonUseCase(prompt = fullPrompt, chatHistory = chatHistory)
+            Timber.d("Generated trip JSON: $updatedTrip")
+        } else {
+            Timber.w("No trip found for ID: $tripId")
+        }
+    }
+
 
     internal fun sendMessage(messageText: String) {
         val tripId = getCurrentTripId() ?: return
@@ -186,8 +194,8 @@ class HomeViewModel @Inject constructor(
             }
 
             val fullPrompt = messageText.trim()
-
             generateAndSaveAiResponse(tripId, fullPrompt)
+            generateTripDataFromPrompt(tripId, fullPrompt)
         }
     }
 
