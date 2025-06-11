@@ -6,21 +6,21 @@ import com.aurora.data.data.entity.message.SENDER_USER
 import com.google.firebase.Firebase
 import com.google.firebase.ai.ai
 import com.google.firebase.ai.type.GenerativeBackend
-import com.google.firebase.ai.type.content // Added import
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
+import com.google.firebase.ai.type.content
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.map
 import timber.log.Timber
 import javax.inject.Inject
 
 interface GeminiRepository {
     /**
-     * Generates content based on the given prompt using the Gemini API.
+     * Generates content based on the given prompt using the Gemini API, returning a stream of responses.
      *
      * @param prompt The text prompt to send to the model.
      * @param chatHistory A list of previous messages in the conversation.
-     * @return The generated text response from the model, or null if an error occurred.
+     * @return A Flow emitting GenerateContentResponse objects from the model.
      */
-    suspend fun generateContent(prompt: String, chatHistory: List<MessageEntity>): String?
+    fun generateContent(prompt: String, chatHistory: List<MessageEntity>): Flow<String>
 }
 
 class GeminiRepositoryImpl @Inject constructor() : GeminiRepository {
@@ -30,33 +30,23 @@ class GeminiRepositoryImpl @Inject constructor() : GeminiRepository {
             modelName = "gemini-1.5-flash"
         )
 
-    override suspend fun generateContent(
+    override fun generateContent(
         prompt: String,
         chatHistory: List<MessageEntity>
-    ): String? {
-        return withContext(Dispatchers.IO) {
-            try {
-                Timber.d("Building chat history for Gemini. History size: ${chatHistory.size}")
-                val history = chatHistory.mapNotNull { message ->
-                    when (message.sender) {
-                        SENDER_USER -> content(role = "user") { text(message.content) }
-                        SENDER_AI -> content(role = "model") { text(message.content) }
-                        else -> null
-                    }
-                }
-
-                Timber.d("Starting chat with history. Mapped history size: ${history.size}")
-                val chat = model.startChat(history = history)
-
-                Timber.d("Sending prompt to Gemini: $prompt")
-                val response = chat.sendMessage(prompt)
-                val responseText = response.text
-                Timber.d("Received response from Gemini: $responseText")
-                responseText
-            } catch (e: Exception) {
-                Timber.e(e, "Error generating content with Gemini")
-                null
+    ): Flow<String> {
+        Timber.d("Building chat history for Gemini. History size: ${chatHistory.size}")
+        val history = chatHistory.mapNotNull { message ->
+            when (message.sender) {
+                SENDER_USER -> content(role = "user") { text(message.content) }
+                SENDER_AI -> content(role = "model") { text(message.content) }
+                else -> null
             }
         }
+
+        Timber.d("Starting chat with history. Mapped history size: ${history.size}")
+        val chat = model.startChat(history = history)
+
+        Timber.d("Sending prompt to Gemini via stream: $prompt")
+        return chat.sendMessageStream(prompt).map { it.text ?: "" }
     }
 }

@@ -1,6 +1,7 @@
 package com.aurora.home.domain
 
 // ... other imports ...
+// No specific import for .collect is needed if using the extension function
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.aurora.data.data.entity.message.createAiMessage
@@ -100,22 +101,35 @@ class HomeViewModel @Inject constructor(
             try {
                 sendMessageUseCase(userMessageEntity)
             } catch (e: Exception) {
-                val errorMessage = "Failed to send message: ${e.localizedMessage}"
+                val errorMessage = "Failed to send user message: ${e.localizedMessage}"
                 _homeUiState.value = HomeUiState.Error(errorMessage)
+                Timber.e(e, errorMessage)
+                return@launch
             }
+
+            val fullPrompt = messageText.trim()
 
             val chatHistory = getMessagesForTripIdUseCase(tripId)
 
-            val geminiResponseText = generateGeminiResponseUseCase(messageText.trim(), chatHistory)
-            if (geminiResponseText != null) {
-                val aiMessageEntity = createAiMessage(tripId, geminiResponseText)
-                sendMessageUseCase(aiMessageEntity)
-            } else {
-                val errorMessage = "Sorry, I couldn't get a response. Please try again."
-                val errorMessageEntity = createSystemMessage(tripId, errorMessage)
-                sendMessageUseCase(errorMessageEntity)
-                Timber.w("Gemini response was null for prompt: $messageText")
-            }
+            generateGeminiResponseUseCase(fullPrompt, chatHistory)
+                .catch { e ->
+                    Timber.e(e, "Error generating Gemini response stream")
+                    val errorMessage = "Sorry, I encountered an issue while generating a response. Please try again."
+                    val errorMessageEntity = createSystemMessage(tripId, errorMessage)
+                    sendMessageUseCase(errorMessageEntity)
+                }
+                .collect { response ->
+                    val aiMessageEntity = createAiMessage(tripId, response.trim())
+                    try {
+                        sendMessageUseCase(aiMessageEntity)
+                    } catch (e: Exception) {
+                        Timber.e(e, "Failed to send AI message to database")
+                        val systemErrorMessage =
+                            createSystemMessage(tripId, "Error: Could not save the AI's response.")
+                        sendMessageUseCase(systemErrorMessage)
+                        _homeUiState.value = HomeUiState.Error("Failed to save AI response: ${e.localizedMessage}")
+                    }
+                }
         }
     }
 
