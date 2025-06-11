@@ -49,6 +49,9 @@ dependencies {
     implementation(libs.androidx.room.testing)
     ksp(libs.androidx.room.compiler)
 
+    implementation(platform(libs.android.firebase.bom))
+    implementation(libs.firebase.ai)
+
     implementation(libs.hilt.android)
     ksp(libs.hilt.compiler)
 

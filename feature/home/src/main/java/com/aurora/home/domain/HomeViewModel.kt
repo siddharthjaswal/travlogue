@@ -114,11 +114,13 @@ class HomeViewModel @Inject constructor(
             generateGeminiResponseUseCase(fullPrompt, chatHistory)
                 .catch { e ->
                     Timber.e(e, "Error generating Gemini response stream")
-                    val errorMessage = "Sorry, I encountered an issue while generating a response. Please try again."
+                    val errorMessage =
+                        "Sorry, I encountered an issue while generating a response. Please try again."
                     val errorMessageEntity = createSystemMessage(tripId, errorMessage)
                     sendMessageUseCase(errorMessageEntity)
                 }
                 .collect { response ->
+                    Timber.tag("Gemini").d("Received response from Gemini: $response")
                     val aiMessageEntity = createAiMessage(tripId, response.trim())
                     try {
                         sendMessageUseCase(aiMessageEntity)
@@ -127,7 +129,8 @@ class HomeViewModel @Inject constructor(
                         val systemErrorMessage =
                             createSystemMessage(tripId, "Error: Could not save the AI's response.")
                         sendMessageUseCase(systemErrorMessage)
-                        _homeUiState.value = HomeUiState.Error("Failed to save AI response: ${e.localizedMessage}")
+                        _homeUiState.value =
+                            HomeUiState.Error("Failed to save AI response: ${e.localizedMessage}")
                     }
                 }
         }
