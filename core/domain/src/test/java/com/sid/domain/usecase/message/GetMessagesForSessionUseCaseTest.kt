@@ -20,11 +20,11 @@ class GetMessagesForSessionUseCaseTest {
     @Mock
     private lateinit var mockMessageRepository: MessageRepository
 
-    private lateinit var getMessagesForSessionUseCase: GetMessagesForSessionUseCase
+    private lateinit var getMessagesFlowForTripIdUseCase: GetMessagesFlowForTripIdUseCase
 
     @Before
     fun setUp() {
-        getMessagesForSessionUseCase = GetMessagesForSessionUseCase(mockMessageRepository)
+        getMessagesFlowForTripIdUseCase = GetMessagesFlowForTripIdUseCase(mockMessageRepository)
     }
 
     @Test
@@ -48,19 +48,19 @@ class GetMessagesForSessionUseCaseTest {
                     content = "Hi there"
                 )
             )
-            `when`(mockMessageRepository.getMessagesForSession(sessionId)).thenReturn(
+            `when`(mockMessageRepository.getMessagesFlowForTripId(sessionId)).thenReturn(
                 flowOf(
                     expectedMessages
                 )
             )
 
             // Act
-            val resultFlow = getMessagesForSessionUseCase(sessionId)
+            val resultFlow = getMessagesFlowForTripIdUseCase(sessionId)
             val actualMessages = resultFlow.firstOrNull()
 
             // Assert
             assertEquals(expectedMessages, actualMessages)
-            verify(mockMessageRepository).getMessagesForSession(sessionId)
+            verify(mockMessageRepository).getMessagesFlowForTripId(sessionId)
         }
     }
 }

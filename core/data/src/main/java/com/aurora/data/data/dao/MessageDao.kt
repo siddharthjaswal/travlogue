@@ -28,7 +28,10 @@ interface MessageDao {
      * @return A Flow emitting a list of messages for the given session.
      */
     @Query("SELECT * FROM $MESSAGES_TABLE_NAME WHERE trip_id = :tripId ORDER BY timestamp ASC")
-    fun getMessagesForSession(tripId: Long): Flow<List<MessageEntity>>
+    fun getMessagesFlowForTripId(tripId: Long): Flow<List<MessageEntity>>
+
+    @Query("SELECT * FROM $MESSAGES_TABLE_NAME WHERE trip_id = :tripId ORDER BY timestamp ASC")
+    suspend fun getMessagesForTripId(tripId: Long): List<MessageEntity>
 
     /**
      * Retrieves a specific message by its ID.

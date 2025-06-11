@@ -19,7 +19,9 @@ interface MessageRepository {
      * @param tripId The unique identifier of the chat session.
      * @return A [Flow] emitting a list of [MessageEntity] objects for the session.
      */
-    fun getMessagesForSession(tripId: Long): Flow<List<MessageEntity>>
+    fun getMessagesFlowForTripId(tripId: Long): Flow<List<MessageEntity>>
+
+    suspend fun getMessagesForTripId(tripId: Long): List<MessageEntity>
 
     /**
      * Saves a message to the repository.
@@ -34,8 +36,12 @@ interface MessageRepository {
 class MessageRepositoryImpl @Inject constructor(
     private val messageDao: MessageDao,
 ) : MessageRepository {
-    override fun getMessagesForSession(tripId: Long): Flow<List<MessageEntity>> {
-        return messageDao.getMessagesForSession(tripId)
+    override fun getMessagesFlowForTripId(tripId: Long): Flow<List<MessageEntity>> {
+        return messageDao.getMessagesFlowForTripId(tripId)
+    }
+
+    override suspend fun getMessagesForTripId(tripId: Long): List<MessageEntity> {
+        return messageDao.getMessagesForTripId(tripId)
     }
 
     override suspend fun saveMessage(message: MessageEntity): Long {

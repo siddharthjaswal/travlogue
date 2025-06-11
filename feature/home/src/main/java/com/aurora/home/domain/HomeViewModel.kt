@@ -8,14 +8,10 @@ import com.aurora.data.data.entity.message.createSenderMessage
 import com.aurora.data.data.entity.message.createSystemMessage
 import com.aurora.data.data.entity.message.getInitialMessage
 import com.aurora.data.data.entity.trip.INIT_TRIP_NAME
-import com.aurora.data.data.entity.trip.PROMPT_AWAITING_DESTINATION
-import com.aurora.data.data.entity.trip.PROMPT_AWAITING_END_DATE
-import com.aurora.data.data.entity.trip.PROMPT_AWAITING_START_DATE
-import com.aurora.data.data.entity.trip.PROMPT_PLANNING_COMPLETE
-import com.aurora.data.data.entity.trip.TripPlanningStage
 import com.aurora.data.data.entity.trip.createNewTripEntity
 import com.sid.domain.usecase.gemini.GenerateGeminiResponseUseCase
-import com.sid.domain.usecase.message.GetMessagesForSessionUseCase
+import com.sid.domain.usecase.message.GetMessagesFlowForTripIdUseCase
+import com.sid.domain.usecase.message.GetMessagesForTripIdUseCase
 import com.sid.domain.usecase.message.SendMessageUseCase
 import com.sid.domain.usecase.trip.CreateTripUseCase
 import com.sid.domain.usecase.trip.GetLatestTripUseCase
@@ -34,7 +30,8 @@ import javax.inject.Inject
 
 @HiltViewModel
 class HomeViewModel @Inject constructor(
-    private val getMessagesForSessionUseCase: GetMessagesForSessionUseCase,
+    private val getMessagesFlowForTripIdUseCase: GetMessagesFlowForTripIdUseCase,
+    private val getMessagesForTripIdUseCase: GetMessagesForTripIdUseCase,
     private val sendMessageUseCase: SendMessageUseCase,
     private val generateGeminiResponseUseCase: GenerateGeminiResponseUseCase,
     private val createTripUseCase: CreateTripUseCase,
@@ -57,7 +54,7 @@ class HomeViewModel @Inject constructor(
 
             val tripId = fetchLatestTrip() ?: createTripAndReturnId()
 
-            getMessagesForSessionUseCase(tripId).catch { e ->
+            getMessagesFlowForTripIdUseCase(tripId).catch { e ->
                 val errorMessage = "Failed to load messages: ${e.localizedMessage}"
                 _homeUiState.value = HomeUiState.Error(errorMessage)
             }.collect { messages ->
@@ -95,29 +92,11 @@ class HomeViewModel @Inject constructor(
     }
 
     internal fun sendMessage(messageText: String) {
-        val tripId =
-            getCurrentTripId() ?: return
+        val tripId = getCurrentTripId() ?: return
 
         val userMessageEntity = createSenderMessage(tripId, messageText.trim())
 
         viewModelScope.launch {
-            val tripEntity = getTripByIdUseCase(tripId)
-            if (tripEntity == null) {
-                val errorMessage = "Failed to retrieve trip details for ID: $tripId"
-                _homeUiState.value = HomeUiState.Error(errorMessage)
-                Timber.e(errorMessage)
-                return@launch
-            }
-
-            val planningStage = getTripPlanningStageUseCase(tripEntity)
-
-            val additionalPrompt = when (planningStage) {
-                TripPlanningStage.STAGE_AWAITING_DESTINATION -> PROMPT_AWAITING_DESTINATION
-                TripPlanningStage.STAGE_AWAITING_START_DATE -> PROMPT_AWAITING_START_DATE
-                TripPlanningStage.STAGE_AWAITING_END_DATE -> PROMPT_AWAITING_END_DATE
-                TripPlanningStage.STAGE_PLANNING_COMPLETE -> PROMPT_PLANNING_COMPLETE
-            }
-
             try {
                 sendMessageUseCase(userMessageEntity)
             } catch (e: Exception) {
@@ -125,8 +104,9 @@ class HomeViewModel @Inject constructor(
                 _homeUiState.value = HomeUiState.Error(errorMessage)
             }
 
-            val geminiResponseText =
-                generateGeminiResponseUseCase("${messageText.trim()}. ($additionalPrompt)")
+            val chatHistory = getMessagesForTripIdUseCase(tripId)
+
+            val geminiResponseText = generateGeminiResponseUseCase(messageText.trim(), chatHistory)
             if (geminiResponseText != null) {
                 val aiMessageEntity = createAiMessage(tripId, geminiResponseText)
                 sendMessageUseCase(aiMessageEntity)
