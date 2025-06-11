@@ -1,7 +1,5 @@
 package com.aurora.home.domain
 
-// ... other imports ...
-// No specific import for .collect is needed if using the extension function
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.aurora.data.data.entity.message.createAiMessage
@@ -9,6 +7,11 @@ import com.aurora.data.data.entity.message.createSenderMessage
 import com.aurora.data.data.entity.message.createSystemMessage
 import com.aurora.data.data.entity.message.getInitialMessage
 import com.aurora.data.data.entity.trip.INIT_TRIP_NAME
+import com.aurora.data.data.entity.trip.PROMPT_AWAITING_DESTINATION // Added
+import com.aurora.data.data.entity.trip.PROMPT_AWAITING_END_DATE // Added
+import com.aurora.data.data.entity.trip.PROMPT_AWAITING_START_DATE // Added
+import com.aurora.data.data.entity.trip.PROMPT_PLANNING_COMPLETE // Added
+import com.aurora.data.data.entity.trip.TripPlanningStage // Added
 import com.aurora.data.data.entity.trip.createNewTripEntity
 import com.sid.domain.usecase.gemini.GenerateGeminiResponseUseCase
 import com.sid.domain.usecase.gemini.GenerateTripJsonUseCase
@@ -54,9 +57,7 @@ class HomeViewModel @Inject constructor(
     private fun loadInitialSessionAndMessages() {
         viewModelScope.launch {
             _homeUiState.value = HomeUiState.Loading
-
             val tripId = fetchLatestTrip() ?: createTripAndReturnId()
-
             getMessagesFlowForTripIdUseCase(tripId).catch { e ->
                 val errorMessage = "Failed to load messages: ${e.localizedMessage}"
                 _homeUiState.value = HomeUiState.Error(errorMessage)
@@ -64,10 +65,8 @@ class HomeViewModel @Inject constructor(
                 if (messages.isEmpty()) {
                     _homeUiState.value = HomeUiState.NoMessages(tripId = tripId)
                 } else {
-                    _homeUiState.value = HomeUiState.ChatMessages(
-                        messages = messages,
-                        tripId = tripId
-                    )
+                    _homeUiState.value =
+                        HomeUiState.ChatMessages(messages = messages, tripId = tripId)
                 }
             }
         }
@@ -94,53 +93,104 @@ class HomeViewModel @Inject constructor(
         }
     }
 
+    private suspend fun sendUserMessageInternal(tripId: Long, messageText: String): Boolean {
+        val userMessageEntity = createSenderMessage(tripId, messageText)
+        return try {
+            sendMessageUseCase(userMessageEntity)
+            true
+        } catch (e: Exception) {
+            val errorMessage = "Failed to send user message: ${e.localizedMessage}"
+            _homeUiState.value = HomeUiState.Error(errorMessage)
+            Timber.e(e, errorMessage)
+            false
+        }
+    }
+
+    private suspend fun prepareFullPromptForGemini(
+        tripId: Long,
+        originalMessageText: String
+    ): String? {
+        val tripEntity = getTripByIdUseCase(tripId)
+        if (tripEntity == null) {
+            val errorMessage =
+                "Failed to retrieve trip details for ID: $tripId. Cannot determine planning stage."
+            Timber.e(errorMessage)
+            val errorSystemMessage = createSystemMessage(
+                tripId,
+                "Error: Could not retrieve trip details to assist further."
+            )
+            sendMessageUseCase(errorSystemMessage)
+            _homeUiState.value = HomeUiState.Error(errorMessage)
+            return null
+        }
+
+        val planningStage = getTripPlanningStageUseCase(tripEntity)
+        val contextHint = when (planningStage) {
+            TripPlanningStage.STAGE_AWAITING_DESTINATION -> PROMPT_AWAITING_DESTINATION
+            TripPlanningStage.STAGE_AWAITING_START_DATE -> PROMPT_AWAITING_START_DATE
+            TripPlanningStage.STAGE_AWAITING_END_DATE -> PROMPT_AWAITING_END_DATE
+            TripPlanningStage.STAGE_PLANNING_COMPLETE -> PROMPT_PLANNING_COMPLETE
+        }
+
+        return "${originalMessageText.trim()}\n\n[System Note: Current planning focus is on: $contextHint]"
+    }
+
+    private suspend fun generateAndSaveAiResponse(tripId: Long, fullPrompt: String) {
+        val chatHistory = getMessagesForTripIdUseCase(tripId)
+        val geminiResponseBuilder = StringBuilder()
+
+        generateGeminiResponseUseCase(fullPrompt, chatHistory)
+            .catch { e ->
+                Timber.e(e, "Error generating Gemini response stream")
+                val errorMessage =
+                    "Sorry, I encountered an issue while generating a response. Please try again."
+                val errorMessageEntity = createSystemMessage(tripId, errorMessage)
+                sendMessageUseCase(errorMessageEntity)
+            }
+            .collect { response ->
+                geminiResponseBuilder.append(response)
+                Timber.tag("Gemini").d("Received part of response from Gemini: $response")
+            }
+
+        if (geminiResponseBuilder.isNotBlank()) {
+            val finalAiText = geminiResponseBuilder.toString().trim()
+            Timber.tag("Gemini").d("Final assembled response from Gemini: $finalAiText")
+            val aiMessageEntity = createAiMessage(tripId, finalAiText)
+            try {
+                sendMessageUseCase(aiMessageEntity)
+            } catch (e: Exception) {
+                Timber.e(e, "Failed to send AI message to database")
+                val systemErrorMessage =
+                    createSystemMessage(tripId, "Error: Could not save the AI's response.")
+                sendMessageUseCase(systemErrorMessage)
+                _homeUiState.value =
+                    HomeUiState.Error("Failed to save AI response: ${e.localizedMessage}")
+            }
+        } else {
+            Timber.w("Gemini response was empty or only whitespace for prompt: $fullPrompt")
+            val emptyResponseMessage = createSystemMessage(
+                tripId,
+                "I received an empty response. Could you try rephrasing or ask something else?"
+            )
+            sendMessageUseCase(emptyResponseMessage)
+        }
+    }
+
+
     internal fun sendMessage(messageText: String) {
         val tripId = getCurrentTripId() ?: return
 
-        val userMessageEntity = createSenderMessage(tripId, messageText.trim())
-
         viewModelScope.launch {
-            try {
-                sendMessageUseCase(userMessageEntity)
-            } catch (e: Exception) {
-                val errorMessage = "Failed to send user message: ${e.localizedMessage}"
-                _homeUiState.value = HomeUiState.Error(errorMessage)
-                Timber.e(e, errorMessage)
+            if (!sendUserMessageInternal(tripId, messageText.trim())) {
                 return@launch
             }
 
             val fullPrompt = messageText.trim()
 
-            val chatHistory = getMessagesForTripIdUseCase(tripId)
-
-            generateGeminiResponseUseCase(fullPrompt, chatHistory)
-                .catch { e ->
-                    Timber.e(e, "Error generating Gemini response stream")
-                    val errorMessage =
-                        "Sorry, I encountered an issue while generating a response. Please try again."
-                    val errorMessageEntity = createSystemMessage(tripId, errorMessage)
-                    sendMessageUseCase(errorMessageEntity)
-                }
-                .collect { response ->
-                    Timber.tag("Gemini").d("Received response from Gemini: $response")
-                    val aiMessageEntity = createAiMessage(tripId, response.trim())
-                    try {
-                        sendMessageUseCase(aiMessageEntity)
-                    } catch (e: Exception) {
-                        Timber.e(e, "Failed to send AI message to database")
-                        val systemErrorMessage =
-                            createSystemMessage(tripId, "Error: Could not save the AI's response.")
-                        sendMessageUseCase(systemErrorMessage)
-                        _homeUiState.value =
-                            HomeUiState.Error("Failed to save AI response: ${e.localizedMessage}")
-                    }
-                }
+            generateAndSaveAiResponse(tripId, fullPrompt)
         }
     }
 
-    /**
-     * Fetches the latest trip, updates [latestTripId], and returns its ID or null.
-     */
     private suspend fun fetchLatestTrip(): Long? {
         return try {
             val latestTripEntity = getLatestTripUseCase().firstOrNull()
