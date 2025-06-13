@@ -2,10 +2,11 @@ package com.sid.domain.repository.trip
 
 import com.aurora.data.data.dao.TripDao
 import com.aurora.data.data.entity.trip.TripEntity
-import com.aurora.data.data.entity.trip.TripPlanningStage // Added import
-import com.aurora.data.data.entity.trip.getTripPlanningStage // Added import
+import com.aurora.data.data.entity.trip.TripPlanningStage
+import com.aurora.data.data.entity.trip.getTripPlanningStage
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
+import timber.log.Timber
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -32,6 +33,13 @@ interface TripRepository {
      * @return The TripPlanningStage of the trip.
      */
     fun getTripStage(trip: TripEntity?): TripPlanningStage
+
+    /**
+     * Updates an existing trip in the database.
+     * @param trip The TripEntity with updated information.
+     * @return True if the update was successful (one or more rows affected), false otherwise.
+     */
+    suspend fun updateTrip(trip: TripEntity): Boolean
 }
 
 @Singleton
@@ -39,10 +47,12 @@ class TripRepositoryImpl @Inject constructor(
     private val tripDao: TripDao,
 ) : TripRepository {
     override suspend fun createTrip(trip: TripEntity): Long {
+        Timber.d("createTrip")
         return tripDao.insert(trip)
     }
 
     override suspend fun getTripById(tripId: Long?): TripEntity? {
+        Timber.d("Fetching trip by ID: $tripId")
         return tripDao.getTripById(tripId)
     }
 
@@ -54,5 +64,9 @@ class TripRepositoryImpl @Inject constructor(
 
     override fun getTripStage(trip: TripEntity?): TripPlanningStage {
         return getTripPlanningStage(trip)
+    }
+
+    override suspend fun updateTrip(trip: TripEntity): Boolean {
+        return tripDao.update(trip) > 0
     }
 }

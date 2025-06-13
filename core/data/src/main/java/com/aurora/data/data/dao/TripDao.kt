@@ -17,7 +17,7 @@ interface TripDao {
     suspend fun insert(trip: TripEntity): Long
 
     @Update
-    suspend fun update(trip: TripEntity)
+    suspend fun update(trip: TripEntity): Int
 
     @Delete
     suspend fun delete(trip: TripEntity)

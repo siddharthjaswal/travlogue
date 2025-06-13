@@ -24,7 +24,7 @@ private const val LOG_STARTING_CHAT_WITH_HISTORY =
 private const val LOG_SENDING_PROMPT_GEMINI_STREAM = "Sending prompt to Gemini via stream: %s"
 
 // Constant for system instruction
-private const val SYS_INSTRUCTION_TRAVEL_ASSISTANT = "You are a travel assistant"
+private const val SYS_INSTRUCTION_TRAVEL_ASSISTANT = "You are a travel assistant. Break the questions in parts, ask one at time."
 
 private const val LOG_RECEIVED_TRIP_JSON_RESPONSE = "Received Trip JSON response from Gemini: %s"
 private const val LOG_PARSING_TRIP_JSON = "Attempting to parse Trip JSON"

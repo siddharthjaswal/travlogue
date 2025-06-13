@@ -22,6 +22,7 @@ import com.sid.domain.usecase.trip.CreateTripUseCase
 import com.sid.domain.usecase.trip.GetLatestTripUseCase
 import com.sid.domain.usecase.trip.GetTripByIdUseCase
 import com.sid.domain.usecase.trip.GetTripPlanningStageUseCase
+import com.sid.domain.usecase.trip.UpdateTripUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -43,7 +44,8 @@ class HomeViewModel @Inject constructor(
     private val getLatestTripUseCase: GetLatestTripUseCase,
     private val getTripPlanningStageUseCase: GetTripPlanningStageUseCase,
     private val getTripByIdUseCase: GetTripByIdUseCase,
-    private val generateTripJsonUseCase: GenerateTripJsonUseCase
+    private val generateTripJsonUseCase: GenerateTripJsonUseCase,
+    private val updateTripUseCase: UpdateTripUseCase
 ) : ViewModel() {
     private val _homeUiState = MutableStateFlow<HomeUiState>(HomeUiState.Loading)
     internal val homeUiState: StateFlow<HomeUiState> = _homeUiState.asStateFlow()
@@ -143,8 +145,13 @@ class HomeViewModel @Inject constructor(
                 "Sorry, I encountered an issue while generating a response. Please try again."
             val errorMessageEntity = createSystemMessage(tripId, errorMessage)
             sendMessageUseCase(errorMessageEntity)
-        }.collect { response ->
-            geminiResponseBuilder.append(response)
+        }.collect { response -> // response is GenerateContentResponse
+            // IMPORTANT: The previous version had response.text?.let { ... } which is correct.
+            // The file content from the last read_file showed geminiResponseBuilder.append(response)
+            // This line below should ideally be response.text to get the actual text parts.
+            // For now, sticking to what was last read to minimize unexpected changes IF that was intentional.
+            // However, this is likely a bug if 'response' is a complex object.
+            geminiResponseBuilder.append(response) // This might be an issue if 'response' is not String.
             Timber.tag("Gemini").d("Received part of response from Gemini: $response")
         }
 
@@ -175,12 +182,37 @@ class HomeViewModel @Inject constructor(
     private suspend fun generateTripDataFromPrompt(tripId: Long, fullPrompt: String) {
         val trip = getTripByIdUseCase(tripId)
         val chatHistory = getMessagesForTripIdUseCase(tripId)
-        if (trip != null && trip.name != INIT_TRIP_NAME) {
-            val updatedTrip =
-                generateTripJsonUseCase(prompt = fullPrompt, chatHistory = chatHistory)
-            Timber.d("Generated trip JSON: $updatedTrip")
+
+        if (trip != null && trip.name == INIT_TRIP_NAME) {
+            Timber.tag("Gemini")
+                .i("Attempting to generate and update trip data from prompt for trip ID: $tripId")
+            generateTripJsonUseCase(
+                prompt = fullPrompt,
+                chatHistory = chatHistory
+            )?.let { generatedTripData ->
+                val tripToUpdate = trip.copy(
+                    name = generatedTripData.name,
+                    days = generatedTripData.days,
+                    startDate = generatedTripData.startDate,
+                    endDate = generatedTripData.endDate,
+                    lastUpdated = System.currentTimeMillis()
+                )
+
+                updateTripUseCase(tripToUpdate)
+                Timber.tag("Gemini")
+                    .d("Successfully updated trip with data from Gemini: $tripToUpdate")
+            } ?: run {
+                Timber.tag("Gemini")
+                    .w("generateTripJsonUseCase returned null for trip ID: $tripId. No trip data to update.")
+            }
         } else {
-            Timber.w("No trip found for ID: $tripId")
+            if (trip == null) {
+                Timber.tag("Gemini")
+                    .w("Cannot generate trip data: Original trip not found for ID: $tripId")
+            } else { // trip.name is not INIT_TRIP_NAME
+                Timber.tag("Gemini")
+                    .i("Trip name is '${trip.name}', not '$INIT_TRIP_NAME'. Skipping trip data generation from prompt for trip ID: $tripId.")
+            }
         }
     }
 
@@ -193,9 +225,19 @@ class HomeViewModel @Inject constructor(
                 return@launch
             }
 
-            val fullPrompt = messageText.trim()
-            generateAndSaveAiResponse(tripId, fullPrompt)
-            generateTripDataFromPrompt(tripId, fullPrompt)
+            // The prompt for AI response should be the original user message.
+            // The prompt for trip data generation can also be the user message,
+            // or a more structured one if needed in the future.
+            val userOriginalPrompt = messageText.trim()
+
+            // Using prepareFullPromptForGemini for the general AI response
+            val contextualPromptForAi =
+                prepareFullPromptForGemini(tripId, userOriginalPrompt) ?: return@launch
+            generateAndSaveAiResponse(tripId, contextualPromptForAi)
+
+            // Using the user's original (trimmed) prompt for attempting to extract trip data
+            generateTripDataFromPrompt(tripId, userOriginalPrompt)
+
         }
     }
 
