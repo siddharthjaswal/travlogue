@@ -19,18 +19,18 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.aurora.designsystem.theme.AppTheme
-import com.aurora.home.domain.HomeViewModel
 import com.aurora.home.domain.HomeUiState
-import com.aurora.home.ui.components.NoMessage
-import com.aurora.home.ui.components.MessageList
-import com.aurora.home.ui.components.MessageInputBar
+import com.aurora.home.domain.HomeViewModel
 import com.aurora.home.ui.components.HomeTopBar
+import com.aurora.home.ui.components.MessageInputBar
+import com.aurora.home.ui.components.MessageList
+import com.aurora.home.ui.components.NoMessage
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun HomeScreen(
     viewModel: HomeViewModel = hiltViewModel(),
-    onClickCreate: () -> Unit = {}
+    onNavigateToPlan: (Long) -> Unit
 ) {
 
     val state = viewModel.homeUiState.collectAsStateWithLifecycle().value
@@ -41,7 +41,12 @@ fun HomeScreen(
             HomeTopBar(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 16.dp)
+                    .padding(horizontal = 16.dp),
+                onNavigateToPlan = {
+                    viewModel.latestTripId?.let {
+                        onNavigateToPlan(it)
+                    }
+                }
             )
         },
         bottomBar = {
@@ -64,6 +69,7 @@ fun HomeScreen(
                 HomeUiState.Loading -> {
 
                 }
+
                 is HomeUiState.ChatMessages -> {
                     MessageList(state.messages)
                 }
@@ -87,7 +93,7 @@ internal fun Preview() {
             modifier = Modifier.fillMaxSize(),
             color = MaterialTheme.colorScheme.background
         ) {
-            HomeScreen()
+            HomeScreen(){}
         }
     }
 }

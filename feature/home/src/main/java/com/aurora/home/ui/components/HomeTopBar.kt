@@ -1,12 +1,14 @@
 package com.aurora.home.ui.components
 
+// import androidx.compose.foundation.layout.Spacer // Not used
+// import androidx.compose.foundation.layout.width // Not used
+// import androidx.compose.ui.unit.dp // Not used directly here anymore, but good to keep for potential future use
 import android.content.res.Configuration
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Map
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -22,20 +24,26 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.aurora.designsystem.theme.AppTheme
-import timber.log.Timber
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 internal fun HomeTopBar(
     modifier: Modifier = Modifier,
+    onNavigateToPlan: () -> Unit
 ) {
     TopAppBar(
         modifier = modifier,
         title = { TopBarTitle() },
-        actions = {},
+        actions = {
+            IconButton(onClick = { onNavigateToPlan() }) {
+                Icon(
+                    imageVector = Icons.Filled.Map,
+                    contentDescription = "Navigate to Plan"
+                )
+            }
+        },
         colors = TopAppBarDefaults.topAppBarColors(
             containerColor = Color.Transparent
         )
@@ -53,7 +61,7 @@ private fun TopBarTitle() {
     ) {
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
             Text(
-                text = "Travlogue",
+                text = "Travlogue", // TODO: Consider making this dynamic or a string resource
                 fontWeight = FontWeight.Normal,
                 fontSize = 18.sp
             )
@@ -66,7 +74,7 @@ private fun TopBarTitle() {
  * @param onClick Lambda to be invoked when the button is clicked.
  */
 @Composable
-private fun NavigationMenuButton(onClick: () -> Unit) {
+private fun NavigationMenuButton(onClick: () -> Unit) { // This is not used in the current TopAppBar
     IconButton(onClick = onClick) {
         Icon(
             imageVector = Icons.Filled.Menu,
@@ -83,8 +91,9 @@ internal fun TopBarLayoutPreview() {
         Surface(
             color = MaterialTheme.colorScheme.background
         ) {
-            HomeTopBar()
+            HomeTopBar(
+                onNavigateToPlan = {}
+            )
         }
     }
 }
-

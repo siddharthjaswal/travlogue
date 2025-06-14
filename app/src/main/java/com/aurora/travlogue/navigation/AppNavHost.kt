@@ -22,7 +22,7 @@ fun AppNavHost(
         composable(route = Home.route) {
             HomeScreen(
                 viewModel = hiltViewModel<HomeViewModel>(),
-                onClickCreate = {
+                onNavigateToPlan = {
                     navController.navigateSingleTopTo(Genesis.route)
                 }
             )

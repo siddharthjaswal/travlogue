@@ -24,8 +24,10 @@ private const val LOG_STARTING_CHAT_WITH_HISTORY =
 private const val LOG_SENDING_PROMPT_GEMINI_STREAM = "Sending prompt to Gemini via stream: %s"
 
 // Constant for system instruction
-private const val SYS_INSTRUCTION_TRAVEL_ASSISTANT = "You are a travel assistant. Break the questions in parts, ask one at time."
-
+private const val SYS_INSTRUCTION_TRAVEL_ASSISTANT =
+    "You are a travel assistant. Break the questions in parts, ask one at time."
+private const val SYS_INSTRUCTION_ADD_EMOJI_TO_NAME =
+    "Add Destination Related Cute Emoji to the name field. Keep it maximum to 3 words and a emoji. Come up with cute names"
 private const val LOG_RECEIVED_TRIP_JSON_RESPONSE = "Received Trip JSON response from Gemini: %s"
 private const val LOG_PARSING_TRIP_JSON = "Attempting to parse Trip JSON"
 private const val LOG_PARSED_TRIP_JSON_SUCCESS = "Successfully parsed Trip JSON to TripEntity: %s"
@@ -76,7 +78,7 @@ class GeminiRepositoryImpl @Inject constructor() : GeminiRepository {
 
     val tripModel = Firebase.ai(backend = GenerativeBackend.googleAI()).generativeModel(
         modelName = "gemini-1.5-flash",
-        systemInstruction = content { text(SYS_INSTRUCTION_TRAVEL_ASSISTANT) },
+        systemInstruction = content { text(SYS_INSTRUCTION_ADD_EMOJI_TO_NAME) },
         generationConfig = generationConfig {
             responseMimeType = "application/json"
             responseSchema = TripEntity.tripJsonSchema
