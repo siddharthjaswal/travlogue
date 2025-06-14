@@ -54,12 +54,13 @@ dependencies {
 
     implementation(libs.androidx.activity.compose)
     implementation(platform(libs.androidx.compose.bom))
-
-    implementation(libs.androidx.navigation.fragment.ktx)
-    implementation(libs.androidx.navigation.ui.ktx)
     implementation(libs.androidx.ui.tooling.preview.android)
 
-    implementation(libs.timber)
+    implementation(libs.androidx.lifecycle.viewmodel.ktx)
+    implementation(libs.androidx.lifecycle.livedata.ktx)
+    implementation(libs.androidx.lifecycle.common.java8)
+    implementation(libs.androidx.lifecycle.process)
+    implementation(libs.androidx.compose.runtime)
 
     implementation(libs.androidx.hilt.navigation.compose)
     implementation(libs.hilt.android)
@@ -67,10 +68,8 @@ dependencies {
     implementation(platform(libs.android.firebase.bom))
     implementation(libs.android.firebase.config)
     implementation(libs.android.firebase.analytics)
-    implementation(libs.places)
-    implementation(libs.play.services.maps)
-    implementation(libs.maps.compose)
-    implementation(libs.androidx.compose.runtime)
+
+    implementation(libs.timber)
 
     testImplementation(libs.mockito.core)
     testImplementation(libs.mockito.inline)

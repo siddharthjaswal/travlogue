@@ -1,7 +1,7 @@
 package com.aurora.genesis.ui
 
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -9,28 +9,19 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
-import com.aurora.genesis.domain.UiState
+import com.aurora.data.data.entity.trip.TripEntity
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-internal fun TopBarLayout(onBackPressed: () -> Unit, state: UiState) {
+internal fun TopBarLayout(onBackPressed: () -> Unit, trip: TripEntity) {
     TopAppBar(
         title = {
-            when (state) {
-                UiState.EmptyState -> {}
-                UiState.GetTimelinesState -> {
-                    Text(text = "New Plan", color = MaterialTheme.colorScheme.primary)
-                }
-
-                UiState.ModificationState -> {
-                    Text(text = "Edit Plan", color = MaterialTheme.colorScheme.primary)
-                }
-            }
+            Text(text = trip.name, color = MaterialTheme.colorScheme.primary)
         },
         navigationIcon = {
             IconButton(onClick = onBackPressed) {
                 Icon(
-                    imageVector = Icons.Default.Close,
+                    imageVector = Icons.AutoMirrored.Default.ArrowBack,
                     contentDescription = "Back",
                     tint = MaterialTheme.colorScheme.primary
                 )

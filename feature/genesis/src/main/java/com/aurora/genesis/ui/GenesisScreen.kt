@@ -1,7 +1,6 @@
 package com.aurora.genesis.ui
 
 import android.content.res.Configuration
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -12,7 +11,6 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.aurora.designsystem.theme.AppTheme
@@ -28,9 +26,11 @@ fun GenesisScreen(viewModel: GenesisViewModel = hiltViewModel(), onBackPressed: 
 
     Scaffold(
         topBar = {
-            TopBarLayout(state = state, onBackPressed = {
-                onBackPressed()
-            })
+            if (state is UiState.GetTimelinesState) {
+                TopBarLayout(trip = state.trip, onBackPressed = {
+                    onBackPressed()
+                })
+            }
         },
         bottomBar = {
         },
@@ -45,12 +45,8 @@ fun GenesisScreen(viewModel: GenesisViewModel = hiltViewModel(), onBackPressed: 
                     EmptyContent()
                 }
 
-                UiState.GetTimelinesState -> {
-                    GetTimelineLayout()
-                }
-
-                UiState.ModificationState -> {
-
+                is UiState.GetTimelinesState -> {
+                    GetTimelineLayout(state.trip)
                 }
             }
         }
