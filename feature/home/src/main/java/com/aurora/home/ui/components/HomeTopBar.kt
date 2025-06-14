@@ -61,7 +61,7 @@ private fun TopBarTitle() {
     ) {
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
             Text(
-                text = "Travlogue", // TODO: Consider making this dynamic or a string resource
+                text = "Travlogue",
                 fontWeight = FontWeight.Normal,
                 fontSize = 18.sp
             )
