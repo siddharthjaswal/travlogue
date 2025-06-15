@@ -11,6 +11,7 @@ const val TRIPS_TABLE_NAME = "trips"
 data class TripEntity(
     @PrimaryKey(autoGenerate = true) @ColumnInfo(name = "id") val id: Long = 0,
     @ColumnInfo(name = "name") val name: String,
+    @ColumnInfo(name = "banner_image_path") val bannerImagePath: String? = null,
     @ColumnInfo(name = "days") val days: Int? = null,
     @ColumnInfo(name = "start_date") val startDate: Long? = null,
     @ColumnInfo(name = "end_date") val endDate: Long? = null,

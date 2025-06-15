@@ -4,6 +4,8 @@ import com.sid.domain.repository.gemini.GeminiRepository
 import com.sid.domain.repository.gemini.GeminiRepositoryImpl
 import com.sid.domain.repository.message.MessageRepository
 import com.sid.domain.repository.message.MessageRepositoryImpl
+import com.sid.domain.repository.storage.ImageStorageRepository
+import com.sid.domain.repository.storage.ImageStorageRepositoryImpl
 import com.sid.domain.repository.trip.TripRepository
 import com.sid.domain.repository.trip.TripRepositoryImpl
 import dagger.Binds
@@ -33,4 +35,10 @@ abstract class RepositoryModule {
     abstract fun bindTripRepository(
         tripRepositoryImpl: TripRepositoryImpl
     ): TripRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindImageStorageRepository(
+        imageStorageRepositoryImpl: ImageStorageRepositoryImpl
+    ): ImageStorageRepository
 }

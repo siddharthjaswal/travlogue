@@ -13,6 +13,7 @@ import com.aurora.data.data.entity.trip.PROMPT_AWAITING_START_DATE
 import com.aurora.data.data.entity.trip.PROMPT_PLANNING_COMPLETE
 import com.aurora.data.data.entity.trip.TripPlanningStage
 import com.aurora.data.data.entity.trip.createNewTripEntity
+import com.sid.domain.usecase.gemini.GenerateBannerImageUseCase
 import com.sid.domain.usecase.gemini.GenerateGeminiResponseUseCase
 import com.sid.domain.usecase.gemini.GenerateTripJsonUseCase
 import com.sid.domain.usecase.message.GetMessagesFlowForTripIdUseCase
@@ -39,10 +40,11 @@ class HomeViewModel @Inject constructor(
     private val getMessagesFlowForTripIdUseCase: GetMessagesFlowForTripIdUseCase,
     private val getMessagesForTripIdUseCase: GetMessagesForTripIdUseCase,
     private val sendMessageUseCase: SendMessageUseCase,
-    private val generateGeminiResponseUseCase: GenerateGeminiResponseUseCase,
     private val createTripUseCase: CreateTripUseCase,
     private val getLatestTripUseCase: GetLatestTripUseCase,
     private val getTripPlanningStageUseCase: GetTripPlanningStageUseCase,
+    private val generateGeminiResponseUseCase: GenerateGeminiResponseUseCase,
+    private val generateBannerImageUseCase: GenerateBannerImageUseCase,
     private val getTripByIdUseCase: GetTripByIdUseCase,
     private val generateTripJsonUseCase: GenerateTripJsonUseCase,
     private val updateTripUseCase: UpdateTripUseCase
@@ -145,13 +147,8 @@ class HomeViewModel @Inject constructor(
                 "Sorry, I encountered an issue while generating a response. Please try again."
             val errorMessageEntity = createSystemMessage(tripId, errorMessage)
             sendMessageUseCase(errorMessageEntity)
-        }.collect { response -> // response is GenerateContentResponse
-            // IMPORTANT: The previous version had response.text?.let { ... } which is correct.
-            // The file content from the last read_file showed geminiResponseBuilder.append(response)
-            // This line below should ideally be response.text to get the actual text parts.
-            // For now, sticking to what was last read to minimize unexpected changes IF that was intentional.
-            // However, this is likely a bug if 'response' is a complex object.
-            geminiResponseBuilder.append(response) // This might be an issue if 'response' is not String.
+        }.collect { response ->
+            geminiResponseBuilder.append(response)
             Timber.tag("Gemini").d("Received part of response from Gemini: $response")
         }
 
@@ -179,6 +176,32 @@ class HomeViewModel @Inject constructor(
         }
     }
 
+    private suspend fun generateAndSaveBannerImage(tripId: Long, bannerPrompt: String) {
+        Timber.tag("Gemini").i("Attempting to generate banner image for trip ID: $tripId with prompt: \"$bannerPrompt\"")
+        val imagePath = generateBannerImageUseCase(bannerPrompt)
+
+        if (imagePath != null) {
+            Timber.tag("Gemini").d("Banner image generated successfully for trip ID: $tripId. Path: $imagePath")
+            val currentTrip = getTripByIdUseCase(tripId)
+            if (currentTrip != null) {
+                val updatedTrip = currentTrip.copy(
+                    bannerImagePath = imagePath,
+                    lastUpdated = System.currentTimeMillis()
+                )
+                if (updateTripUseCase(updatedTrip)) {
+                    Timber.tag("Gemini").i("Successfully updated trip ID: $tripId with banner image path: $imagePath")
+                } else {
+                    Timber.tag("Gemini").e("Failed to update trip ID: $tripId with banner image path.")
+                }
+            } else {
+                Timber.tag("Gemini").e("Failed to retrieve trip ID: $tripId to update banner image path.")
+            }
+        } else {
+            Timber.tag("Gemini").w("generateBannerImageUseCase returned null for trip ID: $tripId. No banner image generated or saved.")
+        }
+    }
+
+
     private suspend fun generateTripDataFromPrompt(tripId: Long, fullPrompt: String) {
         val trip = getTripByIdUseCase(tripId)
         val chatHistory = getMessagesForTripIdUseCase(tripId)
@@ -186,10 +209,12 @@ class HomeViewModel @Inject constructor(
         if (trip != null && trip.name == INIT_TRIP_NAME) {
             Timber.tag("Gemini")
                 .i("Attempting to generate and update trip data from prompt for trip ID: $tripId")
-            generateTripJsonUseCase(
+            val generatedTripData = generateTripJsonUseCase(
                 prompt = fullPrompt,
                 chatHistory = chatHistory
-            )?.let { generatedTripData ->
+            )
+
+            if (generatedTripData != null) {
                 val tripToUpdate = trip.copy(
                     name = generatedTripData.name,
                     days = generatedTripData.days,
@@ -198,10 +223,14 @@ class HomeViewModel @Inject constructor(
                     lastUpdated = System.currentTimeMillis()
                 )
 
-                updateTripUseCase(tripToUpdate)
-                Timber.tag("Gemini")
-                    .d("Successfully updated trip with data from Gemini: $tripToUpdate")
-            } ?: run {
+                if (updateTripUseCase(tripToUpdate)) {
+                    Timber.tag("Gemini").d("Successfully updated trip with data from Gemini: $tripToUpdate")
+                    generateAndSaveBannerImage(tripId, tripToUpdate.name)
+                } else {
+                    Timber.tag("Gemini").e("Failed to update trip with data from Gemini for trip ID: $tripId")
+                }
+
+            } else {
                 Timber.tag("Gemini")
                     .w("generateTripJsonUseCase returned null for trip ID: $tripId. No trip data to update.")
             }
@@ -225,19 +254,14 @@ class HomeViewModel @Inject constructor(
                 return@launch
             }
 
-            // The prompt for AI response should be the original user message.
-            // The prompt for trip data generation can also be the user message,
-            // or a more structured one if needed in the future.
             val userOriginalPrompt = messageText.trim()
 
-            // Using prepareFullPromptForGemini for the general AI response
             val contextualPromptForAi =
                 prepareFullPromptForGemini(tripId, userOriginalPrompt) ?: return@launch
             generateAndSaveAiResponse(tripId, contextualPromptForAi)
 
-            // Using the user's original (trimmed) prompt for attempting to extract trip data
+            // This will now also attempt to generate a banner if trip data is successfully extracted and updated
             generateTripDataFromPrompt(tripId, userOriginalPrompt)
-
         }
     }
 
