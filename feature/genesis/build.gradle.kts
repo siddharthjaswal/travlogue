@@ -74,6 +74,8 @@ dependencies {
     implementation(libs.android.firebase.analytics)
 
     implementation(libs.timber)
+    implementation(libs.coil.compose)
+    implementation(libs.coil.network)
 
     testImplementation(libs.mockito.core)
     testImplementation(libs.mockito.inline)
