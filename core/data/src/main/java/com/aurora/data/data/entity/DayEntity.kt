@@ -6,15 +6,16 @@ import androidx.room.ForeignKey
 import androidx.room.PrimaryKey
 import com.aurora.data.data.entity.trip.TripEntity
 import com.aurora.data.data.model.TransitMode
+import com.google.firebase.ai.type.Schema
 
 /**
  * Represents the database table name for day plans.
  */
-const val DAY_PLANS_TABLE_NAME = "day_plans"
+const val DAY_TABLE_NAME = "day_table"
 
 /**
  * Represents a single day's plan within a trip.
- * This entity is stored in the [DAY_PLANS_TABLE_NAME] table.
+ * This entity is stored in the [DAY_TABLE_NAME] table.
  * It has a foreign key relationship with the [com.aurora.data.data.entity.trip.TripEntity] table.
  *
  * @property id Unique identifier for the day plan, auto-generated.
@@ -28,7 +29,7 @@ const val DAY_PLANS_TABLE_NAME = "day_plans"
  * @property notes Optional additional notes or details for this day plan.
  */
 @Entity(
-    tableName = DAY_PLANS_TABLE_NAME,
+    tableName = DAY_TABLE_NAME,
     foreignKeys = [
         ForeignKey(
             entity = TripEntity::class,
@@ -38,16 +39,44 @@ const val DAY_PLANS_TABLE_NAME = "day_plans"
         )
     ]
 )
-data class DayPlanEntity(
+data class DayEntity(
     @PrimaryKey(autoGenerate = true)
     @ColumnInfo(name = "id") val id: Long = 0,
     @ColumnInfo(name = "trip_id", index = true) val tripId: Long,
-    @ColumnInfo(name = "date") val date: Long,
+    @ColumnInfo(name = "date") val date: Long?,
+    @ColumnInfo(name = "day") val day: String?,
     @ColumnInfo(name = "arrival_time") val arrivalTime: Long? = null,
     @ColumnInfo(name = "departure_time") val departureTime: Long? = null,
     @ColumnInfo(name = "transit_mode") val transitMode: TransitMode? = null,
     @ColumnInfo(name = "transit_details") val transitDetails: String? = null,
     @ColumnInfo(name = "place") val place: String,
     @ColumnInfo(name = "notes") val notes: String? = null
-)
+) {
+    companion object {
+        val dayJsonSchema: Schema = Schema.obj(
+            properties = mapOf(
+                "date" to Schema.integer(
+                    description = "The specific date of this plan as a Unix timestamp in milliseconds. Use if start and end date is mentioned in the Trip Data"
+                ),
+                "day" to Schema.integer(
+                    description = "The specific day of this plan as a string: Ex: Day 1, Day 2, Day 3.."
+                ),
+                "place" to Schema.string(
+                    description = "The name or description of the place to visit or activity planned for the day. Required."
+                ),
+                "notes" to Schema.string(
+                    description = "Optional additional notes, tips, reservation details, or reminders for this day plan."
+                )
+            ),
+            optionalProperties = listOf(
+                "date",
+                "arrivalTime",
+                "departureTime",
+                "transitMode",
+                "transitDetails",
+                "notes"
+            )
+        )
+    }
+}
 

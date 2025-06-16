@@ -53,7 +53,6 @@ internal fun GetTimelineLayout(
             }
         }
 
-        // Trip Duration Text
         Text(
             text = "${trip.days} Days",
             style = MaterialTheme.typography.titleMedium.copy(

@@ -11,7 +11,7 @@ data class TripWithDayPlans(
     @Relation(
         parentColumn = "id",       // From TripEntity (the 'id' column)
         entityColumn = "trip_id",  // From DayPlanEntity (the 'trip_id' foreign key column)
-        entity = DayPlanEntity::class
+        entity = DayEntity::class
     )
-    val dayPlans: List<DayPlanEntity>
+    val dayPlans: List<DayEntity>
 )

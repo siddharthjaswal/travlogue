@@ -3,7 +3,7 @@ package com.aurora.data.di
 import android.content.Context
 import androidx.room.Room
 import com.aurora.data.data.dao.ActivityDao
-import com.aurora.data.data.dao.DayPlanDao
+import com.aurora.data.data.dao.DayDao
 import com.aurora.data.data.dao.MessageDao
 import com.aurora.data.data.dao.StayDao
 import com.aurora.data.data.dao.TripDao
@@ -59,7 +59,7 @@ object DatabaseModule {
 
     @Provides
     @Singleton
-    fun provideDayPlanDao(appDatabase: AppDatabase): DayPlanDao {
+    fun provideDayPlanDao(appDatabase: AppDatabase): DayDao {
         return appDatabase.dayPlanDao()
     }
 
