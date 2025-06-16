@@ -34,7 +34,7 @@ abstract class AppDatabase : RoomDatabase() {
     abstract fun tripDao(): TripDao
     abstract fun activityDao(): ActivityDao
     abstract fun stayDao(): StayDao
-    abstract fun dayPlanDao(): DayDao
+    abstract fun dayDao(): DayDao
 
     companion object {
         const val DATABASE_NAME = DB_NAME

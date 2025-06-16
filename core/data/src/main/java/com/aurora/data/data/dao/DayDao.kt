@@ -14,13 +14,13 @@ import kotlinx.coroutines.flow.Flow
 interface DayDao {
 
     @Insert(onConflict = OnConflictStrategy.Companion.REPLACE)
-    suspend fun insert(dayPlan: DayEntity): Long
+    suspend fun insert(dayEntity: DayEntity): Long
 
     @Update
-    suspend fun update(dayPlan: DayEntity)
+    suspend fun update(dayEntity: DayEntity)
 
     @Delete
-    suspend fun delete(dayPlan: DayEntity)
+    suspend fun delete(dayEntity: DayEntity)
 
     @Query("SELECT * FROM $DAY_TABLE_NAME WHERE id = :id")
     fun getById(id: Long): Flow<DayEntity?>

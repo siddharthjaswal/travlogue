@@ -25,8 +25,8 @@ interface ActivityDao {
     @Query("SELECT * FROM $ACTIVITIES_TABLE_NAME WHERE id = :id")
     fun getById(id: Long): Flow<ActivityEntity?>
 
-    @Query("SELECT * FROM $ACTIVITIES_TABLE_NAME WHERE day_plan_id = :dayPlanId ORDER BY time ASC")
-    fun getActivitiesForDayPlan(dayPlanId: Long): Flow<List<ActivityEntity>>
+    @Query("SELECT * FROM $ACTIVITIES_TABLE_NAME WHERE day_id = :dayId ORDER BY time ASC")
+    fun getActivitiesForDay(dayId: Long): Flow<List<ActivityEntity>>
 
     @Query("SELECT * FROM $ACTIVITIES_TABLE_NAME ORDER BY time ASC")
     fun getAll(): Flow<List<ActivityEntity>>

@@ -59,8 +59,8 @@ object DatabaseModule {
 
     @Provides
     @Singleton
-    fun provideDayPlanDao(appDatabase: AppDatabase): DayDao {
-        return appDatabase.dayPlanDao()
+    fun provideDayDao(appDatabase: AppDatabase): DayDao {
+        return appDatabase.dayDao()
     }
 
 }

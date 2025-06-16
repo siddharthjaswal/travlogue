@@ -13,7 +13,7 @@ const val ACTIVITIES_TABLE_NAME = "activities"
  * Represents an activity within a day plan.
  *
  * @property id Unique identifier for the activity.
- * @property dayPlanId Foreign key referencing the id of the DayPlan this activity belongs to.
+ * @property dayId Foreign key referencing the id of the DayPlan this activity belongs to.
  * @property name Name of the activity.
  * @property time Time of the activity in milliseconds since epoch.
  * @property durationInMins Duration of the activity in minutes.
@@ -25,10 +25,7 @@ const val ACTIVITIES_TABLE_NAME = "activities"
 @Entity(tableName = ACTIVITIES_TABLE_NAME)
 data class ActivityEntity(
     @PrimaryKey(autoGenerate = true) @ColumnInfo(name = "id") val id: Long = 0,
-    /**
-     * Foreign key referencing the id of the DayPlan this activity belongs to.
-     */
-    @ColumnInfo(name = "day_plan_id") val dayPlanId: Long,
+    @ColumnInfo(name = "day_id") val dayId: Long,
     @ColumnInfo(name = "name") val name: String,
     @ColumnInfo(name = "time") val time: Long?,
     @ColumnInfo(name = "duration_in_mins") val durationInMins: Int?,
