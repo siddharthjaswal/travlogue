@@ -1,6 +1,7 @@
 package com.sid.domain.repository.gemini
 
 import android.graphics.Bitmap
+import com.aurora.data.data.entity.DayEntity
 import com.aurora.data.data.entity.message.MessageEntity
 import com.aurora.data.data.entity.message.SENDER_AI
 import com.aurora.data.data.entity.message.SENDER_USER
@@ -20,31 +21,7 @@ import kotlinx.coroutines.flow.map
 import timber.log.Timber
 import javax.inject.Inject
 
-private const val LOG_BUILDING_HISTORY_GEMINI = "Building chat history for Gemini. History size: %d"
-private const val LOG_MAPPED_HISTORY_SIZE = "Mapped history size: %d"
-private const val LOG_STARTING_CHAT_WITH_HISTORY =
-    "Starting chat with history. Mapped history size: %d"
-private const val LOG_SENDING_PROMPT_GEMINI_STREAM = "Sending prompt to Gemini via stream: %s"
-private const val SYS_INSTRUCTION_TRAVEL_ASSISTANT =
-    "You are a travel assistant. Break the questions in parts, ask one at time."
-private const val SYS_INSTRUCTION_ADD_EMOJI_TO_NAME =
-    "Add Destination Related Cute Emoji to the name field. Keep it maximum to 3 words and a emoji. Come up with cute names"
-private const val LOG_RECEIVED_TRIP_JSON_RESPONSE = "Received Trip JSON response from Gemini: %s"
-private const val LOG_PARSING_TRIP_JSON = "Attempting to parse Trip JSON"
-private const val LOG_PARSED_TRIP_JSON_SUCCESS = "Successfully parsed Trip JSON to TripEntity: %s"
-private const val LOG_PARSING_TRIP_JSON_ERROR = "Error parsing Trip JSON"
-private const val LOG_EMPTY_TRIP_JSON_RESPONSE =
-    "Received empty or null Trip JSON response from Gemini"
-
-private const val IMAGEN_MODEL_NAME = "imagen-3.0-generate-002"
-private const val LOG_INIT_IMAGEN_MODEL = "Initializing Imagen model: %s"
-private const val LOG_GENERATING_BANNER_PROMPT = "Generating banner image with prompt: %s"
-private const val LOG_BANNER_GENERATION_SUCCESS_OBJECT =
-    "Successfully generated banner image object for prompt: %s"
-private const val LOG_BANNER_NO_IMAGES_IN_RESPONSE = "No images returned from Imagen for prompt: %s"
-private const val LOG_BANNER_GENERATION_ERROR = "Error generating banner image for prompt %s"
-private const val LOG_BANNER_CONVERTED_TO_BITMAP = "Banner image converted to bitmap for prompt: %s"
-private const val LOG_DELEGATING_IMAGE_SAVE = "Delegating image save for prompt: %s"
+private const val GEMINI_FLASH = "gemini-1.5-flash"
 
 interface GeminiRepository {
     fun generateContent(prompt: String, chatHistory: List<MessageEntity>): Flow<String>
@@ -52,6 +29,10 @@ interface GeminiRepository {
     suspend fun generateTripJsonContent(
         prompt: String, chatHistory: List<MessageEntity>
     ): TripEntity?
+
+    suspend fun generateDayJsonContent(
+        prompt: String, chatHistory: List<MessageEntity>, tripId: Long
+    ): DayEntity?
 
     suspend fun generateBannerImage(
         prompt: String
@@ -63,7 +44,7 @@ class GeminiRepositoryImpl @Inject constructor(
 ) : GeminiRepository {
 
     private fun mapChatHistoryToGeminiFormat(chatHistory: List<MessageEntity>): List<Content> {
-        Timber.d(LOG_BUILDING_HISTORY_GEMINI, chatHistory.size)
+        Timber.d(GeminiConstants.LOG_CHAT_HISTORY_BUILDING, chatHistory.size)
         return chatHistory.mapNotNull { message ->
             when (message.sender) {
                 SENDER_USER -> content(role = "user") { text(message.content) }
@@ -71,27 +52,27 @@ class GeminiRepositoryImpl @Inject constructor(
                 else -> null
             }
         }.also { mappedHistory ->
-            Timber.d(LOG_MAPPED_HISTORY_SIZE, mappedHistory.size)
+            Timber.d(GeminiConstants.LOG_CHAT_HISTORY_MAPPED_SIZE, mappedHistory.size)
         }
     }
 
     val model = Firebase.ai(backend = GenerativeBackend.googleAI()).generativeModel(
-        modelName = "gemini-1.5-flash",
-        systemInstruction = content { text(SYS_INSTRUCTION_TRAVEL_ASSISTANT) })
+        modelName = GEMINI_FLASH,
+        systemInstruction = content { text(GeminiConstants.SYS_INSTRUCTION_TRAVEL_ASSISTANT) })
 
     override fun generateContent(
         prompt: String, chatHistory: List<MessageEntity>
     ): Flow<String> {
         val history = mapChatHistoryToGeminiFormat(chatHistory)
-        Timber.d(LOG_STARTING_CHAT_WITH_HISTORY, history.size)
+        Timber.d(GeminiConstants.LOG_CHAT_STARTING_WITH_HISTORY, history.size)
         val chat = model.startChat(history = history)
-        Timber.d(LOG_SENDING_PROMPT_GEMINI_STREAM, prompt)
+        Timber.d(GeminiConstants.LOG_CHAT_PROMPT_SENDING_STREAM, prompt)
         return chat.sendMessageStream(prompt).map { it.text ?: "" }
     }
 
     val tripModel = Firebase.ai(backend = GenerativeBackend.googleAI()).generativeModel(
-        modelName = "gemini-1.5-flash",
-        systemInstruction = content { text(SYS_INSTRUCTION_ADD_EMOJI_TO_NAME) },
+        modelName = GEMINI_FLASH,
+        systemInstruction = content { text(GeminiConstants.SYS_INSTRUCTION_TRIP_JSON_NAME_FORMAT) },
         generationConfig = generationConfig {
             responseMimeType = "application/json"
             responseSchema = TripEntity.tripJsonSchema
@@ -101,56 +82,89 @@ class GeminiRepositoryImpl @Inject constructor(
         prompt: String, chatHistory: List<MessageEntity>
     ): TripEntity? {
         val history = mapChatHistoryToGeminiFormat(chatHistory)
-        Timber.d(LOG_STARTING_CHAT_WITH_HISTORY, history.size)
+        Timber.d(
+            GeminiConstants.LOG_CHAT_STARTING_WITH_HISTORY,
+            history.size
+        ) // Reused general chat log
         val chat = tripModel.startChat(history = history)
         try {
-            Timber.d(LOG_SENDING_PROMPT_GEMINI_STREAM, prompt)
+            Timber.d(
+                GeminiConstants.LOG_CHAT_PROMPT_SENDING_STREAM,
+                prompt
+            ) // Reused general chat log
             val response = chat.sendMessage(prompt)
             val jsonString = response.text
             if (jsonString.isNullOrBlank()) {
-                Timber.w(LOG_EMPTY_TRIP_JSON_RESPONSE)
+                Timber.w(GeminiConstants.LOG_TRIP_JSON_RESPONSE_EMPTY)
                 return null
             }
-            Timber.d(LOG_RECEIVED_TRIP_JSON_RESPONSE, jsonString)
-            Timber.d(LOG_PARSING_TRIP_JSON)
+            Timber.d(GeminiConstants.LOG_TRIP_JSON_RESPONSE_RECEIVED, jsonString)
+            Timber.d(GeminiConstants.LOG_TRIP_JSON_PARSING_ATTEMPT)
             return try {
                 Gson().fromJson(jsonString, TripEntity::class.java).also {
-                    Timber.d(LOG_PARSED_TRIP_JSON_SUCCESS, it.toString())
+                    Timber.d(GeminiConstants.LOG_TRIP_JSON_PARSE_SUCCESS, it.toString())
                 }
             } catch (e: SerializationException) {
-                Timber.e(e, LOG_PARSING_TRIP_JSON_ERROR)
+                Timber.e(e, GeminiConstants.LOG_TRIP_JSON_PARSE_ERROR)
                 null
             } catch (e: Exception) {
-                Timber.e(e, "An unexpected error occurred during Trip JSON parsing")
+                Timber.e(
+                    e,
+                    "An unexpected error occurred during Trip JSON parsing"
+                ) // Kept specific error message if it's unique
                 null
             }
         } catch (e: Exception) {
-            Timber.e(e, "Error generating Trip JSON content from Gemini")
+            Timber.e(
+                e,
+                "Error generating Trip JSON content from Gemini"
+            ) // Kept specific error message
             return null
         }
     }
 
+    val dayModel = Firebase.ai(backend = GenerativeBackend.googleAI()).generativeModel(
+        modelName = GEMINI_FLASH,
+        systemInstruction = content { text(GeminiConstants.SYS_INSTRUCTION_DAY_JSON_NAME_FORMAT) },
+        generationConfig = generationConfig {
+            responseMimeType = "application/json"
+            responseSchema = DayEntity.dayJsonSchema
+        })
+
+    override suspend fun generateDayJsonContent(
+        prompt: String,
+        chatHistory: List<MessageEntity>,
+        tripId: Long
+    ): DayEntity? {
+        return null
+    }
+
+
     @OptIn(PublicPreviewAPI::class)
     override suspend fun generateBannerImage(prompt: String): String? {
-        Timber.d(LOG_GENERATING_BANNER_PROMPT, prompt)
+        Timber.d(GeminiConstants.LOG_BANNER_GENERATING_WITH_PROMPT, prompt)
         try {
-            Timber.d(LOG_INIT_IMAGEN_MODEL, IMAGEN_MODEL_NAME)
+            Timber.d(
+                GeminiConstants.LOG_IMAGEN_MODEL_INITIALIZING,
+                GeminiConstants.IMAGEN_MODEL_NAME_BANNER
+            )
             val imagenModel =
-                Firebase.ai(backend = GenerativeBackend.googleAI()).imagenModel(IMAGEN_MODEL_NAME)
+                Firebase.ai(backend = GenerativeBackend.googleAI())
+                    .imagenModel(GeminiConstants.IMAGEN_MODEL_NAME_BANNER)
             val imageResponse = imagenModel.generateImages(prompt)
             if (imageResponse.images.isNotEmpty()) {
                 val image = imageResponse.images.first()
-                Timber.d(LOG_BANNER_GENERATION_SUCCESS_OBJECT, prompt)
+                Timber.d(GeminiConstants.LOG_BANNER_GENERATION_SUCCESS_OBJECT, prompt)
                 val bitmapImage: Bitmap = image.asBitmap()
-                Timber.d(LOG_BANNER_CONVERTED_TO_BITMAP, prompt)
-                Timber.d(LOG_DELEGATING_IMAGE_SAVE, prompt)
+                Timber.d(GeminiConstants.LOG_BANNER_BITMAP_CONVERTED, prompt)
+                Timber.d(GeminiConstants.LOG_BANNER_IMAGE_SAVE_DELEGATING, prompt)
                 return imageStorageRepository.saveImageToPictures(bitmapImage, "Banner_")
             } else {
-                Timber.w(LOG_BANNER_NO_IMAGES_IN_RESPONSE, prompt)
+                Timber.w(GeminiConstants.LOG_BANNER_RESPONSE_NO_IMAGES, prompt)
                 return null
             }
         } catch (e: Exception) {
-            Timber.e(e, LOG_BANNER_GENERATION_ERROR, prompt)
+            Timber.e(e, GeminiConstants.LOG_BANNER_GENERATION_ERROR, prompt)
             return null
         }
     }
