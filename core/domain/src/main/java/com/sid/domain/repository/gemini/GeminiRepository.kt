@@ -2,12 +2,11 @@ package com.sid.domain.repository.gemini
 
 import android.graphics.Bitmap
 import com.aurora.data.data.entity.day.DayEntity
-import com.aurora.data.data.entity.day.dayJsonSchema
-import com.aurora.data.data.entity.trip.tripJsonSchema
 import com.aurora.data.data.entity.message.MessageEntity
 import com.aurora.data.data.entity.message.SENDER_AI
 import com.aurora.data.data.entity.message.SENDER_USER
 import com.aurora.data.data.entity.trip.TripEntity
+import com.aurora.data.data.entity.trip.tripJsonSchema
 import com.google.firebase.Firebase
 import com.google.firebase.ai.ai
 import com.google.firebase.ai.type.Content
