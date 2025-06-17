@@ -16,25 +16,22 @@ data class TripEntity(
     @ColumnInfo(name = "start_date") val startDate: Long? = null,
     @ColumnInfo(name = "end_date") val endDate: Long? = null,
     @ColumnInfo(name = "last_updated") val lastUpdated: Long
-) {
-    companion object {
-        val tripJsonSchema: Schema = Schema.obj(
-            properties = mapOf(
-                "name" to Schema.string(
-                    description = "The name or destination of the trip.[Feel free to add relevant emojis]"
-                ),
-                "days" to Schema.integer(
-                    description = "The total number of days for the trip. Optional.[Assume if not provided, it's a five-day trip]"
-                ),
-                "startDate" to Schema.integer(
-                    description = "The start date of the trip as a Unix timestamp in milliseconds. Optional."
-                ),
-                "endDate" to Schema.integer(
-                    description = "The end date of the trip as a Unix timestamp in milliseconds. Optional."
-                )
-            ),
-            optionalProperties = listOf("days", "startDate", "endDate")
-        )
+)
 
-    }
-}
+val tripJsonSchema: Schema = Schema.obj(
+    properties = mapOf(
+        "name" to Schema.string(
+            description = "The name or destination of the trip.[Feel free to add relevant emojis]"
+        ),
+        "days" to Schema.integer(
+            description = "The total number of days for the trip. Optional.[Assume if not provided, it's a five-day trip]"
+        ),
+        "startDate" to Schema.integer(
+            description = "The start date of the trip as a Unix timestamp in milliseconds. Optional."
+        ),
+        "endDate" to Schema.integer(
+            description = "The end date of the trip as a Unix timestamp in milliseconds. Optional."
+        )
+    ),
+    optionalProperties = listOf("days", "startDate", "endDate")
+)

@@ -6,8 +6,8 @@ import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import androidx.room.Update
-import com.aurora.data.data.entity.ACTIVITIES_TABLE_NAME
-import com.aurora.data.data.entity.ActivityEntity
+import com.aurora.data.data.entity.activity.ACTIVITIES_TABLE_NAME
+import com.aurora.data.data.entity.activity.ActivityEntity
 import kotlinx.coroutines.flow.Flow
 
 @Dao

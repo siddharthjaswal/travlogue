@@ -1,5 +1,7 @@
 package com.sid.domain.di
 
+import com.sid.domain.repository.day.DayRepository
+import com.sid.domain.repository.day.DayRepositoryImpl
 import com.sid.domain.repository.gemini.GeminiRepository
 import com.sid.domain.repository.gemini.GeminiRepositoryImpl
 import com.sid.domain.repository.message.MessageRepository
@@ -41,4 +43,10 @@ abstract class RepositoryModule {
     abstract fun bindImageStorageRepository(
         imageStorageRepositoryImpl: ImageStorageRepositoryImpl
     ): ImageStorageRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindDayRepository(
+        dayRepositoryImpl: DayRepositoryImpl
+    ): DayRepository
 }

@@ -10,9 +10,9 @@ import com.aurora.data.data.dao.DayDao
 import com.aurora.data.data.dao.MessageDao
 import com.aurora.data.data.dao.StayDao
 import com.aurora.data.data.dao.TripDao
-import com.aurora.data.data.entity.ActivityEntity
-import com.aurora.data.data.entity.DayEntity
-import com.aurora.data.data.entity.StayEntity
+import com.aurora.data.data.entity.activity.ActivityEntity
+import com.aurora.data.data.entity.day.DayEntity
+import com.aurora.data.data.entity.stay.StayEntity
 import com.aurora.data.data.entity.message.MessageEntity
 import com.aurora.data.data.entity.trip.TripEntity
 

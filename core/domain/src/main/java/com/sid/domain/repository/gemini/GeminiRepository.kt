@@ -1,7 +1,9 @@
 package com.sid.domain.repository.gemini
 
 import android.graphics.Bitmap
-import com.aurora.data.data.entity.DayEntity
+import com.aurora.data.data.entity.day.DayEntity
+import com.aurora.data.data.entity.day.dayJsonSchema
+import com.aurora.data.data.entity.trip.tripJsonSchema
 import com.aurora.data.data.entity.message.MessageEntity
 import com.aurora.data.data.entity.message.SENDER_AI
 import com.aurora.data.data.entity.message.SENDER_USER
@@ -21,7 +23,7 @@ import kotlinx.coroutines.flow.map
 import timber.log.Timber
 import javax.inject.Inject
 
-private const val GEMINI_FLASH = "gemini-1.5-flash"
+private const val GEMINI_FLASH = "gemini-2.5-flash"
 
 interface GeminiRepository {
     fun generateContent(prompt: String, chatHistory: List<MessageEntity>): Flow<String>
@@ -75,7 +77,7 @@ class GeminiRepositoryImpl @Inject constructor(
         systemInstruction = content { text(GeminiConstants.SYS_INSTRUCTION_TRIP_JSON_NAME_FORMAT) },
         generationConfig = generationConfig {
             responseMimeType = "application/json"
-            responseSchema = TripEntity.tripJsonSchema
+            responseSchema = tripJsonSchema
         })
 
     override suspend fun generateTripJsonContent(
@@ -85,13 +87,13 @@ class GeminiRepositoryImpl @Inject constructor(
         Timber.d(
             GeminiConstants.LOG_CHAT_STARTING_WITH_HISTORY,
             history.size
-        ) // Reused general chat log
+        )
         val chat = tripModel.startChat(history = history)
         try {
             Timber.d(
                 GeminiConstants.LOG_CHAT_PROMPT_SENDING_STREAM,
                 prompt
-            ) // Reused general chat log
+            )
             val response = chat.sendMessage(prompt)
             val jsonString = response.text
             if (jsonString.isNullOrBlank()) {
@@ -111,25 +113,25 @@ class GeminiRepositoryImpl @Inject constructor(
                 Timber.e(
                     e,
                     "An unexpected error occurred during Trip JSON parsing"
-                ) // Kept specific error message if it's unique
+                )
                 null
             }
         } catch (e: Exception) {
             Timber.e(
                 e,
                 "Error generating Trip JSON content from Gemini"
-            ) // Kept specific error message
+            )
             return null
         }
     }
 
-    val dayModel = Firebase.ai(backend = GenerativeBackend.googleAI()).generativeModel(
-        modelName = GEMINI_FLASH,
-        systemInstruction = content { text(GeminiConstants.SYS_INSTRUCTION_DAY_JSON_NAME_FORMAT) },
-        generationConfig = generationConfig {
-            responseMimeType = "application/json"
-            responseSchema = DayEntity.dayJsonSchema
-        })
+//    val dayModel = Firebase.ai(backend = GenerativeBackend.googleAI()).generativeModel(
+//        modelName = GEMINI_FLASH,
+//        systemInstruction = content { text(GeminiConstants.SYS_INSTRUCTION_DAY_JSON_NAME_FORMAT) },
+//        generationConfig = generationConfig {
+//            responseMimeType = "application/json"
+//            responseSchema = dayJsonSchema
+//        })
 
     override suspend fun generateDayJsonContent(
         prompt: String,

@@ -1,4 +1,4 @@
-package com.aurora.data.data.entity
+package com.aurora.data.data.entity.activity
 
 import androidx.room.ColumnInfo
 import androidx.room.Entity

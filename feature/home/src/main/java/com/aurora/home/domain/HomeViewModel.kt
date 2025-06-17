@@ -2,6 +2,7 @@ package com.aurora.home.domain
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.aurora.data.data.entity.day.createDayEntity
 import com.aurora.data.data.entity.message.createAiMessage
 import com.aurora.data.data.entity.message.createSenderMessage
 import com.aurora.data.data.entity.message.createSystemMessage
@@ -13,6 +14,8 @@ import com.aurora.data.data.entity.trip.PROMPT_AWAITING_START_DATE
 import com.aurora.data.data.entity.trip.PROMPT_PLANNING_COMPLETE
 import com.aurora.data.data.entity.trip.TripPlanningStage
 import com.aurora.data.data.entity.trip.createNewTripEntity
+import com.sid.domain.usecase.day.CreateDayUseCase
+import com.sid.domain.usecase.day.GetDaysForTripUseCase
 import com.sid.domain.usecase.gemini.GenerateBannerImageUseCase
 import com.sid.domain.usecase.gemini.GenerateGeminiResponseUseCase
 import com.sid.domain.usecase.gemini.GenerateTripJsonUseCase
@@ -47,7 +50,9 @@ class HomeViewModel @Inject constructor(
     private val generateBannerImageUseCase: GenerateBannerImageUseCase,
     private val getTripByIdUseCase: GetTripByIdUseCase,
     private val generateTripJsonUseCase: GenerateTripJsonUseCase,
-    private val updateTripUseCase: UpdateTripUseCase
+    private val updateTripUseCase: UpdateTripUseCase,
+    private val getDaysForTripUseCase: GetDaysForTripUseCase,
+    private val createDayUseCase: CreateDayUseCase
 ) : ViewModel() {
     private val _homeUiState = MutableStateFlow<HomeUiState>(HomeUiState.Loading)
     internal val homeUiState: StateFlow<HomeUiState> = _homeUiState.asStateFlow()
@@ -177,11 +182,13 @@ class HomeViewModel @Inject constructor(
     }
 
     private suspend fun generateAndSaveBannerImage(tripId: Long, bannerPrompt: String) {
-        Timber.tag("Gemini").i("Attempting to generate banner image for trip ID: $tripId with prompt: \"$bannerPrompt\"")
+        Timber.tag("Gemini")
+            .i("Attempting to generate banner image for trip ID: $tripId with prompt: \"$bannerPrompt\"")
         val imagePath = generateBannerImageUseCase(bannerPrompt)
 
         if (imagePath != null) {
-            Timber.tag("Gemini").d("Banner image generated successfully for trip ID: $tripId. Path: $imagePath")
+            Timber.tag("Gemini")
+                .d("Banner image generated successfully for trip ID: $tripId. Path: $imagePath")
             val currentTrip = getTripByIdUseCase(tripId)
             if (currentTrip != null) {
                 val updatedTrip = currentTrip.copy(
@@ -189,18 +196,21 @@ class HomeViewModel @Inject constructor(
                     lastUpdated = System.currentTimeMillis()
                 )
                 if (updateTripUseCase(updatedTrip)) {
-                    Timber.tag("Gemini").i("Successfully updated trip ID: $tripId with banner image path: $imagePath")
+                    Timber.tag("Gemini")
+                        .i("Successfully updated trip ID: $tripId with banner image path: $imagePath")
                 } else {
-                    Timber.tag("Gemini").e("Failed to update trip ID: $tripId with banner image path.")
+                    Timber.tag("Gemini")
+                        .e("Failed to update trip ID: $tripId with banner image path.")
                 }
             } else {
-                Timber.tag("Gemini").e("Failed to retrieve trip ID: $tripId to update banner image path.")
+                Timber.tag("Gemini")
+                    .e("Failed to retrieve trip ID: $tripId to update banner image path.")
             }
         } else {
-            Timber.tag("Gemini").w("generateBannerImageUseCase returned null for trip ID: $tripId. No banner image generated or saved.")
+            Timber.tag("Gemini")
+                .w("generateBannerImageUseCase returned null for trip ID: $tripId. No banner image generated or saved.")
         }
     }
-
 
     private suspend fun generateTripDataFromPrompt(tripId: Long, fullPrompt: String) {
         val trip = getTripByIdUseCase(tripId)
@@ -223,11 +233,21 @@ class HomeViewModel @Inject constructor(
                     lastUpdated = System.currentTimeMillis()
                 )
 
+
                 if (updateTripUseCase(tripToUpdate)) {
-                    Timber.tag("Gemini").d("Successfully updated trip with data from Gemini: $tripToUpdate")
+                    Timber.tag("Gemini")
+                        .d("Successfully updated trip with data from Gemini: $tripToUpdate")
                     generateAndSaveBannerImage(tripId, tripToUpdate.name)
                 } else {
-                    Timber.tag("Gemini").e("Failed to update trip with data from Gemini for trip ID: $tripId")
+                    Timber.tag("Gemini")
+                        .e("Failed to update trip with data from Gemini for trip ID: $tripId")
+                }
+
+                tripToUpdate.days?.let { d ->
+                    for (day in 1..d) {
+                        createDayUseCase(createDayEntity(tripId, day))
+                        Timber.tag("Gemini").e("Created Day for trip ID: $tripId, Day: $day")
+                    }
                 }
 
             } else {
@@ -244,7 +264,6 @@ class HomeViewModel @Inject constructor(
             }
         }
     }
-
 
     internal fun sendMessage(messageText: String) {
         val tripId = getCurrentTripId() ?: return
