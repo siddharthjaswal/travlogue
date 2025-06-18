@@ -28,18 +28,13 @@ import com.aurora.genesis.domain.UiState
 fun GenesisScreen(viewModel: GenesisViewModel = hiltViewModel(), onBackPressed: () -> Unit) {
 
     val state = viewModel.uiState.collectAsStateWithLifecycle().value
-    val scrollBehavior =
-        TopAppBarDefaults.exitUntilCollapsedScrollBehavior(rememberTopAppBarState())
-
 
     Scaffold(
-        modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
         topBar = {
             if (state is UiState.GetTimelinesState) {
                 TopBarLayout(
                     trip = state.trip,
-                    onBackPressed = onBackPressed,
-                    scrollBehavior = scrollBehavior
+                    onBackPressed = onBackPressed
                 )
             }
         },
