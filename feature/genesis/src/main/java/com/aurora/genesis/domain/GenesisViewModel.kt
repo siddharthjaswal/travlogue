@@ -2,6 +2,7 @@ package com.aurora.genesis.domain
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.sid.domain.usecase.day.GetDaysForTripUseCase
 import com.sid.domain.usecase.trip.GetLatestTripUseCase
 import com.sid.domain.usecase.trip.GetTripByIdUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -14,6 +15,7 @@ import javax.inject.Inject
 class GenesisViewModel @Inject constructor(
     private val getLatestTripUseCase: GetLatestTripUseCase,
     private val getTripByIdUseCase: GetTripByIdUseCase,
+    private val getDaysForTripUseCase: GetDaysForTripUseCase
 ) : ViewModel() {
 
     internal var uiState = MutableStateFlow<UiState>(UiState.EmptyState)
@@ -28,7 +30,8 @@ class GenesisViewModel @Inject constructor(
             val trip = getLatestTripUseCase().firstOrNull()
 
             if (trip != null) {
-                uiState.emit(UiState.GetTimelinesState(trip))
+                val daysFlow = getDaysForTripUseCase(trip.id)
+                uiState.emit(UiState.GetTimelinesState(trip, daysFlow))
             } else {
                 uiState.emit(UiState.EmptyState)
             }

@@ -5,5 +5,7 @@ enum class TransitMode {
     TRAIN,
     BUS,
     CAR,
-    OTHER
+    OTHER,
+    WALK,
+    BOAT
 }
