@@ -57,6 +57,9 @@ class HomeViewModel @Inject constructor(
     private val _homeUiState = MutableStateFlow<HomeUiState>(HomeUiState.Loading)
     internal val homeUiState: StateFlow<HomeUiState> = _homeUiState.asStateFlow()
 
+    private val _isSendingMessage = MutableStateFlow(false)
+    internal val isSendingMessage: StateFlow<Boolean> = _isSendingMessage.asStateFlow()
+
     internal var latestTripId: Long? = null
 
     init {
@@ -269,18 +272,23 @@ class HomeViewModel @Inject constructor(
         val tripId = getCurrentTripId() ?: return
 
         viewModelScope.launch {
-            if (!sendUserMessageInternal(tripId, messageText.trim())) {
-                return@launch
+            _isSendingMessage.value = true
+            try {
+                if (!sendUserMessageInternal(tripId, messageText.trim())) {
+                    return@launch
+                }
+
+                val userOriginalPrompt = messageText.trim()
+
+                val contextualPromptForAi =
+                    prepareFullPromptForGemini(tripId, userOriginalPrompt) ?: return@launch
+                generateAndSaveAiResponse(tripId, contextualPromptForAi)
+
+                // This will now also attempt to generate a banner if trip data is successfully extracted and updated
+                generateTripDataFromPrompt(tripId, userOriginalPrompt)
+            } finally {
+                _isSendingMessage.value = false
             }
-
-            val userOriginalPrompt = messageText.trim()
-
-            val contextualPromptForAi =
-                prepareFullPromptForGemini(tripId, userOriginalPrompt) ?: return@launch
-            generateAndSaveAiResponse(tripId, contextualPromptForAi)
-
-            // This will now also attempt to generate a banner if trip data is successfully extracted and updated
-            generateTripDataFromPrompt(tripId, userOriginalPrompt)
         }
     }
 

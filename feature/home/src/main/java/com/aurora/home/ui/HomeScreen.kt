@@ -2,6 +2,7 @@ package com.aurora.home.ui
 
 import android.content.res.Configuration
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box // Added
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.fillMaxSize
@@ -9,10 +10,13 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.CircularProgressIndicator // Added
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue // Added
+import androidx.compose.ui.Alignment // Added
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -33,7 +37,8 @@ fun HomeScreen(
     onNavigateToPlan: (Long) -> Unit
 ) {
 
-    val state = viewModel.homeUiState.collectAsStateWithLifecycle().value
+    val state by viewModel.homeUiState.collectAsStateWithLifecycle() // Changed to by delegate
+    val isSending by viewModel.isSendingMessage.collectAsStateWithLifecycle() // Added
 
     Scaffold(
         modifier = Modifier.navigationBarsPadding(),
@@ -53,35 +58,48 @@ fun HomeScreen(
             MessageInputBar(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .imePadding()
+                    .imePadding(),
+                // Optionally, disable input bar while sending
+                // enabled = !isSending
             ) { messageText ->
                 viewModel.sendMessage(messageText)
             }
         }
     ) { paddingValues ->
-        Column(
+        Box( // Wrap content in a Box to overlay the loader
             modifier = Modifier
                 .fillMaxSize()
-                .padding(paddingValues)
+                .padding(paddingValues) // Apply scaffold padding here
                 .background(color = MaterialTheme.colorScheme.background),
         ) {
-            when (state) {
-                HomeUiState.Loading -> {
+            Column(
+                modifier = Modifier
+                    .fillMaxSize() // Column takes full size of the Box content area
+            ) {
+                when (val currentUiState = state) { // Give state a local name for smart casting
+                    HomeUiState.Loading -> {
+                        // You might want a different loading indicator for initial load vs. message sending
+                        // For now, this will be covered by the global 'isSending' loader if initial load is quick
+                    }
 
+                    is HomeUiState.ChatMessages -> {
+                        MessageList(currentUiState.messages)
+                    }
+
+                    is HomeUiState.NoMessages -> NoMessage()
+                    is HomeUiState.Error -> {
+                        // Display error message
+                    }
                 }
+            }
 
-                is HomeUiState.ChatMessages -> {
-                    MessageList(state.messages)
-                }
-
-                is HomeUiState.NoMessages -> NoMessage()
-                is HomeUiState.Error -> {
-
-                }
+            if (isSending) {
+                CircularProgressIndicator(
+                    modifier = Modifier.align(Alignment.Center) // Center the loader
+                )
             }
         }
     }
-
 }
 
 @Preview(name = "Light Mode", showBackground = true)
@@ -93,7 +111,9 @@ internal fun Preview() {
             modifier = Modifier.fillMaxSize(),
             color = MaterialTheme.colorScheme.background
         ) {
-            HomeScreen(){}
+            // Preview might need a mock ViewModel or to pass a static 'isSending' value
+            // For simplicity, just showing the HomeScreen without specific state for loader here.
+            HomeScreen() {}
         }
     }
 }
