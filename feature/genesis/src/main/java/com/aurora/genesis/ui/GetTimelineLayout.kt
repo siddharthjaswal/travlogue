@@ -169,7 +169,7 @@ private fun TimelineIndicator(
             modifier = Modifier
                 .size(24.dp)
                 .background(
-                    color = getDayIndicatorColor(day),
+                    color = MaterialTheme.colorScheme.primary,
                     shape = CircleShape
                 )
                 .border(

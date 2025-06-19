@@ -145,6 +145,8 @@ class GeminiRepositoryImpl @Inject constructor(
     override suspend fun generateBannerImage(prompt: String): String? {
         Timber.d(GeminiConstants.LOG_BANNER_GENERATING_WITH_PROMPT, prompt)
         try {
+            val systemContext =
+                "Abstract artistic interpretation focused on main attractions, vibrant colors, modern style"
             Timber.d(
                 GeminiConstants.LOG_IMAGEN_MODEL_INITIALIZING,
                 GeminiConstants.IMAGEN_MODEL_NAME_BANNER
@@ -152,7 +154,7 @@ class GeminiRepositoryImpl @Inject constructor(
             val imagenModel =
                 Firebase.ai(backend = GenerativeBackend.googleAI())
                     .imagenModel(GeminiConstants.IMAGEN_MODEL_NAME_BANNER)
-            val imageResponse = imagenModel.generateImages(prompt)
+            val imageResponse = imagenModel.generateImages("$prompt [$systemContext]")
             if (imageResponse.images.isNotEmpty()) {
                 val image = imageResponse.images.first()
                 Timber.d(GeminiConstants.LOG_BANNER_GENERATION_SUCCESS_OBJECT, prompt)

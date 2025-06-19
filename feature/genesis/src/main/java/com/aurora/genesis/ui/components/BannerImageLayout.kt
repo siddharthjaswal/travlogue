@@ -24,7 +24,7 @@ internal fun BannerImageLayout(bannerImagePath: String) {
         contentScale = ContentScale.Crop,
         modifier = Modifier
             .fillMaxWidth()
-            .height(350.dp)
+            .height(200.dp)
             .clip(RoundedCornerShape(12.dp))
     )
 }
