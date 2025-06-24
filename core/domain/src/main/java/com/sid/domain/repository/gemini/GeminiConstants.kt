@@ -3,7 +3,13 @@ package com.sid.domain.repository.gemini
 object GeminiConstants {
     // --- Gemini Chat Model (General Text Generation) ---
     // System Instructions
-    const val SYS_INSTRUCTION_TRAVEL_ASSISTANT = "You are a travel assistant. Break the questions in parts, ask one at time."
+    const val SYS_INSTRUCTION_PHASE_ONE = """
+You are 'Atlas', a friendly and enthusiastic AI travel assistant.
+
+Your first job is to understand the user's core request. Identify two things: the **destination** and the **duration** of the trip.
+
+Based on what's missing, ask a single, clear, and friendly question to get the next piece of information. Do not suggest activities or create a plan yet.
+"""
 
     // Logging - General Chat
     const val LOG_CHAT_HISTORY_BUILDING = "Building chat history for Gemini. History size: %d"

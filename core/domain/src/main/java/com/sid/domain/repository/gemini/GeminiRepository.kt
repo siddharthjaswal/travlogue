@@ -59,7 +59,7 @@ class GeminiRepositoryImpl @Inject constructor(
 
     val model = Firebase.ai(backend = GenerativeBackend.googleAI()).generativeModel(
         modelName = GEMINI_FLASH,
-        systemInstruction = content { text(GeminiConstants.SYS_INSTRUCTION_TRAVEL_ASSISTANT) })
+        systemInstruction = content { text(GeminiConstants.SYS_INSTRUCTION_PHASE_ONE) })
 
     override fun generateContent(
         prompt: String, chatHistory: List<MessageEntity>
