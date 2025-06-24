@@ -285,7 +285,7 @@ class HomeViewModel @Inject constructor(
                 generateAndSaveAiResponse(tripId, contextualPromptForAi)
 
                 // This will now also attempt to generate a banner if trip data is successfully extracted and updated
-                generateTripDataFromPrompt(tripId, userOriginalPrompt)
+                //generateTripDataFromPrompt(tripId, userOriginalPrompt)
             } finally {
                 _isSendingMessage.value = false
             }
