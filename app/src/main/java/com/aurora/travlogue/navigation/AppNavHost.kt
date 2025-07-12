@@ -17,7 +17,7 @@ fun AppNavHost(
 ) {
     NavHost(
         navController = navController,
-        startDestination = Home.route,
+        startDestination = Genesis.route,
     ) {
         composable(route = Home.route) {
             HomeScreen(
