@@ -8,7 +8,6 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
@@ -27,12 +26,10 @@ fun GenesisScreen(viewModel: GenesisViewModel = hiltViewModel(), onBackPressed: 
 
     Scaffold(
         topBar = {
-            if (state is UiState.GetTimelinesState) {
-                TopBarLayout(
-                    trip = state.trip,
-                    onBackPressed = onBackPressed
-                )
-            }
+            TopBarLayout(
+                state = state,
+                onBackPressed = onBackPressed
+            )
         },
         bottomBar = {
             // Your bottom bar content if needed
@@ -46,21 +43,18 @@ fun GenesisScreen(viewModel: GenesisViewModel = hiltViewModel(), onBackPressed: 
         ) {
             when (state) {
                 UiState.EmptyState -> {
-                    EmptyContent()
+                    EmptyContent {
+
+                    }
                 }
 
-                is UiState.GetTimelinesState -> {
-                    GetTimelineLayout(state.trip, state.daysFlow)
+                UiState.CreateYourTripState -> {
+
                 }
             }
         }
 
     }
-}
-
-@Composable
-private fun EmptyContent() {
-    Text(text = "Empty")
 }
 
 

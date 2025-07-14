@@ -16,25 +16,26 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import com.aurora.data.data.entity.trip.TripEntity
+import com.aurora.genesis.domain.UiState
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 internal fun TopBarLayout(
-    trip: TripEntity,
+    state: UiState,
     onBackPressed: () -> Unit
 ) {
     CenterAlignedTopAppBar(
         title = {
-            Text(
-                text = trip.name,
-                style = MaterialTheme.typography.headlineMedium.copy(
-                    fontWeight = FontWeight.Bold
-                ),
-                color = if (trip.bannerImagePath != null) Color.White else MaterialTheme.colorScheme.onSurface,
-                textAlign = if (trip.bannerImagePath != null) TextAlign.Center else TextAlign.Start,
-                maxLines = 2,
-                overflow = TextOverflow.Ellipsis
-            )
+//            Text(
+//                text = trip.name,
+//                style = MaterialTheme.typography.headlineMedium.copy(
+//                    fontWeight = FontWeight.Bold
+//                ),
+//                color = if (trip.bannerImagePath != null) Color.White else MaterialTheme.colorScheme.onSurface,
+//                textAlign = if (trip.bannerImagePath != null) TextAlign.Center else TextAlign.Start,
+//                maxLines = 2,
+//                overflow = TextOverflow.Ellipsis
+//            )
         },
         navigationIcon = {
             IconButton(onClick = onBackPressed) {

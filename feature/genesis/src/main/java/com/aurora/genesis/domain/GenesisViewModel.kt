@@ -31,7 +31,7 @@ class GenesisViewModel @Inject constructor(
 
             if (trip != null) {
                 val daysFlow = getDaysForTripUseCase(trip.id)
-                uiState.emit(UiState.GetTimelinesState(trip, daysFlow))
+                //uiState.emit(UiState.GetTimelinesState(trip, daysFlow))
             } else {
                 uiState.emit(UiState.EmptyState)
             }
