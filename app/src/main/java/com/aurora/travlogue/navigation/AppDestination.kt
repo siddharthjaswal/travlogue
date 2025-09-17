@@ -7,7 +7,3 @@ interface AppDestination {
 object Home : AppDestination {
     override val route = "home"
 }
-
-object Genesis : AppDestination {
-    override val route = "genesis"
-}

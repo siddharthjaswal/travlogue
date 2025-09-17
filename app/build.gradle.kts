@@ -69,19 +69,14 @@ dependencies {
     implementation(libs.androidx.material3.icons)
     implementation(libs.androidx.hilt.navigation.compose)
     implementation(libs.hilt.android)
-    implementation(libs.firebase.config.ktx)
     ksp(libs.hilt.compiler)
     implementation(libs.androidx.navigation.compose)
     implementation(libs.timber)
     implementation(platform(libs.android.firebase.bom))
     implementation(libs.android.firebase.config)
-    implementation(libs.firebase.config.ktx)
     implementation(libs.android.firebase.analytics)
     implementation(libs.places)
     implementation(libs.play.services.maps)
-
-    implementation (libs.firebase.appcheck.playintegrity)
-    debugImplementation (libs.firebase.appcheck.debug)
 
 
     testImplementation(libs.junit)

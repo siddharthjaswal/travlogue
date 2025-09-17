@@ -21,7 +21,6 @@ fun AppNavHost(
             HomeScreen(
                 viewModel = hiltViewModel<HomeViewModel>(),
                 onNavigateToPlan = {
-                    navController.navigateSingleTopTo(Genesis.route)
                 }
             )
         }
