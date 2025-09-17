@@ -6,7 +6,7 @@ compile_sdk_version = "36"
 target_sdk_version = "36"
 min_sdk_version = "28"
 
-agp = "8.11.2"
+agp = "8.12.0-alpha08"
 googleServices = "4.4.3"
 kotlin = "2.2.20"
 kspVersion = "2.2.20-2.0.3"
