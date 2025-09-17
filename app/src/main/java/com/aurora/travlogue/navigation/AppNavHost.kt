@@ -6,10 +6,8 @@ import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
-import com.aurora.genesis.domain.GenesisViewModel
-import com.aurora.genesis.ui.GenesisScreen
-import com.aurora.home.domain.HomeViewModel
-import com.aurora.home.ui.HomeScreen
+import com.aurora.travlogue.feature.HomeScreen
+import com.aurora.travlogue.feature.HomeViewModel
 
 @Composable
 fun AppNavHost(
@@ -26,11 +24,6 @@ fun AppNavHost(
                     navController.navigateSingleTopTo(Genesis.route)
                 }
             )
-        }
-        composable(route = Genesis.route) {
-            GenesisScreen(viewModel = hiltViewModel<GenesisViewModel>(), onBackPressed = {
-                navController.popBackStack()
-            })
         }
     }
 }

@@ -21,10 +21,3 @@ dependencyResolutionManagement {
 
 rootProject.name = "Travlogue"
 include(":app")
-include(":core:designsystem")
-include(":feature:home")
-include(":feature:genesis")
-include(":core:data")
-include(":core:widgets")
-include(":core:domain")
-include(":core:network")
