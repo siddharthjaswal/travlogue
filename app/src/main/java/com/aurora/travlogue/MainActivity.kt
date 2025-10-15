@@ -34,6 +34,4 @@ fun MainApp() {
 
     val context = LocalActivity.current as ComponentActivity
     context.enableEdgeToEdge()
-
-
 }
