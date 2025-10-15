@@ -1,4 +1,4 @@
-package com.aurora.travlogue.core
+package com.aurora.travlogue.core.design
 
 import android.os.Build
 import androidx.compose.foundation.isSystemInDarkTheme

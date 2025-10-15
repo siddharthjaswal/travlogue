@@ -8,7 +8,7 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.runtime.Composable
 import androidx.navigation.compose.rememberNavController
-import com.aurora.travlogue.core.AppTheme
+import com.aurora.travlogue.core.design.AppTheme
 import com.aurora.travlogue.navigation.AppNavHost
 import dagger.hilt.android.AndroidEntryPoint
 

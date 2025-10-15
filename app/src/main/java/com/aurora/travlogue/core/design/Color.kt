@@ -1,4 +1,4 @@
-package com.aurora.travlogue.core
+package com.aurora.travlogue.core.design
 
 import androidx.compose.ui.graphics.Color
 

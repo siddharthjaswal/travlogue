@@ -1,0 +1,36 @@
+package com.aurora.travlogue.core.data.local.dao
+
+import androidx.room.*
+import com.aurora.travlogue.core.data.local.entities.Activity
+import kotlinx.coroutines.flow.Flow
+
+@Dao
+interface ActivityDao {
+
+    @Query("SELECT * FROM activities WHERE locationId = :locationId ORDER BY date ASC")
+    fun getActivitiesByLocationId(locationId: String): Flow<List<Activity>>
+
+    @Query("SELECT * FROM activities WHERE locationId = :locationId ORDER BY date ASC")
+    suspend fun getActivitiesByLocationIdSync(locationId: String): List<Activity>
+
+    @Query("SELECT * FROM activities WHERE id = :activityId")
+    suspend fun getActivityById(activityId: String): Activity?
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertActivity(activity: Activity)
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertActivities(activities: List<Activity>)
+
+    @Update
+    suspend fun updateActivity(activity: Activity)
+
+    @Delete
+    suspend fun deleteActivity(activity: Activity)
+
+    @Query("DELETE FROM activities WHERE id = :activityId")
+    suspend fun deleteActivityById(activityId: String)
+
+    @Query("DELETE FROM activities WHERE locationId = :locationId")
+    suspend fun deleteActivitiesByLocationId(locationId: String)
+}
