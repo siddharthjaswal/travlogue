@@ -10,11 +10,13 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.aurora.travlogue.core.common.DateTimeUtils.daysBetween
 import com.aurora.travlogue.core.common.DateTimeUtils.formatDateForDisplay
 import com.aurora.travlogue.core.data.local.entities.DateType
 import com.aurora.travlogue.core.data.local.entities.Trip
+import com.aurora.travlogue.core.data.local.entities.TripMockData
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -142,5 +144,41 @@ fun TripCard(
                 )
             }
         }
+    }
+}
+
+@Preview(showBackground = true, name = "Trip Card - Fixed Dates")
+@Composable
+private fun TripCardFixedPreview() {
+    MaterialTheme {
+        TripCard(
+            trip = TripMockData.spainAdventure,
+            onClick = {},
+            onDelete = {}
+        )
+    }
+}
+
+@Preview(showBackground = true, name = "Trip Card - Flexible Dates")
+@Composable
+private fun TripCardFlexiblePreview() {
+    MaterialTheme {
+        TripCard(
+            trip = TripMockData.japanCherryBlossom,
+            onClick = {},
+            onDelete = {}
+        )
+    }
+}
+
+@Preview(showBackground = true, name = "Trip Card - Flexible Without Duration")
+@Composable
+private fun TripCardFlexibleNoDurationPreview() {
+    MaterialTheme {
+        TripCard(
+            trip = TripMockData.europeBackpacking,
+            onClick = {},
+            onDelete = {}
+        )
     }
 }

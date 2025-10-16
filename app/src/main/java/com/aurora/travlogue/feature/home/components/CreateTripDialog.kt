@@ -10,6 +10,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.aurora.travlogue.core.common.DateTimeUtils.toIsoString
 import com.aurora.travlogue.core.data.local.entities.DateType
@@ -230,5 +231,16 @@ private fun DatePickerField(
         ) {
             DatePicker(state = datePickerState)
         }
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun CreateTripDialogPreview() {
+    MaterialTheme {
+        CreateTripDialog(
+            onDismiss = {},
+            onCreateTrip = { _, _, _, _, _, _, _ -> }
+        )
     }
 }
