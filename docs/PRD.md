@@ -126,31 +126,37 @@ Travlogue is an intelligent travel planning app that:
 
 ### 4.1 Tech Stack
 - **Language:** Kotlin
-- **Architecture:** MVVM (Model-View-ViewModel)
-- **Database:** Room (SQLite) - for offline storage
-- **API Calls:** Retrofit + OkHttp
-- **Async Operations:** Coroutines + Flow
-- **UI:** Jetpack Compose (modern) OR XML layouts (if preferred)
-- **Navigation:** Jetpack Navigation Component
+- **Architecture:** Feature-First Clean Architecture with MVVM pattern
+- **Database:** Room 2.8.2 (SQLite) - for offline storage
+- **API Calls:** Retrofit 2.11.0 + OkHttp 4.12.0
+- **Async Operations:** Kotlin Coroutines + Flow + StateFlow
+- **UI:** Jetpack Compose with Material 3 Design
+- **Navigation:** Jetpack Navigation Compose
+- **Dependency Injection:** Hilt (Dagger)
+- **Build System:** Gradle with Kotlin DSL + Version Catalog
 
 ### 4.2 Data Models (Core Entities)
 
+**Implementation Status:** ✅ All entities implemented in `core/data/local/entities/`
+
 ```kotlin
-@Entity
+@Entity(tableName = "trips")
 data class Trip(
     @PrimaryKey val id: String = UUID.randomUUID().toString(),
     val name: String,
     val originCity: String,
     val dateType: DateType, // FIXED or FLEXIBLE
-    val startDate: LocalDate?,
-    val endDate: LocalDate?,
+    val startDate: String?, // ISO format: yyyy-MM-dd
+    val endDate: String?, // ISO format: yyyy-MM-dd
     val flexibleMonth: String?, // "November 2025"
     val flexibleDuration: Int?, // days
-    val createdAt: Long,
-    val updatedAt: Long
+    val createdAt: Long = System.currentTimeMillis(),
+    val updatedAt: Long = System.currentTimeMillis()
 )
 
 enum class DateType { FIXED, FLEXIBLE }
+
+// Mock data available in TripMockData object for previews and testing
 
 @Entity
 data class Location(
@@ -178,24 +184,28 @@ data class Activity(
 enum class TimeSlot { MORNING, AFTERNOON, EVENING, FULL_DAY }
 enum class ActivityType { ATTRACTION, FOOD, BOOKING, TRANSIT, OTHER }
 
-@Entity
+@Entity(tableName = "bookings")
 data class Booking(
     @PrimaryKey val id: String = UUID.randomUUID().toString(),
     val tripId: String,
     val type: BookingType, // FLIGHT, HOTEL, TRAIN, BUS, TICKET
     val confirmationNumber: String?,
     val provider: String,
-    val startDate: LocalDateTime,
-    val endDate: LocalDateTime?,
+    val startDateTime: String, // ISO 8601 with timezone: "2025-11-15T14:30:00+01:00"
+    val endDateTime: String?,
+    val timezone: String, // IANA timezone: "Europe/Madrid"
     val fromLocation: String?,
     val toLocation: String?,
     val price: Double?,
     val currency: String?,
     val notes: String?,
-    val imageUri: String? // for saved screenshots
+    val imageUri: String?, // for saved screenshots
+    val createdAt: Long = System.currentTimeMillis()
 )
 
 enum class BookingType { FLIGHT, HOTEL, TRAIN, BUS, TICKET, OTHER }
+
+// Note: Timezone-aware bookings with comprehensive DateTimeUtils support
 
 @Entity
 data class Gap(
@@ -291,24 +301,33 @@ enum class TransitMode { FLIGHT, TRAIN, BUS, CAR, FERRY }
 
 ## 6. Feature Roadmap
 
-### Phase 1: MVP (Months 1-2)
-- ✅ Trip CRUD operations
-- ✅ Basic itinerary builder (locations + activities)
-- ✅ Offline storage with Room
-- ✅ Simple gap detection (location jumps)
-- ✅ Basic UI with essential screens
+### Phase 1: MVP (Months 1-2) - **IN PROGRESS** 🚧
+- ✅ **COMPLETED:** Project architecture setup (Feature-First Clean Architecture)
+- ✅ **COMPLETED:** Room database with all core entities (Trip, Location, Activity, Booking, Gap, TransitOption)
+- ✅ **COMPLETED:** Hilt dependency injection setup
+- ✅ **COMPLETED:** Repository pattern implementation
+- ✅ **COMPLETED:** Home Screen with trip listing
+- ✅ **COMPLETED:** Create Trip functionality (Fixed & Flexible dates)
+- ✅ **COMPLETED:** Material 3 design system
+- ✅ **COMPLETED:** Comprehensive preview system for all UI components
+- ✅ **COMPLETED:** Timezone-aware booking system
+- ✅ **COMPLETED:** Date/time utilities (DateTimeUtils)
+- 🚧 **IN PROGRESS:** Trip detail screen
+- 🚧 **IN PROGRESS:** Itinerary builder (locations + activities)
+- ⏳ **TODO:** Basic gap detection (location jumps)
+- ⏳ **TODO:** Offline storage optimization
 
 ### Phase 2: Intelligence (Month 3)
-- ✅ API integrations (weather, attractions)
-- ✅ Transit option suggestions
-- ✅ Flight price integration
-- ✅ AI-powered recommendations
+- ⏳ API integrations (weather, attractions)
+- ⏳ Transit option suggestions
+- ⏳ Flight price integration
+- ⏳ AI-powered recommendations
 
 ### Phase 3: Polish (Month 4)
-- ✅ Booking management with image uploads
-- ✅ Enhanced gap detection (time conflicts)
-- ✅ Better offline experience
-- ✅ Refined UI/UX
+- ⏳ Booking management with image uploads
+- ⏳ Enhanced gap detection (time conflicts)
+- ⏳ Better offline experience
+- ⏳ Refined UI/UX
 
 ### Phase 4: Future Enhancements
 - 🔮 Budget tracking
@@ -361,74 +380,180 @@ Since this is a personal app initially:
 
 ## 9. Development Setup
 
-### Initial Project Structure
+### Implemented Project Structure ✅
+
 ```
-app/
-├── data/
-│   ├── local/
-│   │   ├── dao/
-│   │   ├── database/
-│   │   └── entities/
-│   ├── remote/
-│   │   ├── api/
-│   │   └── dto/
-│   └── repository/
-├── domain/
-│   ├── model/
-│   └── usecase/
-├── ui/
-│   ├── screens/
-│   ├── components/
-│   └── theme/
-└── utils/
+app/src/main/java/com/aurora/travlogue/
+│
+├── core/                           # Shared across all features
+│   ├── data/                      # Data layer
+│   │   ├── local/                 # Room database
+│   │   │   ├── entities/         # Trip, Location, Activity, Booking, Gap, TransitOption
+│   │   │   ├── dao/              # DAOs with Flow support
+│   │   │   └── database/         # TravlogueDatabase + TypeConverters
+│   │   └── repository/           # Repository implementations (6 repositories)
+│   ├── domain/                    # Shared business logic (ready for future use)
+│   ├── common/                    # Utilities
+│   │   ├── DateTimeUtils.kt      # 30+ date/time helper methods
+│   │   └── BookingExamples.kt    # Usage examples
+│   └── design/                    # UI theme and design system
+│       ├── Color.kt
+│       ├── Theme.kt
+│       └── Type.kt
+│
+├── feature/                       # Feature modules
+│   └── home/                      # Home feature ✅ IMPLEMENTED
+│       ├── presentation/          # UI layer
+│       │   ├── HomeScreen.kt     # Main screen with previews
+│       │   ├── HomeViewModel.kt  # State management
+│       │   └── HomeUiState.kt    # UI state models (reference)
+│       ├── domain/                # Feature-specific business logic (ready)
+│       │   ├── usecase/          # For gap detection (future)
+│       │   └── model/            # Domain models (future)
+│       └── components/            # Reusable UI components
+│           ├── TripCard.kt       # Trip display card
+│           ├── TripList.kt       # Trip listing
+│           ├── EmptyState.kt     # Empty state UI
+│           └── CreateTripDialog.kt # Trip creation dialog
+│
+├── di/                            # Dependency injection
+│   ├── DatabaseModule.kt         # Room + DAOs
+│   └── NetworkModule.kt          # Retrofit + OkHttp
+│
+└── navigation/                    # App navigation
+    ├── AppNavHost.kt
+    └── Screen.kt
 ```
 
-### Dependencies (build.gradle.kts)
+**Key Features:**
+- ✅ Feature-First Clean Architecture
+- ✅ MVVM with StateFlow
+- ✅ Complete separation of concerns
+- ✅ All components have @Preview annotations
+- ✅ TripMockData for testing and previews
+- ✅ Comprehensive DateTimeUtils
+- ✅ Timezone-aware booking system
+
+### Implemented Dependencies ✅
+
+**Using Gradle Version Catalog** (`gradle/libs.versions.toml`)
+
+```toml
+[versions]
+room = "2.8.2"
+retrofit = "2.11.0"
+okhttp = "4.12.0"
+hilt = "2.51.1"
+hiltNavigationCompose = "1.2.0"
+
+[libraries]
+# Room (Local Database)
+androidx-room-runtime = { group = "androidx.room", name = "room-runtime", version.ref = "room" }
+androidx-room-ktx = { group = "androidx.room", name = "room-ktx", version.ref = "room" }
+androidx-room-compiler = { group = "androidx.room", name = "room-compiler", version.ref = "room" }
+
+# Retrofit (Networking)
+retrofit = { group = "com.squareup.retrofit2", name = "retrofit", version.ref = "retrofit" }
+retrofit-gson = { group = "com.squareup.retrofit2", name = "converter-gson", version.ref = "retrofit" }
+okhttp = { group = "com.squareup.okhttp3", name = "okhttp", version.ref = "okhttp" }
+okhttp-logging = { group = "com.squareup.okhttp3", name = "logging-interceptor", version.ref = "okhttp" }
+
+# Hilt (Dependency Injection)
+hilt-android = { group = "com.google.dagger", name = "hilt-android", version.ref = "hilt" }
+hilt-compiler = { group = "com.google.dagger", name = "hilt-compiler", version.ref = "hilt" }
+androidx-hilt-navigation-compose = { group = "androidx.hilt", name = "hilt-navigation-compose", version.ref = "hiltNavigationCompose" }
+```
+
+**Build Configuration:**
 ```kotlin
-// Room
-implementation("androidx.room:room-runtime:2.6.0")
-implementation("androidx.room:room-ktx:2.6.0")
-kapt("androidx.room:room-compiler:2.6.0")
+// app/build.gradle.kts
+plugins {
+    id("com.android.application")
+    id("org.jetbrains.kotlin.android")
+    id("com.google.devtools.ksp")
+    id("com.google.dagger.hilt.android")
+}
 
-// Retrofit
-implementation("com.squareup.retrofit2:retrofit:2.9.0")
-implementation("com.squareup.retrofit2:converter-gson:2.9.0")
+dependencies {
+    // Room
+    implementation(libs.androidx.room.runtime)
+    implementation(libs.androidx.room.ktx)
+    ksp(libs.androidx.room.compiler)
 
-// Coroutines
-implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3")
+    // Retrofit
+    implementation(libs.retrofit)
+    implementation(libs.retrofit.gson)
+    implementation(libs.okhttp)
+    implementation(libs.okhttp.logging)
 
-// Jetpack Compose (if using)
-implementation("androidx.compose.ui:ui:1.5.4")
-implementation("androidx.compose.material3:material3:1.1.2")
-implementation("androidx.navigation:navigation-compose:2.7.5")
-
-// ViewModel
-implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.6.2")
+    // Hilt
+    implementation(libs.hilt.android)
+    ksp(libs.hilt.compiler)
+    implementation(libs.androidx.hilt.navigation.compose)
+}
 ```
 
 ---
 
-## 10. Next Steps
+## 10. Current Status & Next Steps
 
-1. **Set up Android project** with MVVM architecture
-2. **Create Room database** with core entities (Trip, Location, Activity)
-3. **Build basic UI** for trip creation and listing
-4. **Implement local gap detection** logic (before APIs)
-5. **Add first API integration** (start with weather - easiest)
-6. **Iterate and test** with real trip planning
+### ✅ Completed
+1. ✅ Set up Android project with Feature-First Clean Architecture
+2. ✅ Created Room database with all core entities (Trip, Location, Activity, Booking, Gap, TransitOption)
+3. ✅ Built Home UI with trip creation and listing
+4. ✅ Implemented comprehensive date/time utilities
+5. ✅ Set up dependency injection with Hilt
+6. ✅ Created repository pattern for all entities
+7. ✅ Implemented preview system for all components
+8. ✅ Added TripMockData for testing and previews
+
+### 🚧 In Progress
+1. Trip detail screen design and implementation
+2. Location and activity management
+
+### ⏳ Next Steps
+1. **Build Trip Detail Screen** - Show trip information and navigate to plan
+2. **Implement Itinerary Builder** - Add locations and activities to trips
+3. **Implement local gap detection** logic
+4. **Add first API integration** (weather or attractions)
+5. **Iterate and test** with real trip planning
 
 ---
 
 ## Notes & Decisions Log
 
-- **Architecture:** Chose MVVM for clear separation and testability
-- **Database:** Room for robust offline support
-- **No Backend:** All processing client-side, direct API calls
-- **Date Handling:** Using java.time for modern date/time operations
-- **API First:** Prioritizing API integrations from MVP for real value
+### Architecture Decisions
+- **Architecture Pattern:** Feature-First Clean Architecture with MVVM for scalability and maintainability
+- **Database:** Room 2.8.2 for robust offline-first support with Flow for reactive queries
+- **No Backend:** All processing client-side, direct API calls to keep it simple
+- **Date Handling:** Hybrid approach using java.time:
+  - Trip dates: ISO strings ("2025-11-15")
+  - Booking date-times: ISO 8601 with timezone ("2025-11-15T14:30:00+01:00")
+  - System timestamps: Long (milliseconds)
+- **Dependency Injection:** Hilt for type-safe, compile-time verified DI
+- **Build System:** Gradle Version Catalog for centralized dependency management
+
+### UI/UX Decisions
+- **Design System:** Material 3 for modern Android look and feel
+- **Preview Strategy:** All components have @Preview annotations for rapid development
+- **Mock Data:** Centralized TripMockData object for consistent testing and previews
+- **Component Structure:** Separated into presentation/domain/components for clear organization
+
+### Development Workflow
+- **Module Strategy:** Starting single-module, but architecture is "module-ready"
+- **State Management:** StateFlow for UI state, SharedFlow for one-time events
+- **Repository Pattern:** Always access data through repositories, never directly from DAOs
+- **Testing Approach:** Mock data available, preview-driven development
+
+### Implementation Notes
+- All 6 core entities implemented with proper relationships and foreign keys
+- DateTimeUtils provides 30+ helper methods for date/time operations
+- HomeScreen fully functional with create, list, and delete operations
+- All UI components are stateless and reusable
+- Comprehensive documentation in ARCHITECTURE.md
 
 ---
 
-**Document Owner:** You  
-**Last Updated:** October 15, 2025  
-**Status:** Foundation - Ready to Build 🚀
+**Document Owner:** Sid
+**Last Updated:** January 2025
+**Status:** Phase 1 MVP - In Active Development 🚀
