@@ -6,6 +6,7 @@ import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import com.aurora.travlogue.feature.createtrip.presentation.CreateTripScreen
 import com.aurora.travlogue.feature.home.presentation.HomeScreen
 import com.aurora.travlogue.feature.home.presentation.HomeViewModel
 
@@ -27,9 +28,21 @@ fun AppNavHost(
         composable<Home> {
             HomeScreen(
                 viewModel = hiltViewModel<HomeViewModel>(),
+                onNavigateToCreateTrip = {
+                    navController.navigate(CreateTrip)
+                },
                 onNavigateToPlan = { tripId ->
                     // Type-safe navigation to trip detail
                     navController.navigate(TripDetail(tripId = tripId))
+                }
+            )
+        }
+
+        // Create Trip screen - full screen form
+        composable<CreateTrip> {
+            CreateTripScreen(
+                onNavigateBack = {
+                    navController.navigateUp()
                 }
             )
         }

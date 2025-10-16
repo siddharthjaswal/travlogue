@@ -10,39 +10,24 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.aurora.travlogue.core.data.local.entities.DateType
 import com.aurora.travlogue.core.data.local.entities.Trip
 import com.aurora.travlogue.core.data.local.entities.TripMockData
-import com.aurora.travlogue.feature.home.components.CreateTripDialog
 import com.aurora.travlogue.feature.home.components.EmptyState
 import com.aurora.travlogue.feature.home.components.TripList
 
 @Composable
 fun HomeScreen(
     viewModel: HomeViewModel = hiltViewModel(),
+    onNavigateToCreateTrip: () -> Unit,
     onNavigateToPlan: (String) -> Unit
 ) {
     val trips by viewModel.allTrips.collectAsState()
-    val showCreateDialog by viewModel.showCreateDialog.collectAsState()
 
     HomeScreenContent(
         trips = trips,
-        showCreateDialog = showCreateDialog,
+        onNavigateToCreateTrip = onNavigateToCreateTrip,
         onNavigateToPlan = onNavigateToPlan,
-        onDeleteTrip = { viewModel.deleteTrip(it) },
-        onShowCreateDialog = { viewModel.showCreateDialog() },
-        onHideCreateDialog = { viewModel.hideCreateDialog() },
-        onCreateTrip = { name, originCity, dateType, startDate, endDate, flexibleMonth, flexibleDuration ->
-            viewModel.createTrip(
-                name = name,
-                originCity = originCity,
-                dateType = dateType,
-                startDate = startDate,
-                endDate = endDate,
-                flexibleMonth = flexibleMonth,
-                flexibleDuration = flexibleDuration
-            )
-        }
+        onDeleteTrip = { viewModel.deleteTrip(it) }
     )
 }
 
@@ -52,12 +37,9 @@ private fun HomeScreenWithTripsPreview() {
     MaterialTheme {
         HomeScreenContent(
             trips = TripMockData.sampleTrips,
-            showCreateDialog = false,
+            onNavigateToCreateTrip = {},
             onNavigateToPlan = {},
-            onDeleteTrip = {},
-            onShowCreateDialog = {},
-            onHideCreateDialog = {},
-            onCreateTrip = { _, _, _, _, _, _, _ -> }
+            onDeleteTrip = {}
         )
     }
 }
@@ -68,12 +50,9 @@ private fun HomeScreenEmptyPreview() {
     MaterialTheme {
         HomeScreenContent(
             trips = emptyList(),
-            showCreateDialog = false,
+            onNavigateToCreateTrip = {},
             onNavigateToPlan = {},
-            onDeleteTrip = {},
-            onShowCreateDialog = {},
-            onHideCreateDialog = {},
-            onCreateTrip = { _, _, _, _, _, _, _ -> }
+            onDeleteTrip = {}
         )
     }
 }
@@ -82,12 +61,9 @@ private fun HomeScreenEmptyPreview() {
 @Composable
 private fun HomeScreenContent(
     trips: List<Trip>,
-    showCreateDialog: Boolean,
+    onNavigateToCreateTrip: () -> Unit,
     onNavigateToPlan: (String) -> Unit,
-    onDeleteTrip: (Trip) -> Unit,
-    onShowCreateDialog: () -> Unit,
-    onHideCreateDialog: () -> Unit,
-    onCreateTrip: (String, String, DateType, String?, String?, String?, Int?) -> Unit
+    onDeleteTrip: (Trip) -> Unit
 ) {
     Scaffold(
         topBar = {
@@ -101,7 +77,7 @@ private fun HomeScreenContent(
         },
         floatingActionButton = {
             FloatingActionButton(
-                onClick = onShowCreateDialog,
+                onClick = onNavigateToCreateTrip,
                 containerColor = MaterialTheme.colorScheme.primary
             ) {
                 Icon(
@@ -117,7 +93,7 @@ private fun HomeScreenContent(
                 .padding(paddingValues)
         ) {
             if (trips.isEmpty()) {
-                EmptyState(onCreateTrip = onShowCreateDialog)
+                EmptyState(onCreateTrip = onNavigateToCreateTrip)
             } else {
                 TripList(
                     trips = trips,
@@ -125,13 +101,6 @@ private fun HomeScreenContent(
                     onDeleteTrip = onDeleteTrip
                 )
             }
-        }
-
-        if (showCreateDialog) {
-            CreateTripDialog(
-                onDismiss = onHideCreateDialog,
-                onCreateTrip = onCreateTrip
-            )
         }
     }
 }

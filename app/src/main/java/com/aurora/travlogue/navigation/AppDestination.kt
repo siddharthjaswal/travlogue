@@ -16,6 +16,14 @@ sealed interface AppDestination
 object Home : AppDestination
 
 /**
+ * Create trip screen destination
+ * Full-screen form for creating a new trip
+ * No arguments required
+ */
+@Serializable
+object CreateTrip : AppDestination
+
+/**
  * Trip detail screen destination
  * Shows detailed information about a specific trip
  *
