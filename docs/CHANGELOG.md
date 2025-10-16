@@ -17,6 +17,37 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+## [0.2.1] - 2025-01-16
+
+### Changed - Navigation Migration
+- **Type-Safe Navigation** - Migrated to Navigation Compose 3.x type-safe APIs
+  - Added Kotlin Serialization plugin and dependency
+  - Updated all route definitions to use `@Serializable` annotations
+  - Replaced string-based routes with type-safe data classes/objects
+  - Updated `NavHost` to use `composable<Type>` instead of `composable(route)`
+  - Updated navigation calls to use objects instead of string concatenation
+  - Updated helper extensions to support generic type-safe destinations
+
+### Added - Navigation
+- **TripDetail** destination - Ready for trip detail screen
+- **TripPlan** destination - Ready for itinerary builder
+- Type-safe navigation extensions
+- Comprehensive navigation migration documentation
+
+### Benefits
+- ✅ Compile-time type safety for all navigation
+- ✅ IDE-assisted refactoring for route changes
+- ✅ Automatic serialization/deserialization of arguments
+- ✅ Default values support for optional parameters
+- ✅ No more string concatenation for routes
+
+### Documentation
+- Created **NAVIGATION_MIGRATION.md** with complete migration guide
+- Examples for future screen implementations
+- Best practices for type-safe navigation
+
+---
+
 ## [0.2.0] - 2025-01-16
 
 ### Added - Home Screen & UI Components

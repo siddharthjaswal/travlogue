@@ -1,6 +1,7 @@
 plugins {
     alias(libs.plugins.androidApplication)
     alias(libs.plugins.kotlinAndroid)
+    alias(libs.plugins.kotlinSerialization)
     alias(libs.plugins.kotlinAndroidKsp)
     alias(libs.plugins.hilt)
     alias(libs.plugins.compose.compiler)
@@ -73,6 +74,7 @@ dependencies {
 
     // Navigation
     implementation(libs.androidx.navigation.compose)
+    implementation(libs.kotlinx.serialization.json)
 
     // Hilt (Dependency Injection)
     implementation(libs.androidx.hilt.navigation.compose)
