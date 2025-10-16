@@ -7,10 +7,10 @@ import kotlinx.coroutines.flow.Flow
 @Dao
 interface BookingDao {
 
-    @Query("SELECT * FROM bookings WHERE tripId = :tripId ORDER BY startDate ASC")
+    @Query("SELECT * FROM bookings WHERE tripId = :tripId ORDER BY startDateTime ASC")
     fun getBookingsByTripId(tripId: String): Flow<List<Booking>>
 
-    @Query("SELECT * FROM bookings WHERE tripId = :tripId ORDER BY startDate ASC")
+    @Query("SELECT * FROM bookings WHERE tripId = :tripId ORDER BY startDateTime ASC")
     suspend fun getBookingsByTripIdSync(tripId: String): List<Booking>
 
     @Query("SELECT * FROM bookings WHERE id = :bookingId")
