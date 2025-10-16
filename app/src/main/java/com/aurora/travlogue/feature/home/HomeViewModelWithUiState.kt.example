@@ -1,0 +1,181 @@
+package com.aurora.travlogue.feature.home
+
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import com.aurora.travlogue.core.data.local.entities.DateType
+import com.aurora.travlogue.core.data.local.entities.Trip
+import com.aurora.travlogue.core.data.repository.TripRepository
+import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.launch
+import javax.inject.Inject
+
+/**
+ * EXAMPLE: Advanced HomeViewModel with UiState pattern
+ *
+ * This is a reference implementation showing how to use UiState.
+ * Your current HomeViewModel is simpler and perfectly fine!
+ *
+ * Use this pattern when you need:
+ * - Loading states
+ * - Error handling
+ * - Complex state management
+ * - One-time events (navigation, snackbars)
+ */
+@HiltViewModel
+class HomeViewModelWithUiState @Inject constructor(
+    private val tripRepository: TripRepository
+) : ViewModel() {
+
+    // UI State - represents the current screen state
+    private val _uiState = MutableStateFlow<HomeUiState>(HomeUiState.Loading)
+    val uiState: StateFlow<HomeUiState> = _uiState.asStateFlow()
+
+    // UI Events - one-time events (navigation, snackbars)
+    private val _uiEvents = MutableSharedFlow<HomeUiEvent>()
+    val uiEvents: SharedFlow<HomeUiEvent> = _uiEvents.asSharedFlow()
+
+    // Dialog state
+    private val _showCreateDialog = MutableStateFlow(false)
+    val showCreateDialog: StateFlow<Boolean> = _showCreateDialog.asStateFlow()
+
+    init {
+        loadTrips()
+    }
+
+    // ==================== Public API ====================
+
+    fun showCreateDialog() {
+        _showCreateDialog.value = true
+    }
+
+    fun hideCreateDialog() {
+        _showCreateDialog.value = false
+    }
+
+    fun createTrip(
+        name: String,
+        originCity: String,
+        dateType: DateType,
+        startDate: String?,
+        endDate: String?,
+        flexibleMonth: String?,
+        flexibleDuration: Int?
+    ) {
+        viewModelScope.launch {
+            try {
+                // Show loading state while creating
+                val currentState = _uiState.value
+                if (currentState is HomeUiState.Success) {
+                    _uiState.value = currentState.copy(isRefreshing = true)
+                }
+
+                val trip = Trip(
+                    name = name,
+                    originCity = originCity,
+                    dateType = dateType,
+                    startDate = startDate,
+                    endDate = endDate,
+                    flexibleMonth = flexibleMonth,
+                    flexibleDuration = flexibleDuration
+                )
+                tripRepository.insertTrip(trip)
+                hideCreateDialog()
+
+                // Send success event
+                _uiEvents.emit(HomeUiEvent.ShowSuccess("Trip created successfully"))
+
+            } catch (e: Exception) {
+                // Handle error
+                _uiEvents.emit(HomeUiEvent.ShowError(e.message ?: "Failed to create trip"))
+            }
+        }
+    }
+
+    fun deleteTrip(trip: Trip) {
+        viewModelScope.launch {
+            try {
+                tripRepository.deleteTrip(trip)
+                _uiEvents.emit(HomeUiEvent.ShowSuccess("${trip.name} deleted"))
+            } catch (e: Exception) {
+                _uiEvents.emit(HomeUiEvent.ShowError("Failed to delete trip"))
+            }
+        }
+    }
+
+    fun onTripClicked(tripId: String) {
+        viewModelScope.launch {
+            _uiEvents.emit(HomeUiEvent.NavigateToTrip(tripId))
+        }
+    }
+
+    fun refresh() {
+        loadTrips()
+    }
+
+    // ==================== Private Methods ====================
+
+    private fun loadTrips() {
+        viewModelScope.launch {
+            tripRepository.allTrips
+                .catch { exception ->
+                    // Handle error
+                    _uiState.value = HomeUiState.Error(
+                        message = exception.message ?: "Failed to load trips"
+                    )
+                }
+                .collect { trips ->
+                    _uiState.value = when {
+                        trips.isEmpty() -> HomeUiState.Empty
+                        else -> HomeUiState.Success(trips = trips)
+                    }
+                }
+        }
+    }
+}
+
+/**
+ * USAGE IN COMPOSABLE:
+ *
+ * @Composable
+ * fun HomeScreen(viewModel: HomeViewModelWithUiState = hiltViewModel()) {
+ *     val uiState by viewModel.uiState.collectAsState()
+ *     val showCreateDialog by viewModel.showCreateDialog.collectAsState()
+ *
+ *     // Handle one-time events
+ *     val navController = rememberNavController()
+ *     val snackbarHostState = remember { SnackbarHostState() }
+ *
+ *     LaunchedEffect(Unit) {
+ *         viewModel.uiEvents.collect { event ->
+ *             when (event) {
+ *                 is HomeUiEvent.NavigateToTrip -> navController.navigate("trip/${event.tripId}")
+ *                 is HomeUiEvent.ShowError -> snackbarHostState.showSnackbar(event.message)
+ *                 is HomeUiEvent.ShowSuccess -> snackbarHostState.showSnackbar(event.message)
+ *             }
+ *         }
+ *     }
+ *
+ *     Scaffold(
+ *         snackbarHost = { SnackbarHost(snackbarHostState) }
+ *     ) {
+ *         when (val state = uiState) {
+ *             HomeUiState.Loading -> LoadingIndicator()
+ *             HomeUiState.Empty -> EmptyState(onCreateTrip = { viewModel.showCreateDialog() })
+ *             is HomeUiState.Success -> {
+ *                 TripList(
+ *                     trips = state.trips,
+ *                     isRefreshing = state.isRefreshing,
+ *                     onTripClick = { viewModel.onTripClicked(it) },
+ *                     onDeleteTrip = { viewModel.deleteTrip(it) },
+ *                     onRefresh = { viewModel.refresh() }
+ *                 )
+ *             }
+ *             is HomeUiState.Error -> ErrorState(
+ *                 message = state.message,
+ *                 onRetry = { viewModel.refresh() }
+ *             )
+ *         }
+ *     }
+ * }
+ */

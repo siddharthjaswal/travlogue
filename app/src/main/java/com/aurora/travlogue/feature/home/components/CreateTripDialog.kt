@@ -1,4 +1,4 @@
-package com.aurora.travlogue.feature
+package com.aurora.travlogue.feature.home.components
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState

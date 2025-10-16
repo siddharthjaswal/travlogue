@@ -1,4 +1,4 @@
-package com.aurora.travlogue.feature
+package com.aurora.travlogue.feature.home.presentation
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope

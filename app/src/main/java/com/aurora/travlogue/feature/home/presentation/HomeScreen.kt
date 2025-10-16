@@ -1,4 +1,4 @@
-package com.aurora.travlogue.feature
+package com.aurora.travlogue.feature.home.presentation
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -15,6 +15,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.aurora.travlogue.core.data.local.entities.Trip
+import com.aurora.travlogue.feature.home.components.CreateTripDialog
+import com.aurora.travlogue.feature.home.components.TripCard
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

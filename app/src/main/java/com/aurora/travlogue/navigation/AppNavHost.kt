@@ -6,8 +6,8 @@ import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
-import com.aurora.travlogue.feature.HomeScreen
-import com.aurora.travlogue.feature.HomeViewModel
+import com.aurora.travlogue.feature.home.presentation.HomeScreen
+import com.aurora.travlogue.feature.home.presentation.HomeViewModel
 
 @Composable
 fun AppNavHost(
