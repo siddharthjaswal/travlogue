@@ -20,6 +20,7 @@ fun TimelineTab(
     daySchedules: List<DaySchedule>,
     expandedDays: Set<String>,
     onDayClicked: (String) -> Unit,
+    onActivityClick: (com.aurora.travlogue.core.data.local.entities.Activity) -> Unit,
     modifier: Modifier = Modifier
 ) {
     if (daySchedules.isEmpty()) {
@@ -37,7 +38,8 @@ fun TimelineTab(
                 DayCard(
                     daySchedule = daySchedule,
                     isExpanded = daySchedule.date in expandedDays,
-                    onDayClicked = { onDayClicked(daySchedule.date) }
+                    onDayClicked = { onDayClicked(daySchedule.date) },
+                    onActivityClick = onActivityClick
                 )
             }
         }

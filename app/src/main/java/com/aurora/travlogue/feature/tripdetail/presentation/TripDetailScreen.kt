@@ -15,6 +15,9 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.aurora.travlogue.feature.tripdetail.components.dialogs.AddActivityDialog
 import com.aurora.travlogue.feature.tripdetail.components.dialogs.AddBookingDialog
 import com.aurora.travlogue.feature.tripdetail.components.dialogs.AddLocationDialog
+import com.aurora.travlogue.feature.tripdetail.components.dialogs.EditActivityDialog
+import com.aurora.travlogue.feature.tripdetail.components.dialogs.EditBookingDialog
+import com.aurora.travlogue.feature.tripdetail.components.dialogs.EditLocationDialog
 import com.aurora.travlogue.feature.tripdetail.components.header.TripHeaderSection
 import com.aurora.travlogue.feature.tripdetail.components.tabs.BookingsTab
 import com.aurora.travlogue.feature.tripdetail.components.tabs.LocationsTab
@@ -58,7 +61,10 @@ fun TripDetailScreen(
         onRetry = viewModel::retryLoading,
         onAddActivity = viewModel::showAddActivityDialog,
         onAddLocation = viewModel::showAddLocationDialog,
-        onAddBooking = viewModel::showAddBookingDialog
+        onAddBooking = viewModel::showAddBookingDialog,
+        onActivityClick = viewModel::showEditActivityDialog,
+        onLocationClick = viewModel::showEditLocationDialog,
+        onBookingClick = viewModel::showEditBookingDialog
     )
 
     // Dialogs
@@ -97,6 +103,61 @@ fun TripDetailScreen(
             }
         )
     }
+
+    // Edit Dialogs
+    uiState.editingActivity?.let { activity ->
+        if (uiState.showEditActivityDialog) {
+            EditActivityDialog(
+                activity = activity,
+                onDismiss = viewModel::hideEditActivityDialog,
+                onSave = { updatedActivity ->
+                    viewModel.updateActivity(updatedActivity)
+                    viewModel.hideEditActivityDialog()
+                },
+                onDelete = {
+                    viewModel.deleteActivity(activity.id)
+                    viewModel.hideEditActivityDialog()
+                },
+                locations = uiState.locations
+            )
+        }
+    }
+
+    uiState.editingLocation?.let { location ->
+        if (uiState.showEditLocationDialog) {
+            EditLocationDialog(
+                location = location,
+                onDismiss = viewModel::hideEditLocationDialog,
+                onSave = { updatedLocation ->
+                    viewModel.updateLocation(updatedLocation)
+                    viewModel.hideEditLocationDialog()
+                },
+                onDelete = {
+                    viewModel.deleteLocation(location)
+                    viewModel.hideEditLocationDialog()
+                },
+                tripStartDate = uiState.trip?.startDate,
+                tripEndDate = uiState.trip?.endDate
+            )
+        }
+    }
+
+    uiState.editingBooking?.let { booking ->
+        if (uiState.showEditBookingDialog) {
+            EditBookingDialog(
+                booking = booking,
+                onDismiss = viewModel::hideEditBookingDialog,
+                onSave = { updatedBooking ->
+                    viewModel.updateBooking(updatedBooking)
+                    viewModel.hideEditBookingDialog()
+                },
+                onDelete = {
+                    viewModel.deleteBooking(booking)
+                    viewModel.hideEditBookingDialog()
+                }
+            )
+        }
+    }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -111,7 +172,10 @@ private fun TripDetailScreenContent(
     onRetry: () -> Unit,
     onAddActivity: (String?, String?) -> Unit,
     onAddLocation: () -> Unit,
-    onAddBooking: () -> Unit
+    onAddBooking: () -> Unit,
+    onActivityClick: (com.aurora.travlogue.core.data.local.entities.Activity) -> Unit,
+    onLocationClick: (com.aurora.travlogue.core.data.local.entities.Location) -> Unit,
+    onBookingClick: (com.aurora.travlogue.core.data.local.entities.Booking) -> Unit
 ) {
     Scaffold(
         topBar = {
@@ -225,17 +289,20 @@ private fun TripDetailScreenContent(
                             TimelineTab(
                                 daySchedules = uiState.daySchedules,
                                 expandedDays = uiState.expandedDays,
-                                onDayClicked = onDayClicked
+                                onDayClicked = onDayClicked,
+                                onActivityClick = onActivityClick
                             )
                         }
                         TripDetailTab.LOCATIONS -> {
                             LocationsTab(
-                                locations = uiState.locations
+                                locations = uiState.locations,
+                                onLocationClick = onLocationClick
                             )
                         }
                         TripDetailTab.BOOKINGS -> {
                             BookingsTab(
-                                bookings = uiState.bookings
+                                bookings = uiState.bookings,
+                                onBookingClick = onBookingClick
                             )
                         }
                         TripDetailTab.OVERVIEW -> {

@@ -19,6 +19,7 @@ import java.time.format.DateTimeFormatter
 @Composable
 fun BookingsTab(
     bookings: List<Booking>,
+    onBookingClick: (Booking) -> Unit,
     modifier: Modifier = Modifier
 ) {
     if (bookings.isEmpty()) {
@@ -33,7 +34,10 @@ fun BookingsTab(
                 items = bookings,
                 key = { it.id }
             ) { booking ->
-                BookingCard(booking = booking)
+                BookingCard(
+                    booking = booking,
+                    onBookingClick = onBookingClick
+                )
             }
         }
     }
@@ -42,10 +46,12 @@ fun BookingsTab(
 @Composable
 private fun BookingCard(
     booking: Booking,
+    onBookingClick: (Booking) -> Unit,
     modifier: Modifier = Modifier
 ) {
     Card(
-        modifier = modifier.fillMaxWidth()
+        modifier = modifier.fillMaxWidth(),
+        onClick = { onBookingClick(booking) }
     ) {
         Column(
             modifier = Modifier

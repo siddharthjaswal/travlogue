@@ -17,11 +17,19 @@ data class TripDetailUiState(
     val expandedDays: Set<String> = emptySet(),
     val isLoading: Boolean = false,
     val error: String? = null,
+    // Add dialogs
     val showAddActivityDialog: Boolean = false,
     val showAddLocationDialog: Boolean = false,
     val showAddBookingDialog: Boolean = false,
     val preselectedDate: String? = null,
-    val preselectedLocationId: String? = null
+    val preselectedLocationId: String? = null,
+    // Edit dialogs
+    val showEditActivityDialog: Boolean = false,
+    val showEditLocationDialog: Boolean = false,
+    val showEditBookingDialog: Boolean = false,
+    val editingActivity: com.aurora.travlogue.core.data.local.entities.Activity? = null,
+    val editingLocation: Location? = null,
+    val editingBooking: Booking? = null
 ) {
     val locationCount: Int get() = locations.size
     val activityCount: Int get() = daySchedules.sumOf { it.activitiesByTimeSlot.values.flatten().size }

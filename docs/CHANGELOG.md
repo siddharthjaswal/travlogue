@@ -8,13 +8,152 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
-### Planned
+### Planned (Phase 2)
 - Gap detection feature (key differentiator)
 - Weather API integration
 - Attractions/Places API integration
-- Edit functionality for activities, locations, and bookings
 - Drag-to-reorder locations
 - Rich datetime picker for bookings
+- Image attachment support for bookings
+- Budget tracking
+
+---
+
+## [0.5.0] - 2025-01-17 🎉 **PHASE 1 MVP COMPLETE**
+
+### Added - Edit & Delete Functionality
+
+- **Edit Activity Dialog** - Complete activity editing
+  - Pre-populated form with existing activity data
+  - Location selector dropdown
+  - Activity title and description fields
+  - Date picker
+  - Time slot selector (Morning, Afternoon, Evening, Full Day)
+  - Activity type selector with icons
+  - Form validation
+  - Delete button with confirmation
+  - Bottom action bar (Cancel | Save Changes + Delete)
+
+- **Edit Location Dialog** - Location editing with warnings
+  - Pre-populated name and country
+  - Optional date picker
+  - Location order display (#1, #2, #3...)
+  - Delete with cascade warning (deletes associated activities)
+  - Confirmation dialog before deletion
+  - Bottom action bar design
+
+- **Edit Booking Dialog** - Full booking editing
+  - Pre-populated form with all booking data
+  - Booking type selector
+  - Provider and confirmation number fields
+  - From/To locations for transit
+  - Price with currency
+  - Notes field
+  - Current date/time display (editing coming in future update)
+  - Delete confirmation
+  - Bottom action bar
+
+- **Tap-to-Edit Functionality**
+  - Activities clickable in Timeline tab
+  - Locations clickable in Locations tab
+  - Bookings clickable in Bookings tab
+  - Opens appropriate edit dialog with pre-filled data
+
+- **Delete Confirmations**
+  - AlertDialog before deleting any entity
+  - Clear warning messages
+  - Cascade delete warning for locations (deletes activities too)
+  - Cancel and Delete buttons
+  - Error color for destructive actions
+
+### Changed
+
+- **DayCard.kt** - Added `onActivityClick` parameter and made activity items clickable
+- **TimelineTab.kt** - Pass through activity click handler
+- **LocationsTab.kt** - Added `onLocationClick` parameter and made location cards clickable
+- **BookingsTab.kt** - Added `onBookingClick` parameter and made booking cards clickable
+- **TripDetailScreen.kt** - Wired up all edit dialog handlers to ViewModel
+- **TripDetailViewModel.kt** - Added 6 edit dialog management methods
+- **TripDetailUiState.kt** - Added edit dialog state and editing entity properties
+
+### Fixed
+
+- **Smart Cast Issues** - Fixed Kotlin smart cast errors using `let` scope function
+- **Edit Dialog State** - Proper null-safe handling of editing entities
+- **Build Errors** - All compilation errors resolved
+
+### Features
+
+✅ **Phase 1 MVP Complete** - All core features implemented
+✅ **Full CRUD Operations** - Create, Read, Update, Delete for all entities
+✅ **Edit Dialogs** - Pre-populated forms for all entity types
+✅ **Delete Confirmations** - Prevent accidental data loss
+✅ **Cascade Warnings** - Clear indication of deletion side effects
+✅ **Tap-to-Edit** - Intuitive editing workflow
+✅ **Bottom Action Bars** - Consistent UI pattern across edit dialogs
+✅ **Form Validation** - Same validation as Add dialogs
+✅ **Reactive Updates** - Immediate UI refresh after edits
+✅ **User Feedback** - Snackbar notifications for all operations
+
+### Technical Highlights
+
+- 3 new edit dialog components (EditActivityDialog, EditLocationDialog, EditBookingDialog)
+- Smart state management to avoid smart cast issues
+- Kotlin's `let` scope function for safe null handling
+- Bottom action bar pattern with Cancel, Save, and Delete buttons
+- AlertDialog integration for delete confirmations
+- Cascade delete logic maintained from database foreign keys
+- Type-safe parameter passing through ViewModel
+
+### Files Created (3 new dialog files)
+
+1. `feature/tripdetail/components/dialogs/EditActivityDialog.kt` (370+ lines)
+2. `feature/tripdetail/components/dialogs/EditLocationDialog.kt` (270+ lines)
+3. `feature/tripdetail/components/dialogs/EditBookingDialog.kt` (340+ lines)
+
+### Files Updated (7 files)
+
+1. `TripDetailViewModel.kt` - Added edit dialog show/hide methods
+2. `TripDetailUiState.kt` - Added edit state properties
+3. `TripDetailScreen.kt` - Integrated edit dialogs with smart cast fix
+4. `DayCard.kt` - Made activities clickable
+5. `TimelineTab.kt` - Added activity click handler
+6. `LocationsTab.kt` - Made locations clickable
+7. `BookingsTab.kt` - Made bookings clickable
+
+### User Experience Flow
+
+1. User taps an activity, location, or booking
+2. Edit dialog opens with pre-filled data
+3. User modifies fields or taps Delete
+4. If deleting:
+   - Confirmation dialog appears
+   - User confirms or cancels
+   - If confirmed, entity is deleted
+5. If saving:
+   - Form validation runs
+   - Data is updated in database
+   - Dialog closes automatically
+   - Success snackbar appears
+   - UI updates immediately
+
+### Complete CRUD Implementation
+
+| Entity | Create | Read | Update | Delete |
+|--------|--------|------|--------|--------|
+| **Activities** | ✅ AddActivityDialog | ✅ Timeline Tab | ✅ EditActivityDialog | ✅ Delete with confirmation |
+| **Locations** | ✅ AddLocationDialog | ✅ Locations Tab | ✅ EditLocationDialog | ✅ Delete with cascade warning |
+| **Bookings** | ✅ AddBookingDialog | ✅ Bookings Tab | ✅ EditBookingDialog | ✅ Delete with confirmation |
+
+### Next Steps
+
+Phase 1 MVP is now complete! Moving to Phase 2:
+- Gap detection (missing transits, unplanned days)
+- API integrations (weather, attractions)
+- Transit option suggestions
+- Enhanced datetime picker for bookings
+- Image attachments for bookings
+- Drag-to-reorder locations
 
 ---
 
@@ -410,14 +549,15 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## Project Milestones
 
-### Phase 1: MVP Foundation (Current)
+### Phase 1: MVP Foundation ✅ **COMPLETE**
 **Goal:** Basic trip planning functionality
 - ✅ Architecture and database setup
 - ✅ Home screen with trip management
 - ✅ Trip detail screen with timeline view
 - ✅ Itinerary builder with add functionality (CRUD create operations)
-- 🚧 Edit/Delete UI for activities, locations, and bookings (next)
-- ⏳ Gap detection
+- ✅ Edit/Delete UI for activities, locations, and bookings
+- ✅ Full CRUD cycle implemented and tested
+- **Status:** Phase 1 MVP Complete! 🎉
 
 ### Phase 2: Intelligence
 **Goal:** Smart suggestions and integrations
@@ -470,6 +610,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## Version History
 
+- **0.5.0** - Edit & Delete UI (Phase 1 MVP Complete!) 🎉
 - **0.4.0** - Activity & Booking Management (Full CRUD Operations)
 - **0.3.0** - Trip Detail Feature (Timeline, Locations, Bookings, Overview)
 - **0.2.1** - Type-Safe Navigation Migration
@@ -480,5 +621,5 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ---
 
 **Maintained by:** Sid
-**Project Status:** Active Development
-**Next Release:** 0.5.0 (Edit/Delete UI & Gap Detection)
+**Project Status:** Active Development - Phase 1 Complete, Moving to Phase 2 🚀
+**Next Release:** 0.6.0 (Gap Detection & API Integrations)

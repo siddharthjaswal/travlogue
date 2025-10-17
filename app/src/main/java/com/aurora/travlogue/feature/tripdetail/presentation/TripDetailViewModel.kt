@@ -116,6 +116,61 @@ class TripDetailViewModel @Inject constructor(
         _uiState.update { it.copy(showAddBookingDialog = false) }
     }
 
+    // Edit Dialogs
+    fun showEditActivityDialog(activity: Activity) {
+        _uiState.update {
+            it.copy(
+                showEditActivityDialog = true,
+                editingActivity = activity
+            )
+        }
+    }
+
+    fun hideEditActivityDialog() {
+        _uiState.update {
+            it.copy(
+                showEditActivityDialog = false,
+                editingActivity = null
+            )
+        }
+    }
+
+    fun showEditLocationDialog(location: Location) {
+        _uiState.update {
+            it.copy(
+                showEditLocationDialog = true,
+                editingLocation = location
+            )
+        }
+    }
+
+    fun hideEditLocationDialog() {
+        _uiState.update {
+            it.copy(
+                showEditLocationDialog = false,
+                editingLocation = null
+            )
+        }
+    }
+
+    fun showEditBookingDialog(booking: Booking) {
+        _uiState.update {
+            it.copy(
+                showEditBookingDialog = true,
+                editingBooking = booking
+            )
+        }
+    }
+
+    fun hideEditBookingDialog() {
+        _uiState.update {
+            it.copy(
+                showEditBookingDialog = false,
+                editingBooking = null
+            )
+        }
+    }
+
     // ==================== Activity CRUD ====================
 
     fun addActivity(

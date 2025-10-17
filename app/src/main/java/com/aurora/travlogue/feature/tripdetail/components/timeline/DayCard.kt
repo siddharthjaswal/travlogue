@@ -28,6 +28,7 @@ fun DayCard(
     daySchedule: DaySchedule,
     isExpanded: Boolean,
     onDayClicked: () -> Unit,
+    onActivityClick: (Activity) -> Unit,
     modifier: Modifier = Modifier
 ) {
     Card(
@@ -72,7 +73,8 @@ fun DayCard(
                         daySchedule.activitiesByTimeSlot.forEach { (timeSlot, activities) ->
                             TimeSlotSection(
                                 timeSlot = timeSlot,
-                                activities = activities
+                                activities = activities,
+                                onActivityClick = onActivityClick
                             )
                         }
                     } else {
@@ -170,7 +172,8 @@ private fun DayHeader(
 @Composable
 private fun TimeSlotSection(
     timeSlot: TimeSlot,
-    activities: List<Activity>
+    activities: List<Activity>,
+    onActivityClick: (Activity) -> Unit
 ) {
     Column(
         verticalArrangement = Arrangement.spacedBy(8.dp)
@@ -189,17 +192,24 @@ private fun TimeSlotSection(
 
         // Activities
         activities.forEach { activity ->
-            ActivityItem(activity = activity)
+            ActivityItem(
+                activity = activity,
+                onActivityClick = onActivityClick
+            )
         }
     }
 }
 
 @Composable
-private fun ActivityItem(activity: Activity) {
+private fun ActivityItem(
+    activity: Activity,
+    onActivityClick: (Activity) -> Unit
+) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(start = 8.dp),
+            .clickable { onActivityClick(activity) }
+            .padding(start = 8.dp, top = 4.dp, bottom = 4.dp, end = 8.dp),
         horizontalArrangement = Arrangement.spacedBy(12.dp)
     ) {
         // Activity type icon placeholder

@@ -301,7 +301,7 @@ enum class TransitMode { FLIGHT, TRAIN, BUS, CAR, FERRY }
 
 ## 6. Feature Roadmap
 
-### Phase 1: MVP (Months 1-2) - **IN PROGRESS** 🚧
+### Phase 1: MVP (Months 1-2) - **✅ COMPLETED** 🎉
 - ✅ **COMPLETED:** Project architecture setup (Feature-First Clean Architecture)
 - ✅ **COMPLETED:** Room database with all core entities (Trip, Location, Activity, Booking, Gap, TransitOption)
 - ✅ **COMPLETED:** Hilt dependency injection setup
@@ -321,9 +321,11 @@ enum class TransitMode { FLIGHT, TRAIN, BUS, CAR, FERRY }
 - ✅ **COMPLETED:** Context-aware FAB (Floating Action Button)
 - ✅ **COMPLETED:** Form validation and user feedback
 - ✅ **COMPLETED:** ViewModel CRUD operations with error handling
-- 🚧 **IN PROGRESS:** Edit and delete UI for activities, locations, and bookings
-- ⏳ **TODO:** Basic gap detection (location jumps)
-- ⏳ **TODO:** Offline storage optimization
+- ✅ **COMPLETED:** Edit and delete UI for activities, locations, and bookings
+- ✅ **COMPLETED:** Delete confirmation dialogs with cascade warnings
+- ✅ **COMPLETED:** Tap-to-edit functionality across all tabs
+- ⏳ **TODO:** Basic gap detection (location jumps) - Phase 2
+- ⏳ **TODO:** Offline storage optimization - Phase 2
 
 ### Phase 2: Intelligence (Month 3)
 - ⏳ API integrations (weather, attractions)
@@ -454,10 +456,13 @@ app/src/main/java/com/aurora/travlogue/
 │           │   └── OverviewTab.kt
 │           ├── timeline/
 │           │   └── DayCard.kt
-│           └── dialogs/           # ✅ NEW in v0.4.0
+│           └── dialogs/           # ✅ CRUD Dialogs
 │               ├── AddActivityDialog.kt   # Add activity with validation
 │               ├── AddLocationDialog.kt   # Add location with auto-order
-│               └── AddBookingDialog.kt    # Add booking with timezone
+│               ├── AddBookingDialog.kt    # Add booking with timezone
+│               ├── EditActivityDialog.kt  # ✅ NEW in v0.5.0 - Edit activities
+│               ├── EditLocationDialog.kt  # ✅ NEW in v0.5.0 - Edit locations
+│               └── EditBookingDialog.kt   # ✅ NEW in v0.5.0 - Edit bookings
 │
 ├── di/                            # Dependency injection
 │   ├── DatabaseModule.kt         # Room + DAOs
@@ -540,7 +545,7 @@ dependencies {
 
 ## 10. Current Status & Next Steps
 
-### ✅ Completed
+### ✅ Completed (Phase 1 MVP - 100%)
 1. ✅ Set up Android project with Feature-First Clean Architecture
 2. ✅ Created Room database with all core entities (Trip, Location, Activity, Booking, Gap, TransitOption)
 3. ✅ Built Home UI with trip creation and listing
@@ -562,17 +567,19 @@ dependencies {
 19. ✅ Complete ViewModel CRUD operations (create, update, delete)
 20. ✅ User feedback with snackbar notifications
 21. ✅ Reactive UI updates via Flow
+22. ✅ Edit Activity Dialog with pre-populated form
+23. ✅ Edit Location Dialog with pre-populated form
+24. ✅ Edit Booking Dialog with pre-populated form
+25. ✅ Delete confirmation dialogs for all entities
+26. ✅ Cascade delete warning for locations
+27. ✅ Tap-to-edit functionality in all tabs
 
-### 🚧 In Progress
-1. Edit functionality - Allow users to edit existing activities, locations, and bookings
-2. Delete confirmation dialogs - Prevent accidental deletions
-
-### ⏳ Next Steps
-1. **Implement Edit Dialogs** - Tap to edit existing items
-2. **Add Delete Confirmations** - Dialog before deleting items
-3. **Implement local gap detection** logic
-4. **Add proper datetime picker** for bookings
-5. **Add first API integration** (weather or attractions)
+### ⏳ Next Steps (Phase 2)
+1. **Implement local gap detection** - Identify missing transits and unplanned days
+2. **Add proper datetime picker** for bookings
+3. **Add first API integration** (weather or attractions)
+4. **Implement drag-to-reorder** for locations
+5. **Add image attachment support** for bookings
 6. **Iterate and test** with real trip planning
 
 ---
@@ -615,7 +622,19 @@ dependencies {
 - Type-safe navigation with Kotlin Serialization
 - Enhanced repository with JOIN queries for efficient data loading
 
-### Recent Additions (v0.4.0 - January 17, 2025)
+### Recent Additions (v0.5.0 - January 17, 2025) - **Phase 1 MVP Complete!** 🎉
+- **Edit Activity Dialog**: Pre-populated form for editing existing activities with delete confirmation
+- **Edit Location Dialog**: Edit locations with cascade delete warning (deletes associated activities)
+- **Edit Booking Dialog**: Full edit functionality with all booking fields pre-filled
+- **Tap-to-Edit**: Click any activity, location, or booking to edit it
+- **Delete Confirmations**: AlertDialog prevents accidental deletions
+- **Cascade Warnings**: Clear warning when deleting a location will also delete activities
+- **Smart Cast Fix**: Proper state management for editing entities
+- **Complete CRUD**: Full Create, Read, Update, Delete cycle for all entities
+- **Bottom Action Bars**: Cancel, Save Changes, and Delete buttons in edit dialogs
+- **Phase 1 Complete**: All MVP features implemented and tested
+
+### v0.4.0 Additions (January 17, 2025)
 - **Add Activity Dialog**: Complete form with location selector, date picker, time slots, and activity types
 - **Add Location Dialog**: Destination management with auto-ordering and trip date integration
 - **Add Booking Dialog**: Full booking form with type selector, price fields, and timezone support
@@ -639,5 +658,5 @@ dependencies {
 
 **Document Owner:** Sid
 **Last Updated:** January 17, 2025
-**Status:** Phase 1 MVP - In Active Development 🚀
-**Latest Version:** 0.4.0 (Activity & Booking Management - CRUD Operations)
+**Status:** Phase 1 MVP - ✅ COMPLETE! Moving to Phase 2 🚀
+**Latest Version:** 0.5.0 (Edit & Delete UI - Phase 1 MVP Complete)

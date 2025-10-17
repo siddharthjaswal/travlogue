@@ -20,6 +20,7 @@ import java.time.format.DateTimeFormatter
 @Composable
 fun LocationsTab(
     locations: List<Location>,
+    onLocationClick: (Location) -> Unit,
     modifier: Modifier = Modifier
 ) {
     if (locations.isEmpty()) {
@@ -36,7 +37,8 @@ fun LocationsTab(
             ) { index, location ->
                 LocationCard(
                     location = location,
-                    orderNumber = index + 1
+                    orderNumber = index + 1,
+                    onLocationClick = onLocationClick
                 )
             }
         }
@@ -47,10 +49,12 @@ fun LocationsTab(
 private fun LocationCard(
     location: Location,
     orderNumber: Int,
+    onLocationClick: (Location) -> Unit,
     modifier: Modifier = Modifier
 ) {
     Card(
-        modifier = modifier.fillMaxWidth()
+        modifier = modifier.fillMaxWidth(),
+        onClick = { onLocationClick(location) }
     ) {
         Row(
             modifier = Modifier
