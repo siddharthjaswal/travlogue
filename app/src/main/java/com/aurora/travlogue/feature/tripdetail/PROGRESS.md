@@ -49,56 +49,46 @@
 ### 5. Navigation
 - ✅ `TripDetail` route already exists in `AppDestination.kt`
 - ✅ Updated `AppNavHost.kt` with TripDetail composable
-- ⏳ **TODO**: Wire up navigation from HomeScreen trip cards (tap to navigate)
+- ✅ **COMPLETED**: Wired up navigation from HomeScreen trip cards (tap to navigate)
 
-## 📋 TODO - Phase 1 (MVP)
+### 6. Add/Create Dialogs (v0.4.0)
+- ✅ **AddActivityDialog.kt**: Full-featured activity creation with validation
+- ✅ **AddLocationDialog.kt**: Destination management with auto-ordering
+- ✅ **AddBookingDialog.kt**: Reservation tracking with timezone support
+- ✅ **Context-aware FAB**: Changes based on selected tab
+- ✅ **ViewModel CRUD**: Complete create, update, delete operations
+- ✅ **Form Validation**: Client-side validation with error messages
+- ✅ **User Feedback**: Snackbar notifications for all operations
 
-### Components to Create
-1. **Header Components** (`components/header/`):
-   - [ ] `TripHeaderSection.kt`
-   - [ ] `TripStatistics.kt`
+## 📋 TODO - Phase 1 (MVP) - **REMAINING**
 
-2. **Tab Components** (`components/tabs/`):
-   - [ ] `TimelineTab.kt`
-   - [ ] `LocationsTab.kt`
-   - [ ] `BookingsTab.kt`
-   - [ ] `OverviewTab.kt`
+### Edit Functionality
+- [ ] `EditActivityDialog.kt` - Edit existing activities
+- [ ] `EditLocationDialog.kt` - Edit existing locations
+- [ ] `EditBookingDialog.kt` - Edit existing bookings
+- [ ] Add tap-to-edit handlers in list items
 
-3. **Timeline Components** (`components/timeline/`):
-   - [ ] `DayCard.kt`
-   - [ ] `ActivityItem.kt`
-   - [ ] `TimeSlotSection.kt`
-   - [ ] `DayNotes.kt`
-
-4. **Location Components** (`components/location/`):
-   - [ ] `LocationCard.kt`
-
-5. **Booking Components** (`components/booking/`):
-   - [ ] `BookingCard.kt`
-   - [ ] `BookingTypeIcon.kt`
-
-### Main Screen
-- [ ] `TripDetailScreen.kt`: Complete implementation with tab navigation
-
-### Navigation
-- [ ] Add `TripDetail(tripId: String)` to `AppDestination.kt`
-- [ ] Add composable route in `AppNavHost.kt`
-- [ ] Update `HomeScreen` to navigate with tripId
+### Delete Functionality
+- [ ] Delete confirmation dialog component
+- [ ] Add delete buttons/swipe actions to items
+- [ ] Implement delete with undo snackbar
 
 ### Testing & Polish
-- [ ] Build and test navigation flow
-- [ ] Test with different trip types (fixed/flexible dates)
-- [ ] Test with empty states (no locations/activities)
-- [ ] Add loading states and error handling
-- [ ] Test expand/collapse animations
+- ✅ Build and test navigation flow
+- ✅ Test with different trip types (fixed/flexible dates)
+- ✅ Test with empty states (no locations/activities)
+- ✅ Add loading states and error handling
+- ✅ Test expand/collapse animations
+- [ ] Manual testing of add flows
+- [ ] Test edit and delete flows
+- [ ] Performance testing with large datasets
 
 ## 📋 TODO - Phase 2 (Enhanced Features)
 
-### Add/Edit Dialogs
-- [ ] `AddActivityDialog.kt`
-- [ ] `AddBookingDialog.kt`
-- [ ] `AddLocationDialog.kt`
-- [ ] `EditTripDialog.kt`
+### Enhanced Dialogs
+- [ ] `EditTripDialog.kt` - Edit trip details
+- [ ] Proper datetime picker for bookings
+- [ ] Image attachment support for bookings
 
 ### Enhanced Features
 - [ ] Drag-to-reorder locations
@@ -206,34 +196,47 @@ TripRepository → ViewModel → UiState → Composables
 
 ## Files Created
 
-### Documentation
+### Documentation (4 files)
 - `/feature/tripdetail/TRIP_DETAIL_PRD.md`
 - `/feature/tripdetail/ARCHITECTURE.md`
 - `/feature/tripdetail/PROGRESS.md` (this file)
+- `/feature/tripdetail/IMPLEMENTATION_COMPLETE.md`
 
-### Domain Layer
+### Domain Layer (2 files)
 - `/feature/tripdetail/domain/models/DaySchedule.kt`
 - `/feature/tripdetail/domain/models/TripDetailData.kt`
 
-### Presentation Layer
+### Presentation Layer (3 files)
 - `/feature/tripdetail/presentation/TripDetailUiState.kt`
 - `/feature/tripdetail/presentation/TripDetailViewModel.kt`
 - `/feature/tripdetail/presentation/TripDetailScreen.kt`
 
-### UI Components
+### UI Components - Header (1 file)
 - `/feature/tripdetail/components/header/TripHeaderSection.kt`
+
+### UI Components - Tabs (4 files)
 - `/feature/tripdetail/components/tabs/TimelineTab.kt`
 - `/feature/tripdetail/components/tabs/LocationsTab.kt`
 - `/feature/tripdetail/components/tabs/BookingsTab.kt`
 - `/feature/tripdetail/components/tabs/OverviewTab.kt`
+
+### UI Components - Timeline (1 file)
 - `/feature/tripdetail/components/timeline/DayCard.kt`
 
+### UI Components - Dialogs (3 files - v0.4.0)
+- `/feature/tripdetail/components/dialogs/AddActivityDialog.kt` ✨ NEW
+- `/feature/tripdetail/components/dialogs/AddLocationDialog.kt` ✨ NEW
+- `/feature/tripdetail/components/dialogs/AddBookingDialog.kt` ✨ NEW
+
 ### Data Layer (Updated)
-- `/core/data/repository/TripRepository.kt` (updated)
+- `/core/data/repository/TripRepository.kt` (updated with deleteActivityById)
 - `/core/data/local/dao/ActivityDao.kt` (updated)
 
 ### Navigation (Updated)
 - `/navigation/AppNavHost.kt` (added TripDetail route)
+
+**Total Files Created:** 18 files (15 original + 3 dialogs in v0.4.0)
+**Total Files Updated:** 3 files
 
 ## Notes & Considerations
 

@@ -317,7 +317,11 @@ enum class TransitMode { FLIGHT, TRAIN, BUS, CAR, FERRY }
 - ✅ **COMPLETED:** Smart day schedule generation for fixed and flexible trips
 - ✅ **COMPLETED:** Activity organization by time slots
 - ✅ **COMPLETED:** Expandable day cards with animations
-- 🚧 **IN PROGRESS:** Activity and booking add/edit functionality
+- ✅ **COMPLETED:** Add Activity/Location/Booking functionality (Full create operations)
+- ✅ **COMPLETED:** Context-aware FAB (Floating Action Button)
+- ✅ **COMPLETED:** Form validation and user feedback
+- ✅ **COMPLETED:** ViewModel CRUD operations with error handling
+- 🚧 **IN PROGRESS:** Edit and delete UI for activities, locations, and bookings
 - ⏳ **TODO:** Basic gap detection (location jumps)
 - ⏳ **TODO:** Offline storage optimization
 
@@ -448,8 +452,12 @@ app/src/main/java/com/aurora/travlogue/
 │           │   ├── LocationsTab.kt
 │           │   ├── BookingsTab.kt
 │           │   └── OverviewTab.kt
-│           └── timeline/
-│               └── DayCard.kt
+│           ├── timeline/
+│           │   └── DayCard.kt
+│           └── dialogs/           # ✅ NEW in v0.4.0
+│               ├── AddActivityDialog.kt   # Add activity with validation
+│               ├── AddLocationDialog.kt   # Add location with auto-order
+│               └── AddBookingDialog.kt    # Add booking with timezone
 │
 ├── di/                            # Dependency injection
 │   ├── DatabaseModule.kt         # Room + DAOs
@@ -546,16 +554,24 @@ dependencies {
 11. ✅ Implemented smart day schedule generation algorithm
 12. ✅ Created expandable day cards with activity time slot organization
 13. ✅ Enhanced TripRepository with comprehensive query methods
+14. ✅ Wired navigation from HomeScreen to TripDetail
+15. ✅ Implemented Add Activity Dialog with full form validation
+16. ✅ Implemented Add Location Dialog with auto-ordering
+17. ✅ Implemented Add Booking Dialog with timezone support
+18. ✅ Context-aware FAB that changes based on selected tab
+19. ✅ Complete ViewModel CRUD operations (create, update, delete)
+20. ✅ User feedback with snackbar notifications
+21. ✅ Reactive UI updates via Flow
 
 ### 🚧 In Progress
-1. Activity and booking add/edit functionality
-2. Wire navigation from HomeScreen to TripDetail
+1. Edit functionality - Allow users to edit existing activities, locations, and bookings
+2. Delete confirmation dialogs - Prevent accidental deletions
 
 ### ⏳ Next Steps
-1. **Complete navigation wiring** - Connect trip cards to detail screen
-2. **Implement Add Activity** - Dialog/screen for creating activities
-3. **Implement Add Booking** - Dialog/screen for creating bookings
-4. **Implement local gap detection** logic
+1. **Implement Edit Dialogs** - Tap to edit existing items
+2. **Add Delete Confirmations** - Dialog before deleting items
+3. **Implement local gap detection** logic
+4. **Add proper datetime picker** for bookings
 5. **Add first API integration** (weather or attractions)
 6. **Iterate and test** with real trip planning
 
@@ -599,7 +615,17 @@ dependencies {
 - Type-safe navigation with Kotlin Serialization
 - Enhanced repository with JOIN queries for efficient data loading
 
-### Recent Additions (v0.3.0)
+### Recent Additions (v0.4.0 - January 17, 2025)
+- **Add Activity Dialog**: Complete form with location selector, date picker, time slots, and activity types
+- **Add Location Dialog**: Destination management with auto-ordering and trip date integration
+- **Add Booking Dialog**: Full booking form with type selector, price fields, and timezone support
+- **Context-Aware FAB**: Changes based on tab (Timeline → Activity, Locations → Location, Bookings → Booking)
+- **ViewModel CRUD**: Complete create, update, delete operations with error handling
+- **Form Validation**: Client-side validation with helpful error messages
+- **User Feedback**: Snackbar notifications for all operations
+- **Reactive Updates**: Immediate UI updates via Flow when data changes
+
+### v0.3.0 (January 17, 2025)
 - **Trip Detail Screen**: Complete 4-tab interface for trip visualization
 - **Timeline View**: Day-by-day expandable cards with activity time slots
 - **Locations View**: Ordered destination list with visual badges
@@ -614,4 +640,4 @@ dependencies {
 **Document Owner:** Sid
 **Last Updated:** January 17, 2025
 **Status:** Phase 1 MVP - In Active Development 🚀
-**Latest Version:** 0.3.0 (Trip Detail Feature)
+**Latest Version:** 0.4.0 (Activity & Booking Management - CRUD Operations)

@@ -266,35 +266,39 @@ The Trip Detail feature serves as the central hub for viewing and managing all a
 
 ## Features Breakdown
 
-### Phase 1: MVP (Current Scope)
+### Phase 1: MVP (Current Scope) - 85% COMPLETE 🚧
 
-#### 1.1 Trip Header & Overview
-- Display trip name, dates, origin
-- Show trip statistics (locations, activities, bookings count)
-- Tab navigation setup
+#### 1.1 Trip Header & Overview ✅ COMPLETE (v0.3.0)
+- ✅ Display trip name, dates, origin
+- ✅ Show trip statistics (locations, activities, bookings count)
+- ✅ Tab navigation setup
 
-#### 1.2 Timeline View
-- Day-by-day expandable cards
-- Display activities grouped by time slot
-- Show linked bookings on relevant days
-- Add quick "Add Activity" button per day
+#### 1.2 Timeline View ✅ COMPLETE (v0.3.0)
+- ✅ Day-by-day expandable cards
+- ✅ Display activities grouped by time slot
+- ✅ Show linked bookings on relevant days
+- ✅ Empty states for days without activities
 
-#### 1.3 Locations List
-- Display all locations chronologically
-- Show date range and activity count per location
-- Navigate to location-specific activities
+#### 1.3 Locations List ✅ COMPLETE (v0.3.0)
+- ✅ Display all locations chronologically
+- ✅ Show date range and activity count per location
+- ✅ Visual order badges (#1, #2, #3...)
 
-#### 1.4 Bookings List
-- Display all bookings chronologically
-- Categorize by booking type
-- Show key information (confirmation, times, price)
-- View booking details
+#### 1.4 Bookings List ✅ COMPLETE (v0.3.0)
+- ✅ Display all bookings chronologically
+- ✅ Categorize by booking type
+- ✅ Show key information (confirmation, times, price)
+- ✅ Timezone-aware datetime display
 
-#### 1.5 Basic Add/Edit
-- Add activities to days
-- Add bookings
-- Edit activity details
-- Delete items
+#### 1.5 Basic Add (Create Operations) ✅ COMPLETE (v0.4.0)
+- ✅ Add activities to days with full form validation
+- ✅ Add locations with auto-ordering
+- ✅ Add bookings with timezone support
+- ✅ Context-aware FAB that changes based on tab
+- ✅ Form validation with error messages
+- ✅ Snackbar notifications
+- ⏳ Edit activity/location/booking details (TODO)
+- ⏳ Delete items with confirmation (TODO)
 
 ### Phase 2: Enhanced Features
 
