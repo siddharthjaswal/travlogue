@@ -6,6 +6,7 @@ plugins {
     alias(libs.plugins.hilt)
     alias(libs.plugins.compose.compiler)
     alias(libs.plugins.googleServices)
+    id("jacoco")
 }
 
 android {
@@ -19,7 +20,7 @@ android {
         versionCode = libs.versions.version.code.get().toInt()
         versionName = libs.versions.version.name.get()
 
-        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+        testInstrumentationRunner = "com.aurora.travlogue.HiltTestRunner"
         vectorDrawables {
             useSupportLibrary = true
         }
@@ -56,6 +57,54 @@ android {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
         }
     }
+    testOptions {
+        unitTests {
+            isIncludeAndroidResources = true
+            isReturnDefaultValues = true
+        }
+    }
+}
+
+// JaCoCo Configuration
+tasks.withType<Test> {
+    configure<JacocoTaskExtension> {
+        isIncludeNoLocationClasses = true
+        excludes = listOf("jdk.internal.*")
+    }
+}
+
+tasks.register<JacocoReport>("jacocoTestReport") {
+    dependsOn("testDebugUnitTest")
+
+    reports {
+        xml.required.set(true)
+        html.required.set(true)
+    }
+
+    val fileFilter = listOf(
+        "**/R.class",
+        "**/R$*.class",
+        "**/BuildConfig.*",
+        "**/Manifest*.*",
+        "**/*Test*.*",
+        "android/**/*.*",
+        "**/*_Hilt*.class",
+        "hilt_aggregated_deps/**",
+        "**/*_Factory.class",
+        "**/*_MembersInjector.class"
+    )
+
+    val debugTree = fileTree("${project.layout.buildDirectory}/tmp/kotlin-classes/debug") {
+        exclude(fileFilter)
+    }
+
+    val mainSrc = "${project.projectDir}/src/main/java"
+
+    sourceDirectories.setFrom(files(mainSrc))
+    classDirectories.setFrom(files(debugTree))
+    executionData.setFrom(fileTree(project.layout.buildDirectory) {
+        include("jacoco/testDebugUnitTest.exec")
+    })
 }
 
 dependencies {
@@ -107,12 +156,30 @@ dependencies {
     implementation(libs.places)
     implementation(libs.play.services.maps)
 
-    // Testing
+    // Testing - Unit Tests
     testImplementation(libs.junit)
+    testImplementation(libs.truth)
+    testImplementation(libs.mockk)
+    testImplementation(libs.kotlinx.coroutines.test)
+    testImplementation(libs.androidx.arch.core.testing)
+    testImplementation(libs.turbine)
+    testImplementation(libs.androidx.room.testing)
+    testImplementation(libs.hilt.android.testing)
+    testImplementation(libs.robolectric)
+    kspTest(libs.hilt.compiler)
+
+    // Testing - Android Tests
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
     androidTestImplementation(platform(libs.androidx.compose.bom))
     androidTestImplementation(libs.androidx.ui.test.junit4)
+    androidTestImplementation(libs.truth)
+    androidTestImplementation(libs.mockk.android)
+    androidTestImplementation(libs.kotlinx.coroutines.test)
+    androidTestImplementation(libs.androidx.room.testing)
+    androidTestImplementation(libs.hilt.android.testing)
+    androidTestImplementation(libs.androidx.navigation.testing)
+    kspAndroidTest(libs.hilt.compiler)
 
     // Debug
     debugImplementation(libs.androidx.ui.tooling)

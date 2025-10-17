@@ -266,7 +266,7 @@ The Trip Detail feature serves as the central hub for viewing and managing all a
 
 ## Features Breakdown
 
-### Phase 1: MVP (Current Scope) - 85% COMPLETE 🚧
+### Phase 1: MVP (Current Scope) - ✅ 100% COMPLETE! 🎉
 
 #### 1.1 Trip Header & Overview ✅ COMPLETE (v0.3.0)
 - ✅ Display trip name, dates, origin
@@ -278,27 +278,39 @@ The Trip Detail feature serves as the central hub for viewing and managing all a
 - ✅ Display activities grouped by time slot
 - ✅ Show linked bookings on relevant days
 - ✅ Empty states for days without activities
+- ✅ Tap activity to edit (v0.5.0)
 
-#### 1.3 Locations List ✅ COMPLETE (v0.3.0)
+#### 1.3 Locations List ✅ COMPLETE (v0.3.0 + v0.5.0)
 - ✅ Display all locations chronologically
 - ✅ Show date range and activity count per location
 - ✅ Visual order badges (#1, #2, #3...)
+- ✅ Tap location to edit (v0.5.0)
 
-#### 1.4 Bookings List ✅ COMPLETE (v0.3.0)
+#### 1.4 Bookings List ✅ COMPLETE (v0.3.0 + v0.5.0)
 - ✅ Display all bookings chronologically
 - ✅ Categorize by booking type
 - ✅ Show key information (confirmation, times, price)
 - ✅ Timezone-aware datetime display
+- ✅ Tap booking to edit (v0.5.0)
 
-#### 1.5 Basic Add (Create Operations) ✅ COMPLETE (v0.4.0)
+#### 1.5 Create Operations ✅ COMPLETE (v0.4.0)
 - ✅ Add activities to days with full form validation
 - ✅ Add locations with auto-ordering
 - ✅ Add bookings with timezone support
 - ✅ Context-aware FAB that changes based on tab
 - ✅ Form validation with error messages
 - ✅ Snackbar notifications
-- ⏳ Edit activity/location/booking details (TODO)
-- ⏳ Delete items with confirmation (TODO)
+
+#### 1.6 Edit & Delete Operations ✅ COMPLETE (v0.5.0)
+- ✅ Edit activity details - Pre-populated form with all fields
+- ✅ Edit location details - Pre-populated with cascade delete warning
+- ✅ Edit booking details - Full booking editing capability
+- ✅ Delete activities with confirmation dialog
+- ✅ Delete locations with cascade warning (deletes activities too)
+- ✅ Delete bookings with confirmation dialog
+- ✅ Tap-to-edit across all tabs (Timeline, Locations, Bookings)
+- ✅ Bottom action bars with Cancel, Save Changes, Delete buttons
+- ✅ Form validation matching Add dialogs
 
 ### Phase 2: Enhanced Features
 

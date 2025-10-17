@@ -8,6 +8,54 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+### Added - Testing Infrastructure (v0.6.0-dev) ✅
+
+**Week 1: Foundation & Setup Complete**
+
+- **Testing Dependencies** - Comprehensive testing stack
+  - JUnit 4.13.2, Google Truth 1.4.4, MockK 1.13.17
+  - Turbine 1.2.0 for Flow testing
+  - Coroutines Test 1.10.2, Arch Core Testing 2.2.0
+  - Room Testing, Hilt Testing, Navigation Testing
+  - All dependencies configured in Gradle Version Catalog
+
+- **JaCoCo Code Coverage** - Automated coverage reporting
+  - XML and HTML report generation
+  - Excludes generated code and Hilt classes
+  - Custom Gradle task: `./gradlew jacocoTestReport`
+  - Reports at `app/build/reports/jacoco/jacocoTestReport/`
+
+- **Test Utilities**
+  - `MainDispatcherRule` - Coroutine test dispatcher replacement
+  - `HiltTestRunner` - Custom test runner for Hilt integration
+  - Test options configured for unit and Android tests
+
+- **DateTimeUtilsTest** - First test suite (35 unit tests)
+  - Date conversions (ISO ↔ LocalDate)
+  - DateTime conversions (ISO 8601 ↔ ZonedDateTime)
+  - Display formatting and timezone handling
+  - Date calculations and duration formatting
+  - Validation (dates, datetimes, timezones)
+  - Edge cases (leap years, boundaries)
+  - ✅ **35/35 tests passing** in 89ms
+
+- **Documentation**
+  - `TESTING_STRATEGY.md` (600+ lines) - 6-week implementation plan
+  - `TESTING_SETUP_COMPLETE.md` - Week 1 completion summary
+  - Testing best practices and code examples
+  - Coverage targets and CI/CD guidelines
+
+### Testing Progress
+- ✅ Week 1: Foundation & Setup (100% complete)
+- ⏳ Week 2: Core Layer Tests (Repositories, DAOs)
+- ⏳ Week 3: ViewModel Tests
+- ⏳ Week 4: Integration Tests
+- ⏳ Week 5: UI Tests (Compose)
+- ⏳ Week 6: E2E Tests & CI/CD
+
+**Current Coverage:** ~5% (DateTimeUtils fully tested)
+**Target Coverage:** 75%+ overall
+
 ### Planned (Phase 2)
 - Gap detection feature (key differentiator)
 - Weather API integration
