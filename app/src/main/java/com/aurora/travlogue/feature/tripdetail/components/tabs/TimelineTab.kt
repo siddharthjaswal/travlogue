@@ -8,12 +8,15 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.aurora.travlogue.core.common.PreviewData
 import com.aurora.travlogue.core.data.local.entities.Gap
 import com.aurora.travlogue.core.data.local.entities.Location
 import com.aurora.travlogue.feature.tripdetail.components.timeline.DayCard
 import com.aurora.travlogue.feature.tripdetail.domain.models.DaySchedule
 import com.aurora.travlogue.feature.tripdetail.presentation.components.CompactGapCard
+import com.aurora.travlogue.core.design.AppTheme
 import java.time.LocalDate
 
 /**
@@ -106,5 +109,39 @@ private fun EmptyTimelineState(modifier: Modifier = Modifier) {
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
         }
+    }
+}
+
+// ==================== Previews ====================
+
+@Preview(showBackground = true)
+@Composable
+private fun TimelineTabPreview_WithGaps() {
+    AppTheme {
+        TimelineTab(
+            daySchedules = PreviewData.sampleDaySchedules,
+            gaps = PreviewData.sampleGaps,
+            locations = PreviewData.sampleLocations,
+            expandedDays = setOf("2025-07-01"),
+            onDayClicked = {},
+            onActivityClick = {},
+            onGapClick = {}
+        )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun TimelineTabPreview_Empty() {
+    AppTheme {
+        TimelineTab(
+            daySchedules = emptyList(),
+            gaps = emptyList(),
+            locations = emptyList(),
+            expandedDays = emptySet(),
+            onDayClicked = {},
+            onActivityClick = {},
+            onGapClick = {}
+        )
     }
 }

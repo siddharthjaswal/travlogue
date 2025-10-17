@@ -7,9 +7,12 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.aurora.travlogue.core.common.PreviewData
 import com.aurora.travlogue.core.data.local.entities.Booking
 import com.aurora.travlogue.core.data.local.entities.BookingType
+import com.aurora.travlogue.core.design.AppTheme
 import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
 
@@ -216,5 +219,29 @@ private fun formatBookingDateTime(dateTimeString: String, timezone: String): Str
         zonedDateTime.format(formatter)
     } catch (e: Exception) {
         dateTimeString
+    }
+}
+
+// ==================== Previews ====================
+
+@Preview(showBackground = true)
+@Composable
+private fun BookingsTabPreview_WithBookings() {
+    AppTheme {
+        BookingsTab(
+            bookings = PreviewData.sampleBookings,
+            onBookingClick = {}
+        )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun BookingsTabPreview_Empty() {
+    AppTheme {
+        BookingsTab(
+            bookings = emptyList(),
+            onBookingClick = {}
+        )
     }
 }

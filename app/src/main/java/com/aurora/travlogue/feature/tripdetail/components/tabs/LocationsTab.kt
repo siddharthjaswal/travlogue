@@ -9,8 +9,11 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.aurora.travlogue.core.common.PreviewData
 import com.aurora.travlogue.core.data.local.entities.Location
+import com.aurora.travlogue.core.design.AppTheme
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
@@ -149,5 +152,29 @@ private fun formatLocationDate(dateString: String): String {
         date.format(DateTimeFormatter.ofPattern("MMM d, yyyy"))
     } catch (e: Exception) {
         dateString
+    }
+}
+
+// ==================== Previews ====================
+
+@Preview(showBackground = true)
+@Composable
+private fun LocationsTabPreview_WithLocations() {
+    AppTheme {
+        LocationsTab(
+            locations = PreviewData.sampleLocations,
+            onLocationClick = {}
+        )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun LocationsTabPreview_Empty() {
+    AppTheme {
+        LocationsTab(
+            locations = emptyList(),
+            onLocationClick = {}
+        )
     }
 }

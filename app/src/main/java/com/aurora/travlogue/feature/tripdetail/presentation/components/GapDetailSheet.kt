@@ -30,16 +30,20 @@ import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.SheetState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.aurora.travlogue.core.common.PreviewData
 import com.aurora.travlogue.core.data.local.entities.Gap
 import com.aurora.travlogue.core.data.local.entities.GapType
 import com.aurora.travlogue.core.data.local.entities.Location
+import com.aurora.travlogue.core.design.AppTheme
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.time.temporal.ChronoUnit
@@ -369,4 +373,44 @@ private fun getFormattedDateRange(gap: Gap): String {
     val formatter = DateTimeFormatter.ofPattern("MMM d, yyyy")
 
     return "${fromDate.format(formatter)} - ${toDate.format(formatter)}"
+}
+
+// ==================== Previews ====================
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Preview
+@Composable
+private fun GapDetailSheetPreview_MissingTransit() {
+    AppTheme {
+        GapDetailSheet(
+            gap = PreviewData.gapMissingTransit,
+            fromLocation = PreviewData.locationKyoto,
+            toLocation = PreviewData.locationOsaka,
+            sheetState = rememberModalBottomSheetState(),
+            onDismiss = {},
+            onAddTransit = {},
+            onAddActivity = {},
+            onMarkResolved = {},
+            onDismissGap = {}
+        )
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Preview
+@Composable
+private fun GapDetailSheetPreview_UnplannedDay() {
+    AppTheme {
+        GapDetailSheet(
+            gap = PreviewData.gapUnplannedDay,
+            fromLocation = PreviewData.locationTokyo,
+            toLocation = PreviewData.locationKyoto,
+            sheetState = rememberModalBottomSheetState(),
+            onDismiss = {},
+            onAddTransit = {},
+            onAddActivity = {},
+            onMarkResolved = {},
+            onDismissGap = {}
+        )
+    }
 }

@@ -30,10 +30,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.aurora.travlogue.core.common.PreviewData
 import com.aurora.travlogue.core.data.local.entities.Gap
 import com.aurora.travlogue.core.data.local.entities.GapType
 import com.aurora.travlogue.core.data.local.entities.Location
+import com.aurora.travlogue.core.design.AppTheme
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.time.temporal.ChronoUnit
@@ -263,5 +266,72 @@ private fun getGapDisplayInfo(
                 duration = duration
             )
         }
+    }
+}
+
+// ==================== Previews ====================
+
+@Preview(showBackground = true)
+@Composable
+private fun GapCardPreview_MissingTransit() {
+    AppTheme {
+        GapCard(
+            gap = PreviewData.gapMissingTransit,
+            fromLocation = PreviewData.locationKyoto,
+            toLocation = PreviewData.locationOsaka,
+            onClick = {}
+        )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun GapCardPreview_UnplannedDay() {
+    AppTheme {
+        GapCard(
+            gap = PreviewData.gapUnplannedDay,
+            fromLocation = PreviewData.locationTokyo,
+            toLocation = PreviewData.locationKyoto,
+            onClick = {}
+        )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun GapCardPreview_TimeConflict() {
+    AppTheme {
+        GapCard(
+            gap = PreviewData.gapTimeConflict,
+            fromLocation = PreviewData.locationTokyo,
+            toLocation = PreviewData.locationTokyo,
+            onClick = {}
+        )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun CompactGapCardPreview_MissingTransit() {
+    AppTheme {
+        CompactGapCard(
+            gap = PreviewData.gapMissingTransit,
+            fromLocation = PreviewData.locationKyoto,
+            toLocation = PreviewData.locationOsaka,
+            onClick = {}
+        )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun CompactGapCardPreview_UnplannedDay() {
+    AppTheme {
+        CompactGapCard(
+            gap = PreviewData.gapUnplannedDay,
+            fromLocation = PreviewData.locationTokyo,
+            toLocation = PreviewData.locationKyoto,
+            onClick = {}
+        )
     }
 }

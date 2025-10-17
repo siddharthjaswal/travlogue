@@ -10,12 +10,15 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.aurora.travlogue.core.common.PreviewData
 import com.aurora.travlogue.core.data.local.entities.DateType
 import com.aurora.travlogue.core.data.local.entities.Gap
 import com.aurora.travlogue.core.data.local.entities.Location
 import com.aurora.travlogue.core.data.local.entities.Trip
 import com.aurora.travlogue.feature.tripdetail.presentation.components.GapCard
+import com.aurora.travlogue.core.design.AppTheme
 import java.time.LocalDate
 import java.time.temporal.ChronoUnit
 
@@ -154,6 +157,40 @@ private fun StatRow(
             fontWeight = if (isWarning) FontWeight.SemiBold else FontWeight.Normal,
             color = if (isWarning) MaterialTheme.colorScheme.error
                    else MaterialTheme.colorScheme.onSurface
+        )
+    }
+}
+
+// ==================== Previews ====================
+
+@Preview(showBackground = true)
+@Composable
+private fun OverviewTabPreview_WithGaps() {
+    AppTheme {
+        OverviewTab(
+            trip = PreviewData.sampleTripFixed,
+            locationCount = 3,
+            activityCount = 5,
+            bookingCount = 3,
+            gaps = PreviewData.sampleGaps,
+            locations = PreviewData.sampleLocations,
+            onGapClick = {}
+        )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun OverviewTabPreview_NoGaps() {
+    AppTheme {
+        OverviewTab(
+            trip = PreviewData.sampleTripFixed,
+            locationCount = 3,
+            activityCount = 5,
+            bookingCount = 3,
+            gaps = emptyList(),
+            locations = PreviewData.sampleLocations,
+            onGapClick = {}
         )
     }
 }
