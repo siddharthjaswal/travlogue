@@ -8,9 +8,11 @@ import com.aurora.travlogue.core.data.local.entities.ActivityType
 import com.aurora.travlogue.core.data.local.entities.Booking
 import com.aurora.travlogue.core.data.local.entities.BookingType
 import com.aurora.travlogue.core.data.local.entities.DateType
+import com.aurora.travlogue.core.data.local.entities.Gap
 import com.aurora.travlogue.core.data.local.entities.Location
 import com.aurora.travlogue.core.data.local.entities.TimeSlot
 import com.aurora.travlogue.core.data.repository.TripRepository
+import com.aurora.travlogue.core.domain.GapDetectionService
 import com.aurora.travlogue.feature.tripdetail.domain.models.DaySchedule
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -28,6 +30,7 @@ import javax.inject.Inject
 @HiltViewModel
 class TripDetailViewModel @Inject constructor(
     private val tripRepository: TripRepository,
+    private val gapDetectionService: GapDetectionService,
     savedStateHandle: SavedStateHandle
 ) : ViewModel() {
 
@@ -167,6 +170,24 @@ class TripDetailViewModel @Inject constructor(
             it.copy(
                 showEditBookingDialog = false,
                 editingBooking = null
+            )
+        }
+    }
+
+    fun showGapDetailDialog(gap: Gap) {
+        _uiState.update {
+            it.copy(
+                showGapDetailDialog = true,
+                selectedGap = gap
+            )
+        }
+    }
+
+    fun hideGapDetailDialog() {
+        _uiState.update {
+            it.copy(
+                showGapDetailDialog = false,
+                selectedGap = null
             )
         }
     }
@@ -332,6 +353,56 @@ class TripDetailViewModel @Inject constructor(
         }
     }
 
+    // ==================== Gap Management ====================
+
+    fun markGapAsResolved(gapId: String) {
+        viewModelScope.launch {
+            try {
+                tripRepository.markGapAsResolved(gapId)
+                _uiEvents.emit(TripDetailUiEvent.ShowSnackbar("Gap marked as resolved"))
+            } catch (e: Exception) {
+                _uiEvents.emit(TripDetailUiEvent.ShowError(e.message ?: "Failed to resolve gap"))
+            }
+        }
+    }
+
+    fun deleteGap(gap: Gap) {
+        viewModelScope.launch {
+            try {
+                tripRepository.deleteGap(gap)
+                _uiEvents.emit(TripDetailUiEvent.ShowSnackbar("Gap dismissed"))
+            } catch (e: Exception) {
+                _uiEvents.emit(TripDetailUiEvent.ShowError(e.message ?: "Failed to dismiss gap"))
+            }
+        }
+    }
+
+    /**
+     * Manually trigger gap detection and update database.
+     * Called automatically when trip data changes.
+     */
+    fun detectAndUpdateGaps() {
+        viewModelScope.launch {
+            try {
+                val trip = _uiState.value.trip ?: return@launch
+                val locations = _uiState.value.locations
+                val bookings = _uiState.value.bookings
+
+                // Detect gaps using the service
+                val detectedGaps = gapDetectionService.detectGaps(trip, locations, bookings)
+
+                // Clear old gaps and insert new ones
+                tripRepository.deleteAllGapsForTrip(trip.id)
+                if (detectedGaps.isNotEmpty()) {
+                    tripRepository.insertGaps(detectedGaps)
+                }
+            } catch (e: Exception) {
+                // Silent failure - gap detection is not critical
+                e.printStackTrace()
+            }
+        }
+    }
+
     // ==================== Private Methods ====================
 
     private fun loadTripDetails() {
@@ -347,18 +418,25 @@ class TripDetailViewModel @Inject constructor(
                             tripRepository.getActivitiesForTrip(tripId).collect { activities ->
                                 // Load bookings
                                 tripRepository.getBookingsForTrip(tripId).collect { bookings ->
-                                    // Generate day schedules
-                                    val daySchedules = generateDaySchedules(trip, locations, activities)
+                                    // Load gaps
+                                    tripRepository.getGapsForTrip(tripId).collect { gaps ->
+                                        // Generate day schedules
+                                        val daySchedules = generateDaySchedules(trip, locations, activities)
 
-                                    _uiState.update {
-                                        it.copy(
-                                            trip = trip,
-                                            locations = locations.sortedBy { it.order },
-                                            daySchedules = daySchedules,
-                                            bookings = bookings.sortedBy { it.startDateTime },
-                                            isLoading = false,
-                                            error = null
-                                        )
+                                        _uiState.update {
+                                            it.copy(
+                                                trip = trip,
+                                                locations = locations.sortedBy { it.order },
+                                                daySchedules = daySchedules,
+                                                bookings = bookings.sortedBy { it.startDateTime },
+                                                gaps = gaps,
+                                                isLoading = false,
+                                                error = null
+                                            )
+                                        }
+
+                                        // Automatically detect and update gaps when data changes
+                                        detectAndUpdateGaps()
                                     }
                                 }
                             }

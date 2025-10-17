@@ -2,10 +2,12 @@ package com.aurora.travlogue.core.data.repository
 
 import com.aurora.travlogue.core.data.local.dao.ActivityDao
 import com.aurora.travlogue.core.data.local.dao.BookingDao
+import com.aurora.travlogue.core.data.local.dao.GapDao
 import com.aurora.travlogue.core.data.local.dao.LocationDao
 import com.aurora.travlogue.core.data.local.dao.TripDao
 import com.aurora.travlogue.core.data.local.entities.Activity
 import com.aurora.travlogue.core.data.local.entities.Booking
+import com.aurora.travlogue.core.data.local.entities.Gap
 import com.aurora.travlogue.core.data.local.entities.Location
 import com.aurora.travlogue.core.data.local.entities.Trip
 import kotlinx.coroutines.flow.Flow
@@ -17,7 +19,8 @@ class TripRepository @Inject constructor(
     private val tripDao: TripDao,
     private val locationDao: LocationDao,
     private val activityDao: ActivityDao,
-    private val bookingDao: BookingDao
+    private val bookingDao: BookingDao,
+    private val gapDao: GapDao
 ) {
 
     val allTrips: Flow<List<Trip>> = tripDao.getAllTrips()
@@ -120,5 +123,43 @@ class TripRepository @Inject constructor(
 
     suspend fun deleteBooking(booking: Booking) {
         bookingDao.deleteBooking(booking)
+    }
+
+    // Gap queries
+    fun getGapsForTrip(tripId: String): Flow<List<Gap>> {
+        return gapDao.getGapsByTripId(tripId)
+    }
+
+    fun getUnresolvedGapsForTrip(tripId: String): Flow<List<Gap>> {
+        return gapDao.getUnresolvedGapsByTripId(tripId)
+    }
+
+    suspend fun getGapsForTripSync(tripId: String): List<Gap> {
+        return gapDao.getGapsByTripIdSync(tripId)
+    }
+
+    // Gap mutations
+    suspend fun insertGap(gap: Gap) {
+        gapDao.insertGap(gap)
+    }
+
+    suspend fun insertGaps(gaps: List<Gap>) {
+        gapDao.insertGaps(gaps)
+    }
+
+    suspend fun updateGap(gap: Gap) {
+        gapDao.updateGap(gap)
+    }
+
+    suspend fun deleteGap(gap: Gap) {
+        gapDao.deleteGap(gap)
+    }
+
+    suspend fun markGapAsResolved(gapId: String) {
+        gapDao.markGapAsResolved(gapId)
+    }
+
+    suspend fun deleteAllGapsForTrip(tripId: String) {
+        gapDao.deleteGapsByTripId(tripId)
     }
 }
