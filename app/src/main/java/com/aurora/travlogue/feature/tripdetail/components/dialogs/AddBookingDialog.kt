@@ -13,7 +13,9 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.aurora.travlogue.core.data.local.entities.BookingType
-import java.time.LocalDateTime
+import java.time.LocalDate
+import java.time.LocalTime
+import java.time.ZonedDateTime
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 
@@ -45,13 +47,14 @@ fun AddBookingDialog(
     var notes by remember { mutableStateOf("") }
     var showTypeDropdown by remember { mutableStateOf(false) }
 
-    // Simplified date/time for now - just use current datetime with system timezone
-    val currentDateTime = remember {
-        LocalDateTime.now()
-            .atZone(ZoneId.systemDefault())
-            .format(DateTimeFormatter.ISO_OFFSET_DATE_TIME)
+    // DateTime state with timezone support
+    var startDateTime by remember {
+        mutableStateOf<ZonedDateTime>(ZonedDateTime.now())
     }
-    val systemTimezone = remember { ZoneId.systemDefault().id }
+    var endDateTime by remember {
+        mutableStateOf<ZonedDateTime?>(null)
+    }
+    var useEndDateTime by remember { mutableStateOf(false) }
 
     // Validation
     val isProviderValid = provider.isNotBlank()
@@ -91,9 +94,9 @@ fun AddBookingDialog(
                             selectedType,
                             confirmationNumber.takeIf { it.isNotBlank() },
                             provider,
-                            currentDateTime,  // TODO: Add proper datetime picker
-                            null,  // TODO: Add end datetime picker
-                            systemTimezone,
+                            startDateTime.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME),
+                            endDateTime?.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME),
+                            startDateTime.zone.id,
                             fromLocation.takeIf { it.isNotBlank() },
                             toLocation.takeIf { it.isNotBlank() },
                             priceValue,
@@ -222,6 +225,61 @@ fun AddBookingDialog(
                 )
             }
 
+            // Divider
+            HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
+
+            // Start DateTime Picker
+            DateTimePickerField(
+                label = "Start Date & Time *",
+                selectedDateTime = startDateTime,
+                onDateTimeSelected = { newDateTime ->
+                    startDateTime = newDateTime
+                    // Update endDateTime zone if it exists
+                    endDateTime?.let { endDt ->
+                        endDateTime = endDt.withZoneSameInstant(newDateTime.zone)
+                    }
+                },
+                showTimezone = true
+            )
+
+            // End DateTime Toggle and Picker
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = androidx.compose.ui.Alignment.CenterVertically
+            ) {
+                Text(
+                    text = "Add End Date & Time",
+                    style = MaterialTheme.typography.bodyMedium
+                )
+                Switch(
+                    checked = useEndDateTime,
+                    onCheckedChange = { checked ->
+                        useEndDateTime = checked
+                        if (checked && endDateTime == null) {
+                            // Default end datetime to 2 hours after start
+                            endDateTime = startDateTime.plusHours(2)
+                        } else if (!checked) {
+                            endDateTime = null
+                        }
+                    }
+                )
+            }
+
+            if (useEndDateTime) {
+                DateTimePickerField(
+                    label = "End Date & Time",
+                    selectedDateTime = endDateTime,
+                    onDateTimeSelected = { newDateTime ->
+                        endDateTime = newDateTime
+                    },
+                    showTimezone = false // Use same timezone as start
+                )
+            }
+
+            // Divider
+            HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
+
             // Notes Field
             OutlinedTextField(
                 value = notes,
@@ -232,28 +290,6 @@ fun AddBookingDialog(
                 maxLines = 5,
                 modifier = Modifier.fillMaxWidth()
             )
-
-            // Info Card - Datetime Note
-            Card(
-                colors = CardDefaults.cardColors(
-                    containerColor = MaterialTheme.colorScheme.surfaceVariant
-                )
-            ) {
-                Column(
-                    modifier = Modifier.padding(16.dp),
-                    verticalArrangement = Arrangement.spacedBy(4.dp)
-                ) {
-                    Text(
-                        text = "📅 Date & Time",
-                        style = MaterialTheme.typography.titleSmall
-                    )
-                    Text(
-                        text = "Currently set to now (${formatDateTime(currentDateTime)}). Full datetime picker coming soon!",
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                }
-            }
         }
     }
 }
@@ -300,14 +336,5 @@ private fun getBookingTypeDisplay(type: BookingType): String {
         BookingType.BUS -> "🚌 Bus"
         BookingType.TICKET -> "🎫 Ticket"
         BookingType.OTHER -> "📝 Other"
-    }
-}
-
-private fun formatDateTime(isoDateTime: String): String {
-    return try {
-        val dateTime = LocalDateTime.parse(isoDateTime, DateTimeFormatter.ISO_OFFSET_DATE_TIME)
-        dateTime.format(DateTimeFormatter.ofPattern("MMM d, yyyy 'at' h:mm a"))
-    } catch (e: Exception) {
-        isoDateTime
     }
 }

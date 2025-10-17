@@ -14,7 +14,8 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.aurora.travlogue.core.data.local.entities.Booking
 import com.aurora.travlogue.core.data.local.entities.BookingType
-import java.time.LocalDateTime
+import java.time.ZonedDateTime
+import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -35,6 +36,19 @@ fun EditBookingDialog(
     var notes by remember { mutableStateOf(booking.notes ?: "") }
     var showTypeDropdown by remember { mutableStateOf(false) }
     var showDeleteConfirmation by remember { mutableStateOf(false) }
+
+    // DateTime state with timezone support
+    var startDateTime by remember {
+        mutableStateOf(
+            parseDateTime(booking.startDateTime, booking.timezone)
+        )
+    }
+    var endDateTime by remember {
+        mutableStateOf(
+            booking.endDateTime?.let { parseDateTime(it, booking.timezone) }
+        )
+    }
+    var useEndDateTime by remember { mutableStateOf(booking.endDateTime != null) }
 
     // Validation
     val isProviderValid = provider.isNotBlank()
@@ -75,6 +89,9 @@ fun EditBookingDialog(
                                 type = selectedType,
                                 confirmationNumber = confirmationNumber.takeIf { it.isNotBlank() },
                                 provider = provider,
+                                startDateTime = startDateTime.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME),
+                                endDateTime = endDateTime?.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME),
+                                timezone = startDateTime.zone.id,
                                 fromLocation = fromLocation.takeIf { it.isNotBlank() },
                                 toLocation = toLocation.takeIf { it.isNotBlank() },
                                 price = priceValue,
@@ -205,6 +222,61 @@ fun EditBookingDialog(
                 )
             }
 
+            // Divider
+            HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
+
+            // Start DateTime Picker
+            DateTimePickerField(
+                label = "Start Date & Time *",
+                selectedDateTime = startDateTime,
+                onDateTimeSelected = { newDateTime ->
+                    startDateTime = newDateTime
+                    // Update endDateTime zone if it exists
+                    endDateTime?.let { endDt ->
+                        endDateTime = endDt.withZoneSameInstant(newDateTime.zone)
+                    }
+                },
+                showTimezone = true
+            )
+
+            // End DateTime Toggle and Picker
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = androidx.compose.ui.Alignment.CenterVertically
+            ) {
+                Text(
+                    text = "Add End Date & Time",
+                    style = MaterialTheme.typography.bodyMedium
+                )
+                Switch(
+                    checked = useEndDateTime,
+                    onCheckedChange = { checked ->
+                        useEndDateTime = checked
+                        if (checked && endDateTime == null) {
+                            // Default end datetime to 2 hours after start
+                            endDateTime = startDateTime.plusHours(2)
+                        } else if (!checked) {
+                            endDateTime = null
+                        }
+                    }
+                )
+            }
+
+            if (useEndDateTime) {
+                DateTimePickerField(
+                    label = "End Date & Time",
+                    selectedDateTime = endDateTime,
+                    onDateTimeSelected = { newDateTime ->
+                        endDateTime = newDateTime
+                    },
+                    showTimezone = false // Use same timezone as start
+                )
+            }
+
+            // Divider
+            HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
+
             // Notes Field
             OutlinedTextField(
                 value = notes,
@@ -215,38 +287,6 @@ fun EditBookingDialog(
                 maxLines = 5,
                 modifier = Modifier.fillMaxWidth()
             )
-
-            // Info Card - Date/Time Display
-            Card(
-                colors = CardDefaults.cardColors(
-                    containerColor = MaterialTheme.colorScheme.surfaceVariant
-                )
-            ) {
-                Column(
-                    modifier = Modifier.padding(16.dp),
-                    verticalArrangement = Arrangement.spacedBy(4.dp)
-                ) {
-                    Text(
-                        text = "📅 Booking Date & Time",
-                        style = MaterialTheme.typography.titleSmall
-                    )
-                    Text(
-                        text = formatDateTime(booking.startDateTime),
-                        style = MaterialTheme.typography.bodyMedium
-                    )
-                    if (booking.endDateTime != null) {
-                        Text(
-                            text = "To: ${formatDateTime(booking.endDateTime)}",
-                            style = MaterialTheme.typography.bodyMedium
-                        )
-                    }
-                    Text(
-                        text = "Note: Date/time editing coming in next update",
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                }
-            }
         }
     }
 
@@ -342,11 +382,14 @@ private fun getBookingTypeDisplay(type: BookingType): String {
     }
 }
 
-private fun formatDateTime(isoDateTime: String): String {
+/**
+ * Parse ISO datetime string with timezone into ZonedDateTime
+ */
+private fun parseDateTime(isoDateTime: String, timezoneId: String): ZonedDateTime {
     return try {
-        val dateTime = LocalDateTime.parse(isoDateTime, DateTimeFormatter.ISO_OFFSET_DATE_TIME)
-        dateTime.format(DateTimeFormatter.ofPattern("MMM d, yyyy 'at' h:mm a"))
+        ZonedDateTime.parse(isoDateTime, DateTimeFormatter.ISO_OFFSET_DATE_TIME)
     } catch (e: Exception) {
-        isoDateTime
+        // Fallback: use current time with specified timezone
+        ZonedDateTime.now(ZoneId.of(timezoneId))
     }
 }
