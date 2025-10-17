@@ -13,6 +13,22 @@ interface ActivityDao {
     @Query("SELECT * FROM activities WHERE locationId = :locationId ORDER BY date ASC")
     suspend fun getActivitiesByLocationIdSync(locationId: String): List<Activity>
 
+    @Query("""
+        SELECT a.* FROM activities a
+        INNER JOIN locations l ON a.locationId = l.id
+        WHERE l.tripId = :tripId
+        ORDER BY a.date ASC
+    """)
+    fun getActivitiesByTripId(tripId: String): Flow<List<Activity>>
+
+    @Query("""
+        SELECT a.* FROM activities a
+        INNER JOIN locations l ON a.locationId = l.id
+        WHERE l.tripId = :tripId
+        ORDER BY a.date ASC
+    """)
+    suspend fun getActivitiesByTripIdSync(tripId: String): List<Activity>
+
     @Query("SELECT * FROM activities WHERE id = :activityId")
     suspend fun getActivityById(activityId: String): Activity?
 

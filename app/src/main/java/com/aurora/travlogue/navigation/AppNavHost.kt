@@ -9,6 +9,7 @@ import androidx.navigation.compose.composable
 import com.aurora.travlogue.feature.createtrip.presentation.CreateTripScreen
 import com.aurora.travlogue.feature.home.presentation.HomeScreen
 import com.aurora.travlogue.feature.home.presentation.HomeViewModel
+import com.aurora.travlogue.feature.tripdetail.presentation.TripDetailScreen
 
 /**
  * Main navigation host for the app
@@ -47,7 +48,16 @@ fun AppNavHost(
             )
         }
 
-        // Future: Trip detail screen
+        // Trip detail screen
+        composable<TripDetail> {
+            TripDetailScreen(
+                onNavigateBack = {
+                    navController.navigateUp()
+                }
+            )
+        }
+
+        // Future: Trip detail screen (old comment - now implemented above)
         // composable<TripDetail> { backStackEntry ->
         //     val tripDetail = backStackEntry.toRoute<TripDetail>()
         //     TripDetailScreen(
