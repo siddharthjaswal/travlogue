@@ -36,34 +36,41 @@ fun TimelineTab(
     if (daySchedules.isEmpty()) {
         EmptyTimelineState(modifier = modifier)
     } else {
+        // Build a single list of items (days + gaps) for stable rendering
+        val timelineItems = buildTimelineItems(daySchedules, gaps)
+
+        // Create location map for efficient lookups
+        val locationMap = locations.associateBy { it.id }
+
         LazyColumn(
             modifier = modifier.fillMaxSize(),
             contentPadding = PaddingValues(16.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            daySchedules.forEachIndexed { index, daySchedule ->
-                // Show day card
-                item(key = "day-${daySchedule.date}") {
-                    DayCard(
-                        daySchedule = daySchedule,
-                        isExpanded = daySchedule.date in expandedDays,
-                        onDayClicked = { onDayClicked(daySchedule.date) },
-                        onActivityClick = onActivityClick
-                    )
+            items(
+                items = timelineItems,
+                key = { item ->
+                    when (item) {
+                        is TimelineItem.Day -> "day-${item.daySchedule.date}"
+                        is TimelineItem.GapItem -> "gap-${item.gap.id}"
+                    }
                 }
-
-                // Show gap after this day (if exists)
-                val gapsAfterThisDay = findGapsAfterDate(gaps, daySchedule.date)
-                gapsAfterThisDay.forEach { gap ->
-                    item(key = "gap-${gap.id}") {
-                        val fromLocation = locations.find { it.id == gap.fromLocationId }
-                        val toLocation = locations.find { it.id == gap.toLocationId }
-
+            ) { item ->
+                when (item) {
+                    is TimelineItem.Day -> {
+                        DayCard(
+                            daySchedule = item.daySchedule,
+                            isExpanded = item.daySchedule.date in expandedDays,
+                            onDayClicked = { onDayClicked(item.daySchedule.date) },
+                            onActivityClick = onActivityClick
+                        )
+                    }
+                    is TimelineItem.GapItem -> {
                         CompactGapCard(
-                            gap = gap,
-                            fromLocation = fromLocation,
-                            toLocation = toLocation,
-                            onClick = { onGapClick(gap) }
+                            gap = item.gap,
+                            fromLocation = locationMap[item.gap.fromLocationId],
+                            toLocation = locationMap[item.gap.toLocationId],
+                            onClick = { onGapClick(item.gap) }
                         )
                     }
                 }
@@ -73,17 +80,48 @@ fun TimelineTab(
 }
 
 /**
- * Find gaps that start on or after the given date.
- * Shows gaps between consecutive days.
+ * Sealed class representing items in the timeline
  */
-private fun findGapsAfterDate(gaps: List<Gap>, date: String): List<Gap> {
-    return gaps.filter { gap ->
-        val gapFromDate = LocalDate.parse(gap.fromDate)
-        val currentDate = LocalDate.parse(date)
+private sealed class TimelineItem {
+    data class Day(val daySchedule: DaySchedule) : TimelineItem()
+    data class GapItem(val gap: Gap) : TimelineItem()
+}
 
-        // Show gap if it starts on this day
-        gapFromDate == currentDate
+/**
+ * Build a combined list of days and gaps in chronological order.
+ *
+ * Strategy: Show each gap only ONCE - right before the destination day
+ * (i.e., after the last day of fromLocation, before first day of toLocation)
+ */
+private fun buildTimelineItems(
+    daySchedules: List<DaySchedule>,
+    gaps: List<Gap>
+): List<TimelineItem> {
+    val items = mutableListOf<TimelineItem>()
+    val shownGaps = mutableSetOf<String>()
+
+    daySchedules.forEachIndexed { index, daySchedule ->
+        // Add the day
+        items.add(TimelineItem.Day(daySchedule))
+
+        // Check if we should show any gaps AFTER this day (before next day)
+        if (index < daySchedules.size - 1) {
+            val nextDay = daySchedules[index + 1]
+
+            // Find gaps where:
+            // - toLocationId matches the next day's location
+            // - We haven't shown this gap yet
+            gaps.forEach { gap ->
+                if (gap.id !in shownGaps &&
+                    gap.toLocationId == nextDay.location?.id) {
+                    items.add(TimelineItem.GapItem(gap))
+                    shownGaps.add(gap.id)
+                }
+            }
+        }
     }
+
+    return items
 }
 
 @Composable

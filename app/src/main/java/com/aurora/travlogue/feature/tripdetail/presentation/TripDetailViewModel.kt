@@ -20,6 +20,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.time.LocalDate
@@ -410,36 +411,37 @@ class TripDetailViewModel @Inject constructor(
             _uiState.update { it.copy(isLoading = true, error = null) }
 
             try {
-                tripRepository.getTripById(tripId).collect { trip ->
+                // Combine flows to avoid nested collects and prevent infinite loops
+                combine(
+                    tripRepository.getTripById(tripId),
+                    tripRepository.getLocationsForTrip(tripId),
+                    tripRepository.getActivitiesForTrip(tripId),
+                    tripRepository.getBookingsForTrip(tripId),
+                    tripRepository.getGapsForTrip(tripId)
+                ) { trip, locations, activities, bookings, gaps ->
+                    TripDetailData(trip, locations, activities, bookings, gaps)
+                }.collect { data ->
+                    val trip = data.trip
                     if (trip != null) {
-                        // Load locations
-                        tripRepository.getLocationsForTrip(tripId).collect { locations ->
-                            // Load activities
-                            tripRepository.getActivitiesForTrip(tripId).collect { activities ->
-                                // Load bookings
-                                tripRepository.getBookingsForTrip(tripId).collect { bookings ->
-                                    // Load gaps
-                                    tripRepository.getGapsForTrip(tripId).collect { gaps ->
-                                        // Generate day schedules
-                                        val daySchedules = generateDaySchedules(trip, locations, activities)
+                        // Generate day schedules
+                        val daySchedules = generateDaySchedules(trip, data.locations, data.activities)
 
-                                        _uiState.update {
-                                            it.copy(
-                                                trip = trip,
-                                                locations = locations.sortedBy { it.order },
-                                                daySchedules = daySchedules,
-                                                bookings = bookings.sortedBy { it.startDateTime },
-                                                gaps = gaps,
-                                                isLoading = false,
-                                                error = null
-                                            )
-                                        }
+                        _uiState.update {
+                            it.copy(
+                                trip = trip,
+                                locations = data.locations.sortedBy { it.order },
+                                daySchedules = daySchedules,
+                                bookings = data.bookings.sortedBy { it.startDateTime },
+                                gaps = data.gaps.filter { !it.isResolved },
+                                isLoading = false,
+                                error = null
+                            )
+                        }
 
-                                        // Automatically detect and update gaps when data changes
-                                        detectAndUpdateGaps()
-                                    }
-                                }
-                            }
+                        // Trigger gap detection when locations or bookings change
+                        // but only if no gaps exist (to avoid infinite loop)
+                        if (data.gaps.isEmpty() && (data.locations.isNotEmpty() || data.bookings.isNotEmpty())) {
+                            detectAndUpdateGaps()
                         }
                     } else {
                         _uiState.update {
@@ -462,6 +464,17 @@ class TripDetailViewModel @Inject constructor(
             }
         }
     }
+
+    /**
+     * Data class to hold combined trip detail data
+     */
+    private data class TripDetailData(
+        val trip: com.aurora.travlogue.core.data.local.entities.Trip?,
+        val locations: List<com.aurora.travlogue.core.data.local.entities.Location>,
+        val activities: List<com.aurora.travlogue.core.data.local.entities.Activity>,
+        val bookings: List<Booking>,
+        val gaps: List<Gap>
+    )
 
     private fun generateDaySchedules(
         trip: com.aurora.travlogue.core.data.local.entities.Trip,
