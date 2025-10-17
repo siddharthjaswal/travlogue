@@ -3,6 +3,7 @@ package com.aurora.travlogue.feature.home.presentation
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Science
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -19,7 +20,8 @@ import com.aurora.travlogue.feature.home.components.TripList
 fun HomeScreen(
     viewModel: HomeViewModel = hiltViewModel(),
     onNavigateToCreateTrip: () -> Unit,
-    onNavigateToPlan: (String) -> Unit
+    onNavigateToPlan: (String) -> Unit,
+    onNavigateToMock: () -> Unit = {}
 ) {
     val trips by viewModel.allTrips.collectAsState()
 
@@ -27,7 +29,8 @@ fun HomeScreen(
         trips = trips,
         onNavigateToCreateTrip = onNavigateToCreateTrip,
         onNavigateToPlan = onNavigateToPlan,
-        onDeleteTrip = { viewModel.deleteTrip(it) }
+        onDeleteTrip = { viewModel.deleteTrip(it) },
+        onNavigateToMock = onNavigateToMock
     )
 }
 
@@ -39,7 +42,8 @@ private fun HomeScreenWithTripsPreview() {
             trips = TripMockData.sampleTrips,
             onNavigateToCreateTrip = {},
             onNavigateToPlan = {},
-            onDeleteTrip = {}
+            onDeleteTrip = {},
+            onNavigateToMock = {}
         )
     }
 }
@@ -52,7 +56,8 @@ private fun HomeScreenEmptyPreview() {
             trips = emptyList(),
             onNavigateToCreateTrip = {},
             onNavigateToPlan = {},
-            onDeleteTrip = {}
+            onDeleteTrip = {},
+            onNavigateToMock = {}
         )
     }
 }
@@ -63,12 +68,23 @@ private fun HomeScreenContent(
     trips: List<Trip>,
     onNavigateToCreateTrip: () -> Unit,
     onNavigateToPlan: (String) -> Unit,
-    onDeleteTrip: (Trip) -> Unit
+    onDeleteTrip: (Trip) -> Unit,
+    onNavigateToMock: () -> Unit = {}
 ) {
     Scaffold(
         topBar = {
             TopAppBar(
                 title = { Text("My Trips") },
+                actions = {
+                    // Mock data generator icon (for testing)
+                    IconButton(onClick = onNavigateToMock) {
+                        Icon(
+                            imageVector = Icons.Default.Science,
+                            contentDescription = "Mock Data Generator",
+                            tint = MaterialTheme.colorScheme.onPrimaryContainer
+                        )
+                    }
+                },
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = MaterialTheme.colorScheme.primaryContainer,
                     titleContentColor = MaterialTheme.colorScheme.onPrimaryContainer

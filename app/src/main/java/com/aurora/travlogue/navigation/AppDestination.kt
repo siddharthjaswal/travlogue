@@ -46,3 +46,11 @@ data class TripPlan(
     val tripId: String,
     val editMode: Boolean = false
 ) : AppDestination
+
+/**
+ * Mock data generator screen destination
+ * Testing tool for creating mock trips
+ * No arguments required
+ */
+@Serializable
+object Mock : AppDestination

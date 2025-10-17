@@ -9,6 +9,7 @@ import androidx.navigation.compose.composable
 import com.aurora.travlogue.feature.createtrip.presentation.CreateTripScreen
 import com.aurora.travlogue.feature.home.presentation.HomeScreen
 import com.aurora.travlogue.feature.home.presentation.HomeViewModel
+import com.aurora.travlogue.feature.mock.presentation.MockScreen
 import com.aurora.travlogue.feature.tripdetail.presentation.TripDetailScreen
 
 /**
@@ -35,6 +36,9 @@ fun AppNavHost(
                 onNavigateToPlan = { tripId ->
                     // Type-safe navigation to trip detail
                     navController.navigate(TripDetail(tripId = tripId))
+                },
+                onNavigateToMock = {
+                    navController.navigate(Mock)
                 }
             )
         }
@@ -53,6 +57,18 @@ fun AppNavHost(
             TripDetailScreen(
                 onNavigateBack = {
                     navController.navigateUp()
+                }
+            )
+        }
+
+        // Mock data generator screen - testing tool
+        composable<Mock> {
+            MockScreen(
+                onNavigateBack = {
+                    navController.navigateUp()
+                },
+                onNavigateToTrip = { tripId ->
+                    navController.navigate(TripDetail(tripId = tripId))
                 }
             )
         }
