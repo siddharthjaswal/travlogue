@@ -26,7 +26,9 @@ data class Activity(
     val description: String?,
     val date: String?, // ISO format: yyyy-MM-dd
     val timeSlot: TimeSlot?,
-    val type: ActivityType
+    val type: ActivityType,
+    val startTime: String? = null, // Optional: ISO format with time: HH:mm or ISO_LOCAL_TIME
+    val endTime: String? = null // Optional: ISO format with time: HH:mm or ISO_LOCAL_TIME
 )
 
 enum class TimeSlot {

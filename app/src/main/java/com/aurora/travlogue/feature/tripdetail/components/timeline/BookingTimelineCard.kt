@@ -1,0 +1,224 @@
+package com.aurora.travlogue.feature.tripdetail.components.timeline
+
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowForward
+import androidx.compose.material.icons.filled.*
+import androidx.compose.material3.*
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
+import com.aurora.travlogue.core.data.local.entities.Booking
+import com.aurora.travlogue.core.data.local.entities.BookingType
+import java.time.ZonedDateTime
+import java.time.format.DateTimeFormatter
+import java.time.temporal.ChronoUnit
+
+/**
+ * Card showing a booking in the timeline
+ */
+@Composable
+fun BookingTimelineCard(
+    booking: Booking,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Card(
+        modifier = modifier
+            .fillMaxWidth()
+            .clickable(onClick = onClick),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceVariant
+        )
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            horizontalArrangement = Arrangement.spacedBy(12.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            // Booking type icon
+            Surface(
+                shape = MaterialTheme.shapes.medium,
+                color = MaterialTheme.colorScheme.primaryContainer,
+                modifier = Modifier.size(48.dp)
+            ) {
+                Box(
+                    contentAlignment = Alignment.Center,
+                    modifier = Modifier.fillMaxSize()
+                ) {
+                    Icon(
+                        imageVector = getBookingTypeIcon(booking.type),
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.onPrimaryContainer,
+                        modifier = Modifier.size(24.dp)
+                    )
+                }
+            }
+
+            Column(
+                modifier = Modifier.weight(1f),
+                verticalArrangement = Arrangement.spacedBy(4.dp)
+            ) {
+                // Booking type and provider
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = getBookingTypeDisplay(booking.type),
+                        style = MaterialTheme.typography.labelMedium,
+                        color = MaterialTheme.colorScheme.primary,
+                        fontWeight = FontWeight.SemiBold
+                    )
+                    Text(
+                        text = "•",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                    Text(
+                        text = booking.provider,
+                        style = MaterialTheme.typography.bodyMedium,
+                        fontWeight = FontWeight.Medium
+                    )
+                }
+
+                // Route (for transit bookings)
+                if (booking.fromLocation != null && booking.toLocation != null) {
+                    Row(
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            text = booking.fromLocation,
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.ArrowForward,
+                            contentDescription = null,
+                            modifier = Modifier.size(12.dp),
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                        Text(
+                            text = booking.toLocation,
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                }
+
+                // Time info
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = formatTime(booking.startDateTime),
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurface,
+                        fontWeight = FontWeight.Medium
+                    )
+
+                    if (booking.endDateTime != null) {
+                        Text(
+                            text = "→",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                        Text(
+                            text = formatTime(booking.endDateTime),
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurface,
+                            fontWeight = FontWeight.Medium
+                        )
+
+                        // Duration
+                        val duration = calculateDuration(booking.startDateTime, booking.endDateTime)
+                        if (duration != null) {
+                            Text(
+                                text = "•",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                            Text(
+                                text = duration,
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+                    }
+                }
+
+                // Confirmation number
+                if (booking.confirmationNumber != null) {
+                    Text(
+                        text = "Conf: ${booking.confirmationNumber}",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+            }
+
+            // Price (if available)
+            if (booking.price != null && booking.currency != null) {
+                Text(
+                    text = "${booking.currency} ${String.format("%.2f", booking.price)}",
+                    style = MaterialTheme.typography.bodyMedium,
+                    fontWeight = FontWeight.SemiBold,
+                    color = MaterialTheme.colorScheme.primary
+                )
+            }
+        }
+    }
+}
+
+private fun getBookingTypeIcon(type: BookingType) = when (type) {
+    BookingType.FLIGHT -> Icons.Default.Flight
+    BookingType.HOTEL -> Icons.Default.Hotel
+    BookingType.TRAIN -> Icons.Default.Train
+    BookingType.BUS -> Icons.Default.DirectionsBus
+    BookingType.TICKET -> Icons.Default.ConfirmationNumber
+    BookingType.OTHER -> Icons.Default.Event
+}
+
+private fun getBookingTypeDisplay(type: BookingType) = when (type) {
+    BookingType.FLIGHT -> "Flight"
+    BookingType.HOTEL -> "Hotel"
+    BookingType.TRAIN -> "Train"
+    BookingType.BUS -> "Bus"
+    BookingType.TICKET -> "Ticket"
+    BookingType.OTHER -> "Booking"
+}
+
+private fun formatTime(isoDateTime: String): String {
+    return try {
+        val zonedDateTime = ZonedDateTime.parse(isoDateTime)
+        zonedDateTime.format(DateTimeFormatter.ofPattern("h:mm a"))
+    } catch (e: Exception) {
+        isoDateTime
+    }
+}
+
+private fun calculateDuration(startDateTime: String, endDateTime: String): String? {
+    return try {
+        val start = ZonedDateTime.parse(startDateTime)
+        val end = ZonedDateTime.parse(endDateTime)
+
+        val hours = ChronoUnit.HOURS.between(start, end)
+        val minutes = ChronoUnit.MINUTES.between(start, end) % 60
+
+        when {
+            hours > 0 && minutes > 0 -> "${hours}h ${minutes}m"
+            hours > 0 -> "${hours}h"
+            minutes > 0 -> "${minutes}m"
+            else -> null
+        }
+    } catch (e: Exception) {
+        null
+    }
+}

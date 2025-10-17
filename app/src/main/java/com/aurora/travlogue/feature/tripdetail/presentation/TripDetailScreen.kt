@@ -73,8 +73,8 @@ fun TripDetailScreen(
     if (uiState.showAddActivityDialog) {
         AddActivityDialog(
             onDismiss = viewModel::hideAddActivityDialog,
-            onSave = { locationId, title, description, date, timeSlot, type ->
-                viewModel.addActivity(locationId, title, description, date, timeSlot, type)
+            onSave = { locationId, title, description, date, timeSlot, type, startTime, endTime ->
+                viewModel.addActivity(locationId, title, description, date, timeSlot, type, startTime, endTime)
                 viewModel.hideAddActivityDialog()
             },
             locations = uiState.locations,
@@ -322,11 +322,13 @@ private fun TripDetailScreenContent(
                         TripDetailTab.TIMELINE -> {
                             TimelineTab(
                                 daySchedules = uiState.daySchedules,
+                                bookings = uiState.bookings,
                                 gaps = uiState.gaps,
                                 locations = uiState.locations,
                                 expandedDays = uiState.expandedDays,
                                 onDayClicked = onDayClicked,
                                 onActivityClick = onActivityClick,
+                                onBookingClick = onBookingClick,
                                 onGapClick = onGapClick
                             )
                         }

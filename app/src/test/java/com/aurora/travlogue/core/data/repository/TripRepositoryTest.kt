@@ -3,6 +3,7 @@ package com.aurora.travlogue.core.data.repository
 import app.cash.turbine.test
 import com.aurora.travlogue.core.data.local.dao.ActivityDao
 import com.aurora.travlogue.core.data.local.dao.BookingDao
+import com.aurora.travlogue.core.data.local.dao.GapDao
 import com.aurora.travlogue.core.data.local.dao.LocationDao
 import com.aurora.travlogue.core.data.local.dao.TripDao
 import com.aurora.travlogue.core.data.local.entities.Activity
@@ -40,6 +41,7 @@ class TripRepositoryTest {
     private lateinit var locationDao: LocationDao
     private lateinit var activityDao: ActivityDao
     private lateinit var bookingDao: BookingDao
+    private lateinit var gapDao: GapDao
 
     // System under test
     private lateinit var repository: TripRepository
@@ -100,8 +102,9 @@ class TripRepositoryTest {
         locationDao = mockk(relaxed = true)
         activityDao = mockk(relaxed = true)
         bookingDao = mockk(relaxed = true)
+        gapDao = mockk(relaxed = true)
 
-        repository = TripRepository(tripDao, locationDao, activityDao, bookingDao)
+        repository = TripRepository(tripDao, locationDao, activityDao, bookingDao, gapDao)
     }
 
     // ==================== Trip Queries ====================

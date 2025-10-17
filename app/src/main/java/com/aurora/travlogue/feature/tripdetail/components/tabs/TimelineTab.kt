@@ -8,36 +8,50 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.aurora.travlogue.core.common.PreviewData
+import com.aurora.travlogue.core.data.local.entities.Booking
+import com.aurora.travlogue.core.data.local.entities.BookingType
 import com.aurora.travlogue.core.data.local.entities.Gap
 import com.aurora.travlogue.core.data.local.entities.Location
+import com.aurora.travlogue.feature.tripdetail.components.timeline.BookingTimelineCard
+import com.aurora.travlogue.feature.tripdetail.components.timeline.CityArrivalCard
+import com.aurora.travlogue.feature.tripdetail.components.timeline.CityDepartureCard
 import com.aurora.travlogue.feature.tripdetail.components.timeline.DayCard
 import com.aurora.travlogue.feature.tripdetail.domain.models.DaySchedule
 import com.aurora.travlogue.feature.tripdetail.presentation.components.CompactGapCard
-import com.aurora.travlogue.core.design.AppTheme
-import java.time.LocalDate
+import java.time.ZonedDateTime
+import java.time.format.DateTimeFormatter
 
 /**
- * Timeline tab showing day-by-day schedule with gap detection
+ * Enhanced timeline tab showing chronological view with:
+ * - City arrivals/departures
+ * - Day schedules
+ * - Bookings
+ * - Gaps
  */
 @Composable
 fun TimelineTab(
     daySchedules: List<DaySchedule>,
+    bookings: List<Booking>,
     gaps: List<Gap>,
     locations: List<Location>,
     expandedDays: Set<String>,
     onDayClicked: (String) -> Unit,
     onActivityClick: (com.aurora.travlogue.core.data.local.entities.Activity) -> Unit,
+    onBookingClick: (Booking) -> Unit,
     onGapClick: (Gap) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    if (daySchedules.isEmpty()) {
+    if (daySchedules.isEmpty() && bookings.isEmpty()) {
         EmptyTimelineState(modifier = modifier)
     } else {
-        // Build a single list of items (days + gaps) for stable rendering
-        val timelineItems = buildTimelineItems(daySchedules, gaps)
+        // Build chronological timeline items
+        val timelineItems = buildEnhancedTimelineItems(
+            daySchedules,
+            bookings,
+            gaps,
+            locations
+        )
 
         // Create location map for efficient lookups
         val locationMap = locations.associateBy { it.id }
@@ -49,15 +63,18 @@ fun TimelineTab(
         ) {
             items(
                 items = timelineItems,
-                key = { item ->
-                    when (item) {
-                        is TimelineItem.Day -> "day-${item.daySchedule.date}"
-                        is TimelineItem.GapItem -> "gap-${item.gap.id}"
-                    }
-                }
+                key = { item -> item.getKey() }
             ) { item ->
                 when (item) {
-                    is TimelineItem.Day -> {
+                    is TimelineItem.CityArrival -> {
+                        CityArrivalCard(
+                            location = item.location,
+                            arrivalDateTime = item.arrivalDateTime,
+                            arrivalBooking = item.arrivalBooking
+                        )
+                    }
+
+                    is TimelineItem.DaySchedule -> {
                         DayCard(
                             daySchedule = item.daySchedule,
                             isExpanded = item.daySchedule.date in expandedDays,
@@ -65,6 +82,22 @@ fun TimelineTab(
                             onActivityClick = onActivityClick
                         )
                     }
+
+                    is TimelineItem.CityDeparture -> {
+                        CityDepartureCard(
+                            location = item.location,
+                            departureDateTime = item.departureDateTime,
+                            departureBooking = item.departureBooking
+                        )
+                    }
+
+                    is TimelineItem.BookingItem -> {
+                        BookingTimelineCard(
+                            booking = item.booking,
+                            onClick = { onBookingClick(item.booking) }
+                        )
+                    }
+
                     is TimelineItem.GapItem -> {
                         CompactGapCard(
                             gap = item.gap,
@@ -80,48 +113,162 @@ fun TimelineTab(
 }
 
 /**
- * Sealed class representing items in the timeline
+ * Sealed class representing items in the enhanced timeline
  */
 private sealed class TimelineItem {
-    data class Day(val daySchedule: DaySchedule) : TimelineItem()
-    data class GapItem(val gap: Gap) : TimelineItem()
+    data class CityArrival(
+        val location: Location,
+        val arrivalDateTime: String,
+        val arrivalBooking: Booking
+    ) : TimelineItem()
+
+    data class DaySchedule(
+        val daySchedule: com.aurora.travlogue.feature.tripdetail.domain.models.DaySchedule
+    ) : TimelineItem()
+
+    data class CityDeparture(
+        val location: Location,
+        val departureDateTime: String,
+        val departureBooking: Booking
+    ) : TimelineItem()
+
+    data class BookingItem(
+        val booking: Booking
+    ) : TimelineItem()
+
+    data class GapItem(
+        val gap: Gap
+    ) : TimelineItem()
+
+    /**
+     * Get sortable timestamp for ordering
+     */
+    fun getSortableTimestamp(): String {
+        return when (this) {
+            is CityArrival -> arrivalDateTime
+            is DaySchedule -> "${daySchedule.date}T06:00:00" // Morning of the day
+            is CityDeparture -> departureDateTime
+            is BookingItem -> booking.startDateTime
+            is GapItem -> gap.fromDate ?: "9999-12-31"
+        }
+    }
+
+    /**
+     * Get unique key for LazyColumn
+     */
+    fun getKey(): String {
+        return when (this) {
+            is CityArrival -> "arrival-${location.id}-${arrivalBooking.id}"
+            is DaySchedule -> "day-${daySchedule.date}"
+            is CityDeparture -> "departure-${location.id}-${departureBooking.id}"
+            is BookingItem -> "booking-${booking.id}"
+            is GapItem -> "gap-${gap.id}"
+        }
+    }
 }
 
 /**
- * Build a combined list of days and gaps in chronological order.
+ * Build enhanced timeline combining days, bookings, city transitions, and gaps
  *
- * Strategy: Show each gap only ONCE - right before the destination day
- * (i.e., after the last day of fromLocation, before first day of toLocation)
+ * Strategy:
+ * 1. Add city arrivals (from first booking arriving at each location)
+ * 2. Add day schedules
+ * 3. Add individual bookings (hotels shown inline, transit shown as city transitions)
+ * 4. Add city departures (from last booking leaving each location)
+ * 5. Add gaps
+ * 6. Sort everything chronologically
  */
-private fun buildTimelineItems(
+private fun buildEnhancedTimelineItems(
     daySchedules: List<DaySchedule>,
-    gaps: List<Gap>
+    bookings: List<Booking>,
+    gaps: List<Gap>,
+    locations: List<Location>
 ): List<TimelineItem> {
     val items = mutableListOf<TimelineItem>()
-    val shownGaps = mutableSetOf<String>()
+    val locationMap = locations.associateBy { it.id }
 
-    daySchedules.forEachIndexed { index, daySchedule ->
-        // Add the day
-        items.add(TimelineItem.Day(daySchedule))
+    // Track which bookings we've used for city arrivals/departures
+    val usedForTransitions = mutableSetOf<String>()
 
-        // Check if we should show any gaps AFTER this day (before next day)
-        if (index < daySchedules.size - 1) {
-            val nextDay = daySchedules[index + 1]
+    // Group bookings by location
+    val bookingsByLocation = bookings.groupBy { booking ->
+        // Try to match booking to location by name similarity
+        val toLocation = booking.toLocation
+        locations.find { location ->
+            toLocation?.contains(location.name, ignoreCase = true) == true
+        }?.id
+    }
 
-            // Find gaps where:
-            // - toLocationId matches the next day's location
-            // - We haven't shown this gap yet
-            gaps.forEach { gap ->
-                if (gap.id !in shownGaps &&
-                    gap.toLocationId == nextDay.location?.id) {
-                    items.add(TimelineItem.GapItem(gap))
-                    shownGaps.add(gap.id)
-                }
+    // Add day schedules
+    daySchedules.forEach { daySchedule ->
+        items.add(TimelineItem.DaySchedule(daySchedule))
+
+        // Find arrival booking for this location (first booking arriving here)
+        daySchedule.location?.let { location ->
+            val arrivalBookings = bookings.filter { booking ->
+                booking.type in listOf(BookingType.FLIGHT, BookingType.TRAIN, BookingType.BUS) &&
+                        booking.toLocation?.contains(location.name, ignoreCase = true) == true &&
+                        booking.id !in usedForTransitions
+            }
+
+            // Use the earliest arrival
+            arrivalBookings.minByOrNull { it.startDateTime }?.let { arrivalBooking ->
+                items.add(
+                    TimelineItem.CityArrival(
+                        location = location,
+                        arrivalDateTime = arrivalBooking.endDateTime ?: arrivalBooking.startDateTime,
+                        arrivalBooking = arrivalBooking
+                    )
+                )
+                usedForTransitions.add(arrivalBooking.id)
+            }
+
+            // Find departure booking for this location (last booking leaving)
+            val departureBookings = bookings.filter { booking ->
+                booking.type in listOf(BookingType.FLIGHT, BookingType.TRAIN, BookingType.BUS) &&
+                        booking.fromLocation?.contains(location.name, ignoreCase = true) == true &&
+                        booking.id !in usedForTransitions
+            }
+
+            // Use the latest departure
+            departureBookings.maxByOrNull { it.startDateTime }?.let { departureBooking ->
+                items.add(
+                    TimelineItem.CityDeparture(
+                        location = location,
+                        departureDateTime = departureBooking.startDateTime,
+                        departureBooking = departureBooking
+                    )
+                )
+                usedForTransitions.add(departureBooking.id)
             }
         }
     }
 
-    return items
+    // Add remaining bookings (hotels, tickets, etc.)
+    bookings.forEach { booking ->
+        if (booking.id !in usedForTransitions) {
+            // Hotels and other bookings show as separate items
+            if (booking.type in listOf(BookingType.HOTEL, BookingType.TICKET, BookingType.OTHER)) {
+                items.add(TimelineItem.BookingItem(booking))
+            }
+        }
+    }
+
+    // Add gaps
+    gaps.forEach { gap ->
+        items.add(TimelineItem.GapItem(gap))
+    }
+
+    // Sort chronologically
+    return items.sortedBy { item ->
+        try {
+            val timestamp = item.getSortableTimestamp()
+            ZonedDateTime.parse(timestamp, DateTimeFormatter.ISO_DATE_TIME)
+        } catch (e: Exception) {
+            // Fallback for items without valid timestamps
+            ZonedDateTime.now().plusYears(100)
+        }
+    }
 }
 
 @Composable
@@ -147,39 +294,5 @@ private fun EmptyTimelineState(modifier: Modifier = Modifier) {
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
         }
-    }
-}
-
-// ==================== Previews ====================
-
-@Preview(showBackground = true)
-@Composable
-private fun TimelineTabPreview_WithGaps() {
-    AppTheme {
-        TimelineTab(
-            daySchedules = PreviewData.sampleDaySchedules,
-            gaps = PreviewData.sampleGaps,
-            locations = PreviewData.sampleLocations,
-            expandedDays = setOf("2025-07-01"),
-            onDayClicked = {},
-            onActivityClick = {},
-            onGapClick = {}
-        )
-    }
-}
-
-@Preview(showBackground = true)
-@Composable
-private fun TimelineTabPreview_Empty() {
-    AppTheme {
-        TimelineTab(
-            daySchedules = emptyList(),
-            gaps = emptyList(),
-            locations = emptyList(),
-            expandedDays = emptySet(),
-            onDayClicked = {},
-            onActivityClick = {},
-            onGapClick = {}
-        )
     }
 }

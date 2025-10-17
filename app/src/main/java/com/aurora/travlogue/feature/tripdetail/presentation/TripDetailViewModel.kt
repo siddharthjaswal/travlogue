@@ -201,7 +201,9 @@ class TripDetailViewModel @Inject constructor(
         description: String?,
         date: String?,
         timeSlot: TimeSlot?,
-        type: ActivityType
+        type: ActivityType,
+        startTime: String? = null,
+        endTime: String? = null
     ) {
         viewModelScope.launch {
             try {
@@ -211,7 +213,9 @@ class TripDetailViewModel @Inject constructor(
                     description = description,
                     date = date,
                     timeSlot = timeSlot,
-                    type = type
+                    type = type,
+                    startTime = startTime,
+                    endTime = endTime
                 )
                 tripRepository.insertActivity(activity)
                 _uiEvents.emit(TripDetailUiEvent.ShowSnackbar("Activity added successfully"))

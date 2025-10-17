@@ -15,6 +15,7 @@ import com.aurora.travlogue.core.data.local.entities.ActivityType
 import com.aurora.travlogue.core.data.local.entities.Location
 import com.aurora.travlogue.core.data.local.entities.TimeSlot
 import java.time.LocalDate
+import java.time.LocalTime
 import java.time.format.DateTimeFormatter
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -37,6 +38,21 @@ fun EditActivityDialog(
     var showTypeDropdown by remember { mutableStateOf(false) }
     var showDatePicker by remember { mutableStateOf(false) }
     var showDeleteConfirmation by remember { mutableStateOf(false) }
+
+    // Optional specific time fields
+    var useSpecificTime by remember { mutableStateOf(activity.startTime != null || activity.endTime != null) }
+    var startTime by remember {
+        mutableStateOf<LocalTime?>(
+            activity.startTime?.let { LocalTime.parse(it) }
+        )
+    }
+    var endTime by remember {
+        mutableStateOf<LocalTime?>(
+            activity.endTime?.let { LocalTime.parse(it) }
+        )
+    }
+    var showStartTimePicker by remember { mutableStateOf(false) }
+    var showEndTimePicker by remember { mutableStateOf(false) }
 
     // Validation
     val isTitleValid = title.isNotBlank()
@@ -79,7 +95,9 @@ fun EditActivityDialog(
                                 description = description.takeIf { it.isNotBlank() },
                                 date = selectedDate.takeIf { it.isNotBlank() },
                                 timeSlot = selectedTimeSlot,
-                                type = selectedType
+                                type = selectedType,
+                                startTime = startTime?.format(DateTimeFormatter.ISO_LOCAL_TIME),
+                                endTime = endTime?.format(DateTimeFormatter.ISO_LOCAL_TIME)
                             )
                         )
                     }
@@ -193,6 +211,56 @@ fun EditActivityDialog(
                 }
             }
 
+            // Optional Specific Time Toggle
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = androidx.compose.ui.Alignment.CenterVertically
+            ) {
+                Text(
+                    text = "Add Specific Time (Optional)",
+                    style = MaterialTheme.typography.bodyMedium
+                )
+                Switch(
+                    checked = useSpecificTime,
+                    onCheckedChange = { checked ->
+                        useSpecificTime = checked
+                        if (!checked) {
+                            startTime = null
+                            endTime = null
+                        }
+                    }
+                )
+            }
+
+            // Specific Time Pickers
+            if (useSpecificTime) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    // Start Time
+                    OutlinedButton(
+                        onClick = { showStartTimePicker = true },
+                        modifier = Modifier.weight(1f)
+                    ) {
+                        Text(
+                            text = startTime?.format(DateTimeFormatter.ofPattern("hh:mm a")) ?: "Start Time"
+                        )
+                    }
+
+                    // End Time
+                    OutlinedButton(
+                        onClick = { showEndTimePicker = true },
+                        modifier = Modifier.weight(1f)
+                    ) {
+                        Text(
+                            text = endTime?.format(DateTimeFormatter.ofPattern("hh:mm a")) ?: "End Time"
+                        )
+                    }
+                }
+            }
+
             // Activity Type Dropdown
             ExposedDropdownMenuBox(
                 expanded = showTypeDropdown,
@@ -272,6 +340,78 @@ fun EditActivityDialog(
         ) {
             DatePicker(state = datePickerState)
         }
+    }
+
+    // Start Time Picker Dialog
+    if (showStartTimePicker) {
+        val timePickerState = rememberTimePickerState(
+            initialHour = startTime?.hour ?: 9,
+            initialMinute = startTime?.minute ?: 0,
+            is24Hour = false
+        )
+
+        AlertDialog(
+            onDismissRequest = { showStartTimePicker = false },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        startTime = LocalTime.of(timePickerState.hour, timePickerState.minute)
+                        showStartTimePicker = false
+                    }
+                ) {
+                    Text("OK")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showStartTimePicker = false }) {
+                    Text("Cancel")
+                }
+            },
+            text = {
+                Column(
+                    horizontalAlignment = androidx.compose.ui.Alignment.CenterHorizontally,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    TimePicker(state = timePickerState)
+                }
+            }
+        )
+    }
+
+    // End Time Picker Dialog
+    if (showEndTimePicker) {
+        val timePickerState = rememberTimePickerState(
+            initialHour = endTime?.hour ?: (startTime?.plusHours(1)?.hour ?: 10),
+            initialMinute = endTime?.minute ?: (startTime?.minute ?: 0),
+            is24Hour = false
+        )
+
+        AlertDialog(
+            onDismissRequest = { showEndTimePicker = false },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        endTime = LocalTime.of(timePickerState.hour, timePickerState.minute)
+                        showEndTimePicker = false
+                    }
+                ) {
+                    Text("OK")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showEndTimePicker = false }) {
+                    Text("Cancel")
+                }
+            },
+            text = {
+                Column(
+                    horizontalAlignment = androidx.compose.ui.Alignment.CenterHorizontally,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    TimePicker(state = timePickerState)
+                }
+            }
+        )
     }
 
     // Delete Confirmation Dialog
