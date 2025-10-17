@@ -23,6 +23,7 @@ import com.aurora.travlogue.feature.tripdetail.components.tabs.BookingsTab
 import com.aurora.travlogue.feature.tripdetail.components.tabs.LocationsTab
 import com.aurora.travlogue.feature.tripdetail.components.tabs.OverviewTab
 import com.aurora.travlogue.feature.tripdetail.components.tabs.TimelineTab
+import com.aurora.travlogue.feature.tripdetail.presentation.components.GapDetailSheet
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -64,7 +65,8 @@ fun TripDetailScreen(
         onAddBooking = viewModel::showAddBookingDialog,
         onActivityClick = viewModel::showEditActivityDialog,
         onLocationClick = viewModel::showEditLocationDialog,
-        onBookingClick = viewModel::showEditBookingDialog
+        onBookingClick = viewModel::showEditBookingDialog,
+        onGapClick = viewModel::showGapDetailDialog
     )
 
     // Dialogs
@@ -158,6 +160,37 @@ fun TripDetailScreen(
             )
         }
     }
+
+    // Gap Detail Sheet
+    uiState.selectedGap?.let { gap ->
+        if (uiState.showGapDetailDialog) {
+            val sheetState = rememberModalBottomSheetState()
+            val fromLocation = uiState.locations.find { it.id == gap.fromLocationId }
+            val toLocation = uiState.locations.find { it.id == gap.toLocationId }
+
+            GapDetailSheet(
+                gap = gap,
+                fromLocation = fromLocation,
+                toLocation = toLocation,
+                sheetState = sheetState,
+                onDismiss = viewModel::hideGapDetailDialog,
+                onAddTransit = {
+                    viewModel.hideGapDetailDialog()
+                    viewModel.showAddBookingDialog()
+                },
+                onAddActivity = {
+                    viewModel.hideGapDetailDialog()
+                    viewModel.showAddActivityDialog(gap.fromDate, gap.fromLocationId)
+                },
+                onMarkResolved = {
+                    viewModel.markGapAsResolved(gap.id)
+                },
+                onDismissGap = {
+                    viewModel.deleteGap(gap)
+                }
+            )
+        }
+    }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -175,7 +208,8 @@ private fun TripDetailScreenContent(
     onAddBooking: () -> Unit,
     onActivityClick: (com.aurora.travlogue.core.data.local.entities.Activity) -> Unit,
     onLocationClick: (com.aurora.travlogue.core.data.local.entities.Location) -> Unit,
-    onBookingClick: (com.aurora.travlogue.core.data.local.entities.Booking) -> Unit
+    onBookingClick: (com.aurora.travlogue.core.data.local.entities.Booking) -> Unit,
+    onGapClick: (com.aurora.travlogue.core.data.local.entities.Gap) -> Unit
 ) {
     Scaffold(
         topBar = {
@@ -288,9 +322,12 @@ private fun TripDetailScreenContent(
                         TripDetailTab.TIMELINE -> {
                             TimelineTab(
                                 daySchedules = uiState.daySchedules,
+                                gaps = uiState.gaps,
+                                locations = uiState.locations,
                                 expandedDays = uiState.expandedDays,
                                 onDayClicked = onDayClicked,
-                                onActivityClick = onActivityClick
+                                onActivityClick = onActivityClick,
+                                onGapClick = onGapClick
                             )
                         }
                         TripDetailTab.LOCATIONS -> {
@@ -310,7 +347,10 @@ private fun TripDetailScreenContent(
                                 trip = uiState.trip,
                                 locationCount = uiState.locationCount,
                                 activityCount = uiState.activityCount,
-                                bookingCount = uiState.bookingCount
+                                bookingCount = uiState.bookingCount,
+                                gaps = uiState.gaps,
+                                locations = uiState.locations,
+                                onGapClick = onGapClick
                             )
                         }
                     }
