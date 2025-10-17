@@ -324,14 +324,22 @@ enum class TransitMode { FLIGHT, TRAIN, BUS, CAR, FERRY }
 - ✅ **COMPLETED:** Edit and delete UI for activities, locations, and bookings
 - ✅ **COMPLETED:** Delete confirmation dialogs with cascade warnings
 - ✅ **COMPLETED:** Tap-to-edit functionality across all tabs
-- ⏳ **TODO:** Basic gap detection (location jumps) - Phase 2
-- ⏳ **TODO:** Offline storage optimization - Phase 2
 
-### Phase 2: Intelligence (Month 3)
-- ⏳ API integrations (weather, attractions)
-- ⏳ Transit option suggestions
-- ⏳ Flight price integration
-- ⏳ AI-powered recommendations
+### Phase 2: Intelligence (Month 3) - **In Progress** 🚧
+- ✅ **COMPLETED (v0.6.0):** Gap Detection Foundation - **Travlogue's Key Differentiator!** ⭐
+  - ✅ GapDetectionService with smart algorithms
+  - ✅ MISSING_TRANSIT detection (location jumps without transit bookings)
+  - ✅ UNPLANNED_DAY detection (days with no activities/locations)
+  - ✅ Automatic gap detection on trip data changes
+  - ✅ Beautiful gap UI components (GapCard, GapDetailSheet)
+  - ✅ Timeline tab integration with inline gap display
+  - ✅ Overview tab integration with warning section
+  - ✅ One-click actions to resolve gaps
+  - ✅ Mark as resolved / dismiss functionality
+- ⏳ **TODO (v0.7.0):** Transit Suggestions via Rome2Rio API
+- ⏳ **TODO (v0.8.0):** Weather & Attractions integration
+- ⏳ **TODO (v0.9.0):** Flight price integration
+- ⏳ **TODO:** AI-powered recommendations
 
 ### Phase 3: Polish (Month 4)
 - ⏳ Booking management with image uploads
