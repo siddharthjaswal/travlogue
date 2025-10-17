@@ -9,11 +9,246 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ## [Unreleased]
 
 ### Planned
-- Trip detail screen with full trip information
-- Itinerary builder with location and activity management
 - Gap detection feature (key differentiator)
 - Weather API integration
 - Attractions/Places API integration
+- Edit functionality for activities, locations, and bookings
+- Drag-to-reorder locations
+- Rich datetime picker for bookings
+
+---
+
+## [0.4.0] - 2025-01-17
+
+### Added - Activity & Booking Management (CRUD Operations)
+
+- **Add Activity Dialog** - Full-featured activity creation
+  - Location selection dropdown (from trip locations)
+  - Activity title and description fields
+  - Date picker with pre-selection support
+  - Time slot selector (Morning, Afternoon, Evening, Full Day)
+  - Activity type selector with icons (🎨 Attraction, 🍴 Food, 🎫 Booking, 🚗 Transit, 📝 Other)
+  - Form validation
+  - Material 3 full-screen dialog design
+
+- **Add Location Dialog** - Destination management
+  - Location name and country fields
+  - Optional date picker (linked to trip dates)
+  - Auto-calculated location order (#1, #2, #3...)
+  - Trip date range display for reference
+  - Form validation
+
+- **Add Booking Dialog** - Reservation tracking
+  - Booking type selector (✈️ Flight, 🏨 Hotel, 🚂 Train, 🚌 Bus, 🎫 Ticket, 📝 Other)
+  - Provider/Company field
+  - Confirmation number (optional)
+  - From/To locations (for transit bookings)
+  - Price and currency fields
+  - Notes field for additional details
+  - Timezone-aware datetime (simplified - full picker coming soon)
+
+- **Floating Action Button (FAB)** - Context-aware add button
+  - Changes based on selected tab (Timeline/Locations/Bookings)
+  - Timeline tab: Opens Add Activity dialog
+  - Locations tab: Opens Add Location dialog
+  - Bookings tab: Opens Add Booking dialog
+  - Hidden on Overview tab
+  - Only visible when trip data is loaded
+
+- **ViewModel CRUD Operations**
+  - Activity: `addActivity()`, `updateActivity()`, `deleteActivity()`
+  - Location: `addLocation()`, `updateLocation()`, `deleteLocation()`
+  - Booking: `addBooking()`, `updateBooking()`, `deleteBooking()`
+  - Dialog state management methods
+  - Success/error snackbar notifications
+  - Automatic UI updates via Flow
+
+- **UI State Enhancements**
+  - Added `showAddActivityDialog`, `showAddLocationDialog`, `showAddBookingDialog` flags
+  - Added `preselectedDate` and `preselectedLocationId` for context-aware dialogs
+  - Dialog visibility management in ViewModel
+
+### Changed
+
+- **TripRepository** - Added `deleteActivityById()` helper method
+- **TripDetailUiState** - Extended with dialog visibility and preselection state
+- **TripDetailScreen** - Integrated all three add dialogs with proper state management
+
+### Features
+
+✅ **Complete CRUD Flow** - Create, Read, Update, Delete for all trip components
+✅ **Context-Aware Dialogs** - Pre-select date/location based on user context
+✅ **Form Validation** - Client-side validation with helpful error messages
+✅ **Reactive Updates** - Changes immediately reflect in UI via Flow
+✅ **User Feedback** - Snackbar notifications for all operations
+✅ **Material 3 Design** - Consistent design language across all dialogs
+
+### Technical Highlights
+
+- 3 new dialog components with comprehensive form handling
+- Full CRUD implementation in ViewModel with error handling
+- Type-safe parameter passing for all operations
+- Automatic location order calculation
+- Regex-based price input validation
+- Bottom action bar with system insets padding
+
+### Files Created (3 new dialog files)
+
+1. `feature/tripdetail/components/dialogs/AddActivityDialog.kt` (270 lines)
+2. `feature/tripdetail/components/dialogs/AddLocationDialog.kt` (248 lines)
+3. `feature/tripdetail/components/dialogs/AddBookingDialog.kt` (331 lines)
+
+### Files Updated (4 files)
+
+1. `TripDetailViewModel.kt` - Added CRUD methods and dialog management
+2. `TripDetailUiState.kt` - Added dialog state properties
+3. `TripDetailScreen.kt` - Integrated dialogs and FAB
+4. `TripRepository.kt` - Added deleteActivityById helper
+
+### User Experience Flow
+
+1. User navigates to Trip Detail screen
+2. Selects a tab (Timeline, Locations, or Bookings)
+3. Taps the FAB (+) button
+4. Appropriate dialog opens based on current tab
+5. Fills out form fields with validation
+6. Taps "Save" button
+7. Data is saved to database
+8. Dialog closes automatically
+9. Success snackbar appears
+10. UI updates immediately with new data
+
+### Next Steps
+
+- Add edit functionality (tap to edit existing items)
+- Add delete confirmation dialogs
+- Implement proper datetime picker for bookings
+- Add image attachment support for bookings
+- Implement drag-to-reorder for locations
+
+---
+
+## [0.3.0] - 2025-01-17
+
+### Added - Trip Detail Feature (MVP)
+- **TripDetailScreen** - Comprehensive trip detail view with tab navigation
+  - 4-tab interface: Timeline, Locations, Bookings, Overview
+  - Material 3 design with TopAppBar and smooth animations
+  - Type-safe navigation with tripId parameter
+  - Loading, error, and retry states
+
+- **Timeline Tab** - Day-by-day trip visualization
+  - Expandable day cards with smooth animations
+  - Smart day schedule generation (fixed & flexible dates)
+  - Activities grouped by time slot (Morning/Afternoon/Evening/Full Day)
+  - Activity type icons for visual recognition (🎨🍴🎫🚗📝)
+  - Location badges for each day
+  - Day notes display
+  - Empty state with helpful messages
+
+- **Locations Tab** - Trip destinations overview
+  - Ordered list with visual order badges (1, 2, 3...)
+  - Location name and country display
+  - Date associations
+  - Empty state guidance
+
+- **Bookings Tab** - Reservation management
+  - Chronological booking list
+  - Booking type icons (✈️🏨🚂🚌🎫📝)
+  - Full booking details (dates, times, locations)
+  - Confirmation numbers display
+  - Price and currency
+  - Notes display
+  - Empty state with call-to-action
+
+- **Overview Tab** - Trip statistics and notes
+  - Trip duration and metrics
+  - Location, activity, and booking counts
+  - Trip notes section (ready for enhancement)
+  - Coming soon features preview
+
+- **UI Components** (6 new components)
+  - `TripHeaderSection` - Trip overview with statistics chips
+  - `DayCard` - Expandable day container with activities
+  - `TimelineTab` - Timeline view component
+  - `LocationsTab` - Locations list component
+  - `BookingsTab` - Bookings list component
+  - `OverviewTab` - Overview and statistics
+
+- **Domain Models**
+  - `DaySchedule` - Day schedule with activities by time slot
+  - `TripDetailData` - Aggregated trip data model
+
+- **Presentation Layer**
+  - `TripDetailViewModel` - Comprehensive state management
+    - Smart day schedule generation algorithm
+    - Tab selection and day expansion logic
+    - Reactive data loading with Flow
+    - Error handling and retry functionality
+  - `TripDetailUiState` - Complete UI state with computed properties
+  - `TripDetailUiEvent` - Navigation and UI events
+
+### Changed - Repository Enhancements
+- **TripRepository** - Major expansion with comprehensive queries
+  - Added `getLocationsForTrip()` - Get all locations for a trip
+  - Added `getActivitiesForTrip()` - Get all activities with JOIN
+  - Added `getBookingsForTrip()` - Get all bookings
+  - Added CRUD operations for locations, activities, bookings
+  - Flow-based reactive queries for all methods
+
+- **ActivityDao** - Enhanced with trip-level queries
+  - Added `getActivitiesByTripId()` with JOIN query
+  - Efficient data loading with foreign key relationships
+
+### Features
+✅ **Multi-view Trip Details** - Timeline, locations, bookings, and overview
+✅ **Smart Day Generation** - Handles fixed and flexible date trips
+✅ **Activity Organization** - Grouped by time slots for clarity
+✅ **Expandable UI** - Smooth expand/collapse animations
+✅ **Empty States** - Helpful messages guide users
+✅ **Type-Safe Navigation** - Compile-time safe routing
+✅ **Reactive Updates** - Flow-based data synchronization
+✅ **Error Handling** - Loading, error, and retry states
+
+### Documentation
+- Created **TRIP_DETAIL_PRD.md** - Comprehensive 400+ line PRD
+  - Complete UI/UX specifications
+  - User stories and feature breakdown
+  - Implementation phases (MVP, Enhanced, Advanced)
+  - Future enhancements roadmap
+- Created **ARCHITECTURE.md** - Technical architecture guide
+  - Package structure and component hierarchy
+  - Data flow diagrams
+  - State management patterns
+  - Implementation phases and testing strategy
+- Created **PROGRESS.md** - Implementation tracker
+- Created **IMPLEMENTATION_COMPLETE.md** - Final summary
+
+### Technical Highlights
+- Smart day schedule generation algorithm
+- Activities grouped by time slot (Morning/Afternoon/Evening/Full Day)
+- Efficient JOIN queries for trip data aggregation
+- Set-based day expansion tracking
+- Computed properties for statistics
+- Domain models separate from entities
+- Clean separation: presentation → domain → data
+
+### Files Created (15 new files)
+- Documentation: 4 files (PRD, Architecture, Progress, Complete)
+- Domain Models: 2 files
+- Presentation: 3 files (Screen, ViewModel, UiState)
+- Components: 6 files (Header, 4 tabs, DayCard)
+
+### Files Updated (3 files)
+- `TripRepository.kt` - Added comprehensive query methods
+- `ActivityDao.kt` - Added JOIN query
+- `AppNavHost.kt` - Added TripDetail route
+
+### Next Steps
+- Wire navigation from HomeScreen (tap trip card → navigate to detail)
+- Add activity and booking creation/editing
+- Implement rich notes with markdown
+- Add drag-to-reorder for locations
 
 ---
 
@@ -179,8 +414,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 **Goal:** Basic trip planning functionality
 - ✅ Architecture and database setup
 - ✅ Home screen with trip management
-- 🚧 Trip detail screen (next)
-- ⏳ Itinerary builder
+- ✅ Trip detail screen with timeline view
+- ✅ Itinerary builder with add functionality (CRUD create operations)
+- 🚧 Edit/Delete UI for activities, locations, and bookings (next)
 - ⏳ Gap detection
 
 ### Phase 2: Intelligence
@@ -234,6 +470,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## Version History
 
+- **0.4.0** - Activity & Booking Management (Full CRUD Operations)
+- **0.3.0** - Trip Detail Feature (Timeline, Locations, Bookings, Overview)
+- **0.2.1** - Type-Safe Navigation Migration
 - **0.2.0** - Home Screen with full UI components
 - **0.1.0** - Foundation with database and architecture
 - **0.0.1** - Initial project setup
@@ -242,4 +481,4 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 **Maintained by:** Sid
 **Project Status:** Active Development
-**Next Release:** 0.3.0 (Trip Details)
+**Next Release:** 0.5.0 (Edit/Delete UI & Gap Detection)

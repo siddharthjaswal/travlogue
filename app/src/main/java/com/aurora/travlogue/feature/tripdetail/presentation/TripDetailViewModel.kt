@@ -3,7 +3,12 @@ package com.aurora.travlogue.feature.tripdetail.presentation
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.aurora.travlogue.core.data.local.entities.Activity
+import com.aurora.travlogue.core.data.local.entities.ActivityType
+import com.aurora.travlogue.core.data.local.entities.Booking
+import com.aurora.travlogue.core.data.local.entities.BookingType
 import com.aurora.travlogue.core.data.local.entities.DateType
+import com.aurora.travlogue.core.data.local.entities.Location
 import com.aurora.travlogue.core.data.local.entities.TimeSlot
 import com.aurora.travlogue.core.data.repository.TripRepository
 import com.aurora.travlogue.feature.tripdetail.domain.models.DaySchedule
@@ -71,6 +76,205 @@ class TripDetailViewModel @Inject constructor(
 
     fun retryLoading() {
         loadTripDetails()
+    }
+
+    // ==================== Dialog Management ====================
+
+    fun showAddActivityDialog(date: String? = null, locationId: String? = null) {
+        _uiState.update {
+            it.copy(
+                showAddActivityDialog = true,
+                preselectedDate = date,
+                preselectedLocationId = locationId
+            )
+        }
+    }
+
+    fun hideAddActivityDialog() {
+        _uiState.update {
+            it.copy(
+                showAddActivityDialog = false,
+                preselectedDate = null,
+                preselectedLocationId = null
+            )
+        }
+    }
+
+    fun showAddLocationDialog() {
+        _uiState.update { it.copy(showAddLocationDialog = true) }
+    }
+
+    fun hideAddLocationDialog() {
+        _uiState.update { it.copy(showAddLocationDialog = false) }
+    }
+
+    fun showAddBookingDialog() {
+        _uiState.update { it.copy(showAddBookingDialog = true) }
+    }
+
+    fun hideAddBookingDialog() {
+        _uiState.update { it.copy(showAddBookingDialog = false) }
+    }
+
+    // ==================== Activity CRUD ====================
+
+    fun addActivity(
+        locationId: String,
+        title: String,
+        description: String?,
+        date: String?,
+        timeSlot: TimeSlot?,
+        type: ActivityType
+    ) {
+        viewModelScope.launch {
+            try {
+                val activity = Activity(
+                    locationId = locationId,
+                    title = title,
+                    description = description,
+                    date = date,
+                    timeSlot = timeSlot,
+                    type = type
+                )
+                tripRepository.insertActivity(activity)
+                _uiEvents.emit(TripDetailUiEvent.ShowSnackbar("Activity added successfully"))
+            } catch (e: Exception) {
+                _uiEvents.emit(TripDetailUiEvent.ShowError(e.message ?: "Failed to add activity"))
+            }
+        }
+    }
+
+    fun updateActivity(activity: Activity) {
+        viewModelScope.launch {
+            try {
+                tripRepository.updateActivity(activity)
+                _uiEvents.emit(TripDetailUiEvent.ShowSnackbar("Activity updated successfully"))
+            } catch (e: Exception) {
+                _uiEvents.emit(TripDetailUiEvent.ShowError(e.message ?: "Failed to update activity"))
+            }
+        }
+    }
+
+    fun deleteActivity(activityId: String) {
+        viewModelScope.launch {
+            try {
+                tripRepository.deleteActivityById(activityId)
+                _uiEvents.emit(TripDetailUiEvent.ShowSnackbar("Activity deleted successfully"))
+            } catch (e: Exception) {
+                _uiEvents.emit(TripDetailUiEvent.ShowError(e.message ?: "Failed to delete activity"))
+            }
+        }
+    }
+
+    // ==================== Location CRUD ====================
+
+    fun addLocation(
+        name: String,
+        country: String,
+        date: String?,
+        order: Int
+    ) {
+        viewModelScope.launch {
+            try {
+                val location = Location(
+                    tripId = tripId,
+                    name = name,
+                    country = country,
+                    date = date,
+                    latitude = null,
+                    longitude = null,
+                    order = order
+                )
+                tripRepository.insertLocation(location)
+                _uiEvents.emit(TripDetailUiEvent.ShowSnackbar("Location added successfully"))
+            } catch (e: Exception) {
+                _uiEvents.emit(TripDetailUiEvent.ShowError(e.message ?: "Failed to add location"))
+            }
+        }
+    }
+
+    fun updateLocation(location: Location) {
+        viewModelScope.launch {
+            try {
+                tripRepository.updateLocation(location)
+                _uiEvents.emit(TripDetailUiEvent.ShowSnackbar("Location updated successfully"))
+            } catch (e: Exception) {
+                _uiEvents.emit(TripDetailUiEvent.ShowError(e.message ?: "Failed to update location"))
+            }
+        }
+    }
+
+    fun deleteLocation(location: Location) {
+        viewModelScope.launch {
+            try {
+                tripRepository.deleteLocation(location)
+                _uiEvents.emit(TripDetailUiEvent.ShowSnackbar("Location deleted successfully"))
+            } catch (e: Exception) {
+                _uiEvents.emit(TripDetailUiEvent.ShowError(e.message ?: "Failed to delete location"))
+            }
+        }
+    }
+
+    // ==================== Booking CRUD ====================
+
+    fun addBooking(
+        type: BookingType,
+        confirmationNumber: String?,
+        provider: String,
+        startDateTime: String,
+        endDateTime: String?,
+        timezone: String,
+        fromLocation: String?,
+        toLocation: String?,
+        price: Double?,
+        currency: String?,
+        notes: String?
+    ) {
+        viewModelScope.launch {
+            try {
+                val booking = Booking(
+                    tripId = tripId,
+                    type = type,
+                    confirmationNumber = confirmationNumber,
+                    provider = provider,
+                    startDateTime = startDateTime,
+                    endDateTime = endDateTime,
+                    timezone = timezone,
+                    fromLocation = fromLocation,
+                    toLocation = toLocation,
+                    price = price,
+                    currency = currency,
+                    notes = notes,
+                    imageUri = null
+                )
+                tripRepository.insertBooking(booking)
+                _uiEvents.emit(TripDetailUiEvent.ShowSnackbar("Booking added successfully"))
+            } catch (e: Exception) {
+                _uiEvents.emit(TripDetailUiEvent.ShowError(e.message ?: "Failed to add booking"))
+            }
+        }
+    }
+
+    fun updateBooking(booking: Booking) {
+        viewModelScope.launch {
+            try {
+                tripRepository.updateBooking(booking)
+                _uiEvents.emit(TripDetailUiEvent.ShowSnackbar("Booking updated successfully"))
+            } catch (e: Exception) {
+                _uiEvents.emit(TripDetailUiEvent.ShowError(e.message ?: "Failed to update booking"))
+            }
+        }
+    }
+
+    fun deleteBooking(booking: Booking) {
+        viewModelScope.launch {
+            try {
+                tripRepository.deleteBooking(booking)
+                _uiEvents.emit(TripDetailUiEvent.ShowSnackbar("Booking deleted successfully"))
+            } catch (e: Exception) {
+                _uiEvents.emit(TripDetailUiEvent.ShowError(e.message ?: "Failed to delete booking"))
+            }
+        }
     }
 
     // ==================== Private Methods ====================

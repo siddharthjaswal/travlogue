@@ -3,6 +3,7 @@ package com.aurora.travlogue.feature.tripdetail.presentation
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -11,6 +12,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.aurora.travlogue.feature.tripdetail.components.dialogs.AddActivityDialog
+import com.aurora.travlogue.feature.tripdetail.components.dialogs.AddBookingDialog
+import com.aurora.travlogue.feature.tripdetail.components.dialogs.AddLocationDialog
 import com.aurora.travlogue.feature.tripdetail.components.header.TripHeaderSection
 import com.aurora.travlogue.feature.tripdetail.components.tabs.BookingsTab
 import com.aurora.travlogue.feature.tripdetail.components.tabs.LocationsTab
@@ -51,8 +55,48 @@ fun TripDetailScreen(
         onTabSelected = viewModel::onTabSelected,
         onDayClicked = viewModel::onDayClicked,
         onEditTrip = viewModel::onEditTrip,
-        onRetry = viewModel::retryLoading
+        onRetry = viewModel::retryLoading,
+        onAddActivity = viewModel::showAddActivityDialog,
+        onAddLocation = viewModel::showAddLocationDialog,
+        onAddBooking = viewModel::showAddBookingDialog
     )
+
+    // Dialogs
+    if (uiState.showAddActivityDialog) {
+        AddActivityDialog(
+            onDismiss = viewModel::hideAddActivityDialog,
+            onSave = { locationId, title, description, date, timeSlot, type ->
+                viewModel.addActivity(locationId, title, description, date, timeSlot, type)
+                viewModel.hideAddActivityDialog()
+            },
+            locations = uiState.locations,
+            preselectedLocationId = uiState.preselectedLocationId,
+            preselectedDate = uiState.preselectedDate
+        )
+    }
+
+    if (uiState.showAddLocationDialog) {
+        AddLocationDialog(
+            onDismiss = viewModel::hideAddLocationDialog,
+            onSave = { name, country, date, order ->
+                viewModel.addLocation(name, country, date, order)
+                viewModel.hideAddLocationDialog()
+            },
+            currentLocationCount = uiState.locationCount,
+            tripStartDate = uiState.trip?.startDate,
+            tripEndDate = uiState.trip?.endDate
+        )
+    }
+
+    if (uiState.showAddBookingDialog) {
+        AddBookingDialog(
+            onDismiss = viewModel::hideAddBookingDialog,
+            onSave = { type, confirmationNumber, provider, startDateTime, endDateTime, timezone, fromLocation, toLocation, price, currency, notes ->
+                viewModel.addBooking(type, confirmationNumber, provider, startDateTime, endDateTime, timezone, fromLocation, toLocation, price, currency, notes)
+                viewModel.hideAddBookingDialog()
+            }
+        )
+    }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -64,7 +108,10 @@ private fun TripDetailScreenContent(
     onTabSelected: (TripDetailTab) -> Unit,
     onDayClicked: (String) -> Unit,
     onEditTrip: () -> Unit,
-    onRetry: () -> Unit
+    onRetry: () -> Unit,
+    onAddActivity: (String?, String?) -> Unit,
+    onAddLocation: () -> Unit,
+    onAddBooking: () -> Unit
 ) {
     Scaffold(
         topBar = {
@@ -97,6 +144,30 @@ private fun TripDetailScreenContent(
                     titleContentColor = MaterialTheme.colorScheme.onPrimaryContainer
                 )
             )
+        },
+        floatingActionButton = {
+            if (uiState.trip != null && !uiState.isLoading) {
+                FloatingActionButton(
+                    onClick = {
+                        when (uiState.selectedTab) {
+                            TripDetailTab.TIMELINE -> onAddActivity(null, null)
+                            TripDetailTab.LOCATIONS -> onAddLocation()
+                            TripDetailTab.BOOKINGS -> onAddBooking()
+                            TripDetailTab.OVERVIEW -> {}  // No FAB for overview
+                        }
+                    }
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Add,
+                        contentDescription = when (uiState.selectedTab) {
+                            TripDetailTab.TIMELINE -> "Add Activity"
+                            TripDetailTab.LOCATIONS -> "Add Location"
+                            TripDetailTab.BOOKINGS -> "Add Booking"
+                            TripDetailTab.OVERVIEW -> null
+                        }
+                    )
+                }
+            }
         },
         snackbarHost = { SnackbarHost(snackbarHostState) }
     ) { paddingValues ->

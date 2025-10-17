@@ -16,7 +16,12 @@ data class TripDetailUiState(
     val selectedTab: TripDetailTab = TripDetailTab.TIMELINE,
     val expandedDays: Set<String> = emptySet(),
     val isLoading: Boolean = false,
-    val error: String? = null
+    val error: String? = null,
+    val showAddActivityDialog: Boolean = false,
+    val showAddLocationDialog: Boolean = false,
+    val showAddBookingDialog: Boolean = false,
+    val preselectedDate: String? = null,
+    val preselectedLocationId: String? = null
 ) {
     val locationCount: Int get() = locations.size
     val activityCount: Int get() = daySchedules.sumOf { it.activitiesByTimeSlot.values.flatten().size }

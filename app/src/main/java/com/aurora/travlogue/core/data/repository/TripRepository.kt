@@ -105,6 +105,10 @@ class TripRepository @Inject constructor(
         activityDao.deleteActivity(activity)
     }
 
+    suspend fun deleteActivityById(activityId: String) {
+        activityDao.deleteActivityById(activityId)
+    }
+
     // Booking mutations
     suspend fun insertBooking(booking: Booking) {
         bookingDao.insertBooking(booking)
