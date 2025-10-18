@@ -56,7 +56,7 @@ fun TimelineItem(
             Spacer(modifier = Modifier.fillMaxWidth(0.1f))
         }
 
-        // Content (right side) - 80% of width
+        // Content (right side) - 90% of width
         Box(
             modifier = Modifier
                 .fillMaxWidth()
@@ -157,48 +157,6 @@ fun extractDate(isoDateTime: String?): String? {
     }
 }
 
-/**
- * Larger timeline marker for major events (city arrivals/departures)
- * Shows date with more emphasis
- */
-@Composable
-fun TimelineMajorItem(
-    dateTime: String?,
-    showDate: Boolean = true,
-    dotColor: Color = MaterialTheme.colorScheme.primary,
-    content: @Composable () -> Unit
-) {
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.spacedBy(12.dp)
-    ) {
-        // Date badge for major events (slightly larger) - 10% of width
-        if (showDate && dateTime != null) {
-            Box(
-                modifier = Modifier.fillMaxWidth(0.1f),
-                contentAlignment = Alignment.Center
-            ) {
-                CircularDateBadge(
-                    dateTime = dateTime,
-                    color = dotColor
-                )
-            }
-        } else {
-            // Spacer to maintain alignment
-            Spacer(modifier = Modifier.fillMaxWidth(0.1f))
-        }
-
-        // Content - 80% of width
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(bottom = 12.dp)
-        ) {
-            content()
-        }
-    }
-}
-
 // ==================== Previews ====================
 
 @Preview(name = "Timeline Item with Date Badge", showBackground = true)
@@ -235,11 +193,11 @@ private fun TimelineItemNoBadgePreview() {
     }
 }
 
-@Preview(name = "Timeline Major Item", showBackground = true)
+@Preview(name = "WelcomeCityCard", showBackground = true)
 @Composable
-private fun TimelineMajorItemPreview() {
+private fun WelcomeCityCardPreview() {
     MaterialTheme {
-        TimelineMajorItem(
+        TimelineItem(
             dateTime = "2025-07-01T14:30:00+09:00",
             showDate = true,
             dotColor = MaterialTheme.colorScheme.primary

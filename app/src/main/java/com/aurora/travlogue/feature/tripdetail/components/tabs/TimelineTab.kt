@@ -73,7 +73,7 @@ fun TimelineTab(
             ) { index, (item, showDate) ->
                 when (item) {
                     is TimelineItem.TransitArrival -> {
-                        TimelineMajorItem(
+                        TimelineItem(
                             dateTime = item.getDateTime(),
                             showDate = showDate,
                             dotColor = MaterialTheme.colorScheme.primary
@@ -87,7 +87,7 @@ fun TimelineTab(
                     }
 
                     is TimelineItem.CityWelcome -> {
-                        TimelineMajorItem(
+                        TimelineItem(
                             dateTime = item.getDateTime(),
                             showDate = showDate,
                             dotColor = MaterialTheme.colorScheme.primary
@@ -149,7 +149,7 @@ fun TimelineTab(
                     }
 
                     is TimelineItem.CityGoodbye -> {
-                        TimelineMajorItem(
+                        TimelineItem(
                             dateTime = item.getDateTime(),
                             showDate = showDate,
                             dotColor = MaterialTheme.colorScheme.secondary
@@ -162,7 +162,7 @@ fun TimelineTab(
                     }
 
                     is TimelineItem.TransitDeparture -> {
-                        TimelineMajorItem(
+                        TimelineItem(
                             dateTime = item.getDateTime(),
                             showDate = showDate,
                             dotColor = MaterialTheme.colorScheme.secondary
@@ -255,6 +255,7 @@ private sealed class TimelineItem {
                 }
                 "${date}T${time}:4"
             }
+
             is NothingPlanned -> "${date}T12:00:00:5"
             is HotelCheckOut -> "${booking.endDateTime}:6"
             is CityGoodbye -> "${departureDateTime}:7"
@@ -398,7 +399,8 @@ private fun buildCompleteTimeline(
         try {
             val timestamp = item.getSortableTimestamp()
             val dateTimePart = timestamp.substringBeforeLast(":")
-            ZonedDateTime.parse(dateTimePart, DateTimeFormatter.ISO_DATE_TIME).toInstant().toString() +
+            ZonedDateTime.parse(dateTimePart, DateTimeFormatter.ISO_DATE_TIME).toInstant()
+                .toString() +
                     timestamp.substringAfterLast(":")
         } catch (e: Exception) {
             "9999-12-31T23:59:59Z:${item.getSortableTimestamp().substringAfterLast(":")}"
