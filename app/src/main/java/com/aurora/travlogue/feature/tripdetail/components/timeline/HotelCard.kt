@@ -62,12 +62,12 @@ fun HotelCheckInCard(
 
             Column(
                 modifier = Modifier.weight(1f),
-                verticalArrangement = Arrangement.spacedBy(4.dp)
+                verticalArrangement = Arrangement.spacedBy(2.dp)
             ) {
                 // Check-in label
                 Text(
                     text = "Check-in",
-                    style = MaterialTheme.typography.labelMedium,
+                    style = MaterialTheme.typography.labelSmall,
                     color = MaterialTheme.colorScheme.tertiary,
                     fontWeight = FontWeight.SemiBold
                 )
@@ -75,7 +75,7 @@ fun HotelCheckInCard(
                 // Hotel name
                 Text(
                     text = booking.provider,
-                    style = MaterialTheme.typography.bodyLarge,
+                    style = MaterialTheme.typography.bodyMedium,
                     fontWeight = FontWeight.Medium,
                     color = MaterialTheme.colorScheme.onSurface
                 )
@@ -83,7 +83,7 @@ fun HotelCheckInCard(
                 // Check-in time
                 Text(
                     text = formatCheckInTime(booking.startDateTime),
-                    style = MaterialTheme.typography.bodyMedium,
+                    style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
 
@@ -91,7 +91,7 @@ fun HotelCheckInCard(
                 if (booking.confirmationNumber != null) {
                     Text(
                         text = "Confirmation: ${booking.confirmationNumber}",
-                        style = MaterialTheme.typography.bodySmall,
+                        style = MaterialTheme.typography.labelSmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
@@ -104,14 +104,14 @@ fun HotelCheckInCard(
                 ) {
                     Text(
                         text = "${booking.currency} ${String.format("%.0f", booking.price)}",
-                        style = MaterialTheme.typography.bodyLarge,
+                        style = MaterialTheme.typography.bodyMedium,
                         fontWeight = FontWeight.SemiBold,
                         color = MaterialTheme.colorScheme.primary
                     )
                     booking.endDateTime?.let { endDateTime ->
                         Text(
                             text = formatStayDuration(booking.startDateTime, endDateTime),
-                            style = MaterialTheme.typography.bodySmall,
+                            style = MaterialTheme.typography.labelSmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     }
@@ -166,12 +166,12 @@ fun HotelCheckOutCard(
 
             Column(
                 modifier = Modifier.weight(1f),
-                verticalArrangement = Arrangement.spacedBy(4.dp)
+                verticalArrangement = Arrangement.spacedBy(2.dp)
             ) {
                 // Check-out label
                 Text(
                     text = "Check-out",
-                    style = MaterialTheme.typography.labelMedium,
+                    style = MaterialTheme.typography.labelSmall,
                     color = MaterialTheme.colorScheme.secondary,
                     fontWeight = FontWeight.SemiBold
                 )
@@ -179,7 +179,7 @@ fun HotelCheckOutCard(
                 // Hotel name
                 Text(
                     text = booking.provider,
-                    style = MaterialTheme.typography.bodyLarge,
+                    style = MaterialTheme.typography.bodyMedium,
                     fontWeight = FontWeight.Medium,
                     color = MaterialTheme.colorScheme.onSurface
                 )
@@ -188,7 +188,7 @@ fun HotelCheckOutCard(
                 booking.endDateTime?.let { endDateTime ->
                     Text(
                         text = formatCheckOutTime(endDateTime),
-                        style = MaterialTheme.typography.bodyMedium,
+                        style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }

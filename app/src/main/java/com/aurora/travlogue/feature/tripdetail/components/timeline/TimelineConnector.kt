@@ -1,7 +1,12 @@
 package com.aurora.travlogue.feature.tripdetail.components.timeline
 
-import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -35,21 +40,26 @@ fun TimelineItem(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.spacedBy(12.dp)
     ) {
-        // Date badge (left side)
+        // Date badge (left side) - 10% of width
         if (showDate && dateTime != null) {
-            CircularDateBadge(
-                dateTime = dateTime,
-                color = dotColor
-            )
+            Box(
+                modifier = Modifier.fillMaxWidth(0.1f),
+                contentAlignment = Alignment.Center
+            ) {
+                CircularDateBadge(
+                    dateTime = dateTime,
+                    color = dotColor
+                )
+            }
         } else {
             // Spacer to maintain alignment when date is hidden
-            Spacer(modifier = Modifier.width(56.dp))
+            Spacer(modifier = Modifier.fillMaxWidth(0.1f))
         }
 
-        // Content (right side)
+        // Content (right side) - 80% of width
         Box(
             modifier = Modifier
-                .weight(1f)
+                .fillMaxWidth()
                 .padding(bottom = 12.dp)
         ) {
             content()
@@ -58,9 +68,10 @@ fun TimelineItem(
 }
 
 /**
- * Circular date badge showing:
- * - Day number on top (e.g., "4")
- * - Weekday below (e.g., "Wed")
+ * Compact Circular date badge showing:
+ * - Weekday on top of the circle (e.g., "Wed")
+ * - Day number in the center (e.g., "4")
+ * Circle wraps around the day number with fixed text size
  */
 @Composable
 private fun CircularDateBadge(
@@ -70,39 +81,42 @@ private fun CircularDateBadge(
 ) {
     val (day, weekday) = parseDateToDisplay(dateTime)
 
-    Surface(
-        modifier = modifier.size(56.dp),
-        shape = CircleShape,
-        color = color.copy(alpha = 0.15f),
-        shadowElevation = 2.dp
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(2.dp),
+        modifier = modifier
     ) {
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(4.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center
-        ) {
-            // Day number
-            Text(
-                text = day,
-                style = MaterialTheme.typography.titleLarge,
-                fontWeight = FontWeight.Bold,
-                color = color,
-                textAlign = TextAlign.Center,
-                fontSize = 22.sp
-            )
+        // Weekday on top (3 letters)
+        Text(
+            text = weekday,
+            style = MaterialTheme.typography.labelSmall,
+            fontWeight = FontWeight.SemiBold,
+            color = color.copy(alpha = 0.8f),
+            textAlign = TextAlign.Center,
+            fontSize = 9.sp,
+            letterSpacing = 0.3.sp
+        )
 
-            // Weekday (3 letters)
-            Text(
-                text = weekday,
-                style = MaterialTheme.typography.labelSmall,
-                fontWeight = FontWeight.SemiBold,
-                color = color.copy(alpha = 0.8f),
-                textAlign = TextAlign.Center,
-                fontSize = 11.sp,
-                letterSpacing = 0.5.sp
-            )
+        // Circle with day number
+        Surface(
+            shape = CircleShape,
+            color = color.copy(alpha = 0.15f),
+            shadowElevation = 1.dp
+        ) {
+            Box(
+                contentAlignment = Alignment.Center,
+                modifier = Modifier.padding(10.dp)
+            ) {
+                // Day number with fixed size
+                Text(
+                    text = day,
+                    style = MaterialTheme.typography.titleLarge,
+                    fontWeight = FontWeight.Bold,
+                    color = color,
+                    textAlign = TextAlign.Center,
+                    fontSize = 14.sp
+                )
+            }
         }
     }
 }
@@ -158,71 +172,29 @@ fun TimelineMajorItem(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.spacedBy(12.dp)
     ) {
-        // Date badge for major events (slightly larger)
+        // Date badge for major events (slightly larger) - 10% of width
         if (showDate && dateTime != null) {
-            MajorCircularDateBadge(
-                dateTime = dateTime,
-                color = dotColor
-            )
+            Box(
+                modifier = Modifier.fillMaxWidth(0.1f),
+                contentAlignment = Alignment.Center
+            ) {
+                CircularDateBadge(
+                    dateTime = dateTime,
+                    color = dotColor
+                )
+            }
         } else {
             // Spacer to maintain alignment
-            Spacer(modifier = Modifier.width(64.dp))
+            Spacer(modifier = Modifier.fillMaxWidth(0.1f))
         }
 
-        // Content
+        // Content - 80% of width
         Box(
             modifier = Modifier
-                .weight(1f)
+                .fillMaxWidth()
                 .padding(bottom = 12.dp)
         ) {
             content()
-        }
-    }
-}
-
-/**
- * Larger circular badge for major events
- */
-@Composable
-private fun MajorCircularDateBadge(
-    dateTime: String,
-    color: Color,
-    modifier: Modifier = Modifier
-) {
-    val (day, weekday) = parseDateToDisplay(dateTime)
-
-    Surface(
-        modifier = modifier.size(64.dp),
-        shape = CircleShape,
-        color = color.copy(alpha = 0.2f),
-        shadowElevation = 4.dp
-    ) {
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(6.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center
-        ) {
-            // Day number (larger)
-            Text(
-                text = day,
-                style = MaterialTheme.typography.headlineSmall,
-                fontWeight = FontWeight.Bold,
-                color = color,
-                textAlign = TextAlign.Center
-            )
-
-            // Weekday (3 letters)
-            Text(
-                text = weekday,
-                style = MaterialTheme.typography.labelMedium,
-                fontWeight = FontWeight.Bold,
-                color = color.copy(alpha = 0.9f),
-                textAlign = TextAlign.Center,
-                fontSize = 12.sp,
-                letterSpacing = 0.8.sp
-            )
         }
     }
 }

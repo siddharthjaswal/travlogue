@@ -193,7 +193,8 @@ data class Booking(
     val provider: String,
     val startDateTime: String, // ISO 8601 with timezone: "2025-11-15T14:30:00+01:00"
     val endDateTime: String?,
-    val timezone: String, // IANA timezone: "Europe/Madrid"
+    val timezone: String, // IANA timezone: "Europe/Madrid" (departure)
+    val endTimezone: String? = null, // IANA timezone for arrival (if different)
     val fromLocation: String?,
     val toLocation: String?,
     val price: Double?,
@@ -630,7 +631,24 @@ dependencies {
 - Type-safe navigation with Kotlin Serialization
 - Enhanced repository with JOIN queries for efficient data loading
 
-### Recent Additions (v0.5.0 - January 17, 2025) - **Phase 1 MVP Complete!** 🎉
+### Recent Additions (v0.7.0 - January 18, 2025) - **Timeline Redesign** ✨
+- **Timeline Layout**: Fixed 80/20 width split (20% date badge, 80% content)
+- **Compact Text Sizes**: Reduced all text sizes across timeline cards for better space utilization
+- **Redesigned Date Badges**: Weekday on top, day number in wrapping circle with adaptive sizing
+- **Unified Badge Component**: Merged CircularDateBadge and MajorCircularDateBadge with `isMajor` parameter
+- **Cross-Timezone Bookings**: Added `endTimezone` field to Booking entity for arrival timezone
+- **Database Migration**: Room migration 1→2 for endTimezone support
+- **Timezone UI**: Timezone selector for FLIGHT, TRAIN, BUS bookings with helpful tips
+- **Comprehensive Previews**: Added @Preview annotations to all timeline components
+
+### v0.6.0 Additions (January 17, 2025) - **Gap Detection** ⭐
+- **Gap Detection Service**: Smart algorithms for MISSING_TRANSIT, UNPLANNED_DAY detection
+- **Gap UI Components**: GapCard, GapDetailSheet with beautiful Material 3 design
+- **Timeline Integration**: Inline gap display in timeline with one-click resolution
+- **Overview Integration**: Warning section showing all detected gaps
+- **Mark as Resolved**: Dismiss or mark gaps as handled
+
+### v0.5.0 Additions (January 17, 2025) - **Phase 1 MVP Complete!** 🎉
 - **Edit Activity Dialog**: Pre-populated form for editing existing activities with delete confirmation
 - **Edit Location Dialog**: Edit locations with cascade delete warning (deletes associated activities)
 - **Edit Booking Dialog**: Full edit functionality with all booking fields pre-filled
@@ -665,6 +683,6 @@ dependencies {
 ---
 
 **Document Owner:** Sid
-**Last Updated:** January 17, 2025
-**Status:** Phase 1 MVP - ✅ COMPLETE! Moving to Phase 2 🚀
-**Latest Version:** 0.5.0 (Edit & Delete UI - Phase 1 MVP Complete)
+**Last Updated:** January 18, 2025
+**Status:** Phase 2 - In Progress (Gap Detection + Timeline Polish) 🚀
+**Latest Version:** 0.7.0 (Timeline Redesign + Cross-Timezone Bookings)
