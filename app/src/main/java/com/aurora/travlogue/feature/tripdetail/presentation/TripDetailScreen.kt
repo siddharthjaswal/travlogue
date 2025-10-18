@@ -99,8 +99,8 @@ fun TripDetailScreen(
     if (uiState.showAddBookingDialog) {
         AddBookingDialog(
             onDismiss = viewModel::hideAddBookingDialog,
-            onSave = { type, confirmationNumber, provider, startDateTime, endDateTime, timezone, fromLocation, toLocation, price, currency, notes ->
-                viewModel.addBooking(type, confirmationNumber, provider, startDateTime, endDateTime, timezone, fromLocation, toLocation, price, currency, notes)
+            onSave = { type, confirmationNumber, provider, startDateTime, endDateTime, timezone, endTimezone, fromLocation, toLocation, price, currency, notes ->
+                viewModel.addBooking(type, confirmationNumber, provider, startDateTime, endDateTime, timezone, endTimezone, fromLocation, toLocation, price, currency, notes)
                 viewModel.hideAddBookingDialog()
             }
         )

@@ -45,7 +45,9 @@ fun EditBookingDialog(
     }
     var endDateTime by remember {
         mutableStateOf(
-            booking.endDateTime?.let { parseDateTime(it, booking.timezone) }
+            booking.endDateTime?.let {
+                parseDateTime(it, booking.endTimezone ?: booking.timezone)
+            }
         )
     }
     var useEndDateTime by remember { mutableStateOf(booking.endDateTime != null) }
@@ -92,6 +94,7 @@ fun EditBookingDialog(
                                 startDateTime = startDateTime.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME),
                                 endDateTime = endDateTime?.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME),
                                 timezone = startDateTime.zone.id,
+                                endTimezone = endDateTime?.zone?.id?.takeIf { it != startDateTime.zone.id },
                                 fromLocation = fromLocation.takeIf { it.isNotBlank() },
                                 toLocation = toLocation.takeIf { it.isNotBlank() },
                                 price = priceValue,
@@ -231,10 +234,6 @@ fun EditBookingDialog(
                 selectedDateTime = startDateTime,
                 onDateTimeSelected = { newDateTime ->
                     startDateTime = newDateTime
-                    // Update endDateTime zone if it exists
-                    endDateTime?.let { endDt ->
-                        endDateTime = endDt.withZoneSameInstant(newDateTime.zone)
-                    }
                 },
                 showTimezone = true
             )
@@ -264,14 +263,30 @@ fun EditBookingDialog(
             }
 
             if (useEndDateTime) {
+                val isCrossTimezoneBooking = selectedType in listOf(
+                    BookingType.FLIGHT,
+                    BookingType.TRAIN,
+                    BookingType.BUS
+                )
+
                 DateTimePickerField(
-                    label = "End Date & Time",
+                    label = if (isCrossTimezoneBooking) "End Date & Time (Arrival)" else "End Date & Time",
                     selectedDateTime = endDateTime,
                     onDateTimeSelected = { newDateTime ->
                         endDateTime = newDateTime
                     },
-                    showTimezone = false // Use same timezone as start
+                    showTimezone = isCrossTimezoneBooking // Show timezone for cross-timezone bookings
                 )
+
+                if (isCrossTimezoneBooking && endDateTime != null) {
+                    // Show a helpful message about timezone
+                    Text(
+                        text = "💡 Tip: Set the arrival timezone if different from departure",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.padding(start = 4.dp)
+                    )
+                }
             }
 
             // Divider

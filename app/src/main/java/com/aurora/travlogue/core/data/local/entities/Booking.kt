@@ -27,7 +27,8 @@ data class Booking(
     val provider: String,
     val startDateTime: String, // ISO 8601 with timezone: "2025-11-15T14:30:00+01:00"
     val endDateTime: String?, // ISO 8601 with timezone: "2025-11-15T16:45:00+01:00"
-    val timezone: String, // IANA timezone: "Europe/Madrid", "America/New_York"
+    val timezone: String, // IANA timezone for start: "Europe/Madrid", "America/New_York"
+    val endTimezone: String? = null, // IANA timezone for end (if different from start): "America/Los_Angeles"
     val fromLocation: String?,
     val toLocation: String?,
     val price: Double?,
