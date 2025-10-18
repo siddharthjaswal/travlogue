@@ -1,14 +1,33 @@
 package com.aurora.travlogue.feature.tripdetail.components.timeline
 
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.*
-import androidx.compose.material3.*
+import androidx.compose.material.icons.filled.ConfirmationNumber
+import androidx.compose.material.icons.filled.DirectionsBus
+import androidx.compose.material.icons.filled.Event
+import androidx.compose.material.icons.filled.Flight
+import androidx.compose.material.icons.filled.FlightLand
+import androidx.compose.material.icons.filled.FlightTakeoff
+import androidx.compose.material.icons.filled.Hotel
+import androidx.compose.material.icons.filled.Train
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.aurora.travlogue.core.common.PreviewData.bookingFlight
+import com.aurora.travlogue.core.common.PreviewData.bookingTrain
 import com.aurora.travlogue.core.data.local.entities.Booking
 import com.aurora.travlogue.core.data.local.entities.BookingType
 import com.aurora.travlogue.core.data.local.entities.Location
@@ -99,6 +118,26 @@ fun CityArrivalCard(
     }
 }
 
+@Preview(name = "CityArrivalCardPreview", showBackground = true)
+@Composable
+private fun CityArrivalCardPreview() {
+    val location = Location(
+        tripId = "1",
+        name = "Tokyo",
+        country = "Japan",
+        date = "2025-11-20",
+        latitude = 35.6895,
+        longitude = 139.6917,
+        order = 1
+    )
+    val arrivalBooking = bookingFlight
+    CityArrivalCard(
+        location = location,
+        arrivalDateTime = "2025-11-20T14:30:00+09:00",
+        arrivalBooking = arrivalBooking
+    )
+}
+
 /**
  * Card showing departure from a city
  */
@@ -181,6 +220,26 @@ fun CityDepartureCard(
             }
         }
     }
+}
+
+@Preview(name = "CityDepartureCardPreview", showBackground = true)
+@Composable
+private fun CityDepartureCardPreview() {
+    val location = Location(
+        tripId = "1",
+        name = "Tokyo",
+        country = "Japan",
+        date = "2025-11-25",
+        latitude = 35.6895,
+        longitude = 139.6917,
+        order = 1
+    )
+    val departureBooking = bookingTrain
+    CityDepartureCard(
+        location = location,
+        departureDateTime = "2025-11-25T09:00:00+09:00",
+        departureBooking = departureBooking
+    )
 }
 
 /**
