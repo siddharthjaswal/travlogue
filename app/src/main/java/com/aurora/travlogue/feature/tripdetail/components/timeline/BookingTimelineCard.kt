@@ -10,7 +10,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.aurora.travlogue.core.common.PreviewData
 import com.aurora.travlogue.core.data.local.entities.Booking
 import com.aurora.travlogue.core.data.local.entities.BookingType
 import java.time.ZonedDateTime
@@ -220,5 +222,40 @@ private fun calculateDuration(startDateTime: String, endDateTime: String): Strin
         }
     } catch (e: Exception) {
         null
+    }
+}
+
+// ==================== Previews ====================
+
+@Preview(name = "Booking Card - Flight", showBackground = true)
+@Composable
+private fun BookingTimelineCardFlightPreview() {
+    MaterialTheme {
+        BookingTimelineCard(
+            booking = PreviewData.bookingFlight,
+            onClick = {}
+        )
+    }
+}
+
+@Preview(name = "Booking Card - Train", showBackground = true)
+@Composable
+private fun BookingTimelineCardTrainPreview() {
+    MaterialTheme {
+        BookingTimelineCard(
+            booking = PreviewData.bookingTrain,
+            onClick = {}
+        )
+    }
+}
+
+@Preview(name = "Booking Card - Hotel", showBackground = true)
+@Composable
+private fun BookingTimelineCardHotelPreview() {
+    MaterialTheme {
+        BookingTimelineCard(
+            booking = PreviewData.bookingHotel,
+            onClick = {}
+        )
     }
 }

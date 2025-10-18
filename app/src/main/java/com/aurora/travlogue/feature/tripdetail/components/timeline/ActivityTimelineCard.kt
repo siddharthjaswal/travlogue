@@ -13,7 +13,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.aurora.travlogue.core.common.PreviewData
 import com.aurora.travlogue.core.data.local.entities.Activity
 import com.aurora.travlogue.core.data.local.entities.ActivityType
 import com.aurora.travlogue.core.data.local.entities.TimeSlot
@@ -255,4 +257,50 @@ private fun getCreativeEmptyMessage(): String {
         "Rest & recharge day"
     )
     return messages.random()
+}
+
+// ==================== Previews ====================
+
+@Preview(name = "Activity Card - Attraction", showBackground = true)
+@Composable
+private fun ActivityTimelineCardAttractionPreview() {
+    MaterialTheme {
+        ActivityTimelineCard(
+            activity = PreviewData.activitySensoJi,
+            onClick = {}
+        )
+    }
+}
+
+@Preview(name = "Activity Card - Food", showBackground = true)
+@Composable
+private fun ActivityTimelineCardFoodPreview() {
+    MaterialTheme {
+        ActivityTimelineCard(
+            activity = PreviewData.activityRamen,
+            onClick = {}
+        )
+    }
+}
+
+@Preview(name = "Activity Card - With Specific Time", showBackground = true)
+@Composable
+private fun ActivityTimelineCardWithTimePreview() {
+    MaterialTheme {
+        ActivityTimelineCard(
+            activity = PreviewData.activitySensoJi.copy(
+                startTime = "09:00",
+                endTime = "11:30"
+            ),
+            onClick = {}
+        )
+    }
+}
+
+@Preview(name = "Nothing Planned Card", showBackground = true)
+@Composable
+private fun NothingPlannedCardPreview() {
+    MaterialTheme {
+        NothingPlannedCard()
+    }
 }

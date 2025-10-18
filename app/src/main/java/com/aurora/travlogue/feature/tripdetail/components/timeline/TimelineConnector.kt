@@ -12,8 +12,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.aurora.travlogue.core.common.PreviewData
 import java.time.LocalDate
 import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
@@ -220,6 +222,59 @@ private fun MajorCircularDateBadge(
                 textAlign = TextAlign.Center,
                 fontSize = 12.sp,
                 letterSpacing = 0.8.sp
+            )
+        }
+    }
+}
+
+// ==================== Previews ====================
+
+@Preview(name = "Timeline Item with Date Badge", showBackground = true)
+@Composable
+private fun TimelineItemPreview() {
+    MaterialTheme {
+        TimelineItem(
+            dateTime = "2025-07-01T09:00:00+09:00",
+            showDate = true,
+            dotColor = MaterialTheme.colorScheme.primary
+        ) {
+            ActivityTimelineCard(
+                activity = PreviewData.activitySensoJi,
+                onClick = {}
+            )
+        }
+    }
+}
+
+@Preview(name = "Timeline Item without Date Badge", showBackground = true)
+@Composable
+private fun TimelineItemNoBadgePreview() {
+    MaterialTheme {
+        TimelineItem(
+            dateTime = "2025-07-01T14:00:00+09:00",
+            showDate = false,
+            dotColor = MaterialTheme.colorScheme.primary
+        ) {
+            ActivityTimelineCard(
+                activity = PreviewData.activityShibuya,
+                onClick = {}
+            )
+        }
+    }
+}
+
+@Preview(name = "Timeline Major Item", showBackground = true)
+@Composable
+private fun TimelineMajorItemPreview() {
+    MaterialTheme {
+        TimelineMajorItem(
+            dateTime = "2025-07-01T14:30:00+09:00",
+            showDate = true,
+            dotColor = MaterialTheme.colorScheme.primary
+        ) {
+            WelcomeCityCard(
+                location = PreviewData.locationTokyo,
+                arrivalDateTime = "2025-07-01T14:30:00+09:00"
             )
         }
     }

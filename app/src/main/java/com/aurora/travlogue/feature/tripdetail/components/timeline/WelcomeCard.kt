@@ -8,7 +8,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.aurora.travlogue.core.common.PreviewData
 import com.aurora.travlogue.core.data.local.entities.Location
 import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
@@ -147,5 +149,29 @@ private fun formatGoodbyeTime(isoDateTime: String): String {
         "Time to head out at $time on $date"
     } catch (e: Exception) {
         "Departing soon"
+    }
+}
+
+// ==================== Previews ====================
+
+@Preview(name = "Welcome City Card", showBackground = true)
+@Composable
+private fun WelcomeCityCardPreview() {
+    MaterialTheme {
+        WelcomeCityCard(
+            location = PreviewData.locationTokyo,
+            arrivalDateTime = "2025-07-01T14:30:00+09:00"
+        )
+    }
+}
+
+@Preview(name = "Goodbye City Card", showBackground = true)
+@Composable
+private fun GoodbyeCityCardPreview() {
+    MaterialTheme {
+        GoodbyeCityCard(
+            location = PreviewData.locationKyoto,
+            departureDateTime = "2025-07-05T09:00:00+09:00"
+        )
     }
 }

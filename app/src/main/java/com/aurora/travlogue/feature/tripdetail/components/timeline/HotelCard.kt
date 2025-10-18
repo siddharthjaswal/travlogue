@@ -10,7 +10,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.aurora.travlogue.core.common.PreviewData
 import com.aurora.travlogue.core.data.local.entities.Booking
 import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
@@ -237,5 +239,29 @@ private fun formatStayDuration(startDateTime: String, endDateTime: String): Stri
         }
     } catch (e: Exception) {
         ""
+    }
+}
+
+// ==================== Previews ====================
+
+@Preview(name = "Hotel Check-in Card", showBackground = true)
+@Composable
+private fun HotelCheckInCardPreview() {
+    MaterialTheme {
+        HotelCheckInCard(
+            booking = PreviewData.bookingHotel,
+            onClick = {}
+        )
+    }
+}
+
+@Preview(name = "Hotel Check-out Card", showBackground = true)
+@Composable
+private fun HotelCheckOutCardPreview() {
+    MaterialTheme {
+        HotelCheckOutCard(
+            booking = PreviewData.bookingHotel,
+            onClick = {}
+        )
     }
 }

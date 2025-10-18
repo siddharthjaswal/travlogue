@@ -7,7 +7,9 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.aurora.travlogue.core.common.PreviewData
 import com.aurora.travlogue.core.data.local.entities.DateType
 import com.aurora.travlogue.core.data.local.entities.Trip
 import java.time.LocalDate
@@ -168,5 +170,49 @@ private fun formatDateRange(trip: Trip): String {
             val duration = trip.flexibleDuration?.let { " (≈$it days)" } ?: ""
             "~${trip.flexibleMonth ?: "Date flexible"}$duration"
         }
+    }
+}
+
+// ==================== Previews ====================
+
+@Preview(name = "Trip Header - Fixed Dates", showBackground = true)
+@Composable
+private fun TripHeaderSectionPreview() {
+    MaterialTheme {
+        TripHeaderSection(
+            trip = PreviewData.sampleTripFixed,
+            locationCount = 3,
+            activityCount = 12,
+            bookingCount = 5,
+            notesCount = 2
+        )
+    }
+}
+
+@Preview(name = "Trip Header - Flexible Dates", showBackground = true)
+@Composable
+private fun TripHeaderSectionFlexiblePreview() {
+    MaterialTheme {
+        TripHeaderSection(
+            trip = PreviewData.sampleTripFlexible,
+            locationCount = 4,
+            activityCount = 8,
+            bookingCount = 3,
+            notesCount = 0
+        )
+    }
+}
+
+@Preview(name = "Trip Header - Empty Trip", showBackground = true)
+@Composable
+private fun TripHeaderSectionEmptyPreview() {
+    MaterialTheme {
+        TripHeaderSection(
+            trip = PreviewData.sampleTripFixed,
+            locationCount = 0,
+            activityCount = 0,
+            bookingCount = 0,
+            notesCount = 0
+        )
     }
 }
