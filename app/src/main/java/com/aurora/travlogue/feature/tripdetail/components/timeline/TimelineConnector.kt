@@ -105,16 +105,16 @@ private fun CircularDateBadge(
         ) {
             Box(
                 contentAlignment = Alignment.Center,
-                modifier = Modifier.padding(10.dp)
+                modifier = Modifier.padding(horizontal = 10.dp)
             ) {
                 // Day number with fixed size
                 Text(
                     text = day,
                     style = MaterialTheme.typography.titleLarge,
-                    fontWeight = FontWeight.Bold,
+                    fontWeight = FontWeight.Normal,
                     color = color,
                     textAlign = TextAlign.Center,
-                    fontSize = 14.sp
+                    fontSize = 12.sp
                 )
             }
         }
