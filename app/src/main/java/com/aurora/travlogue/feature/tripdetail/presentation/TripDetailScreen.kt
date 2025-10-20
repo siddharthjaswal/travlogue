@@ -42,9 +42,11 @@ fun TripDetailScreen(
                 is TripDetailUiEvent.ShowError -> {
                     snackbarHostState.showSnackbar(event.message)
                 }
+
                 is TripDetailUiEvent.NavigateToEditTrip -> {
                     // TODO: Navigate to edit trip screen
                 }
+
                 is TripDetailUiEvent.ShowSnackbar -> {
                     snackbarHostState.showSnackbar(event.message)
                 }
@@ -74,7 +76,16 @@ fun TripDetailScreen(
         AddActivityDialog(
             onDismiss = viewModel::hideAddActivityDialog,
             onSave = { locationId, title, description, date, timeSlot, type, startTime, endTime ->
-                viewModel.addActivity(locationId, title, description, date, timeSlot, type, startTime, endTime)
+                viewModel.addActivity(
+                    locationId,
+                    title,
+                    description,
+                    date,
+                    timeSlot,
+                    type,
+                    startTime,
+                    endTime
+                )
                 viewModel.hideAddActivityDialog()
             },
             locations = uiState.locations,
@@ -100,7 +111,20 @@ fun TripDetailScreen(
         AddBookingDialog(
             onDismiss = viewModel::hideAddBookingDialog,
             onSave = { type, confirmationNumber, provider, startDateTime, endDateTime, timezone, endTimezone, fromLocation, toLocation, price, currency, notes ->
-                viewModel.addBooking(type, confirmationNumber, provider, startDateTime, endDateTime, timezone, endTimezone, fromLocation, toLocation, price, currency, notes)
+                viewModel.addBooking(
+                    type,
+                    confirmationNumber,
+                    provider,
+                    startDateTime,
+                    endDateTime,
+                    timezone,
+                    endTimezone,
+                    fromLocation,
+                    toLocation,
+                    price,
+                    currency,
+                    notes
+                )
                 viewModel.hideAddBookingDialog()
             }
         )
@@ -278,20 +302,18 @@ private fun TripDetailScreenContent(
                 uiState.isLoading -> {
                     LoadingState()
                 }
+
                 uiState.error != null -> {
                     ErrorState(
                         message = uiState.error,
                         onRetry = onRetry
                     )
                 }
+
                 uiState.trip != null -> {
                     // Trip Header Section
                     TripHeaderSection(
-                        trip = uiState.trip,
-                        locationCount = uiState.locationCount,
-                        activityCount = uiState.activityCount,
-                        bookingCount = uiState.bookingCount,
-                        notesCount = uiState.notesCount
+                        trip = uiState.trip
                     )
 
                     // Tab Navigation
@@ -332,18 +354,21 @@ private fun TripDetailScreenContent(
                                 onGapClick = onGapClick
                             )
                         }
+
                         TripDetailTab.LOCATIONS -> {
                             LocationsTab(
                                 locations = uiState.locations,
                                 onLocationClick = onLocationClick
                             )
                         }
+
                         TripDetailTab.BOOKINGS -> {
                             BookingsTab(
                                 bookings = uiState.bookings,
                                 onBookingClick = onBookingClick
                             )
                         }
+
                         TripDetailTab.OVERVIEW -> {
                             OverviewTab(
                                 trip = uiState.trip,
