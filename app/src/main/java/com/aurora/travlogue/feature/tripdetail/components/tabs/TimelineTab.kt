@@ -247,16 +247,16 @@ private sealed class TimelineItem {
             is ActivityItem -> {
                 val date = activity.date ?: "9999-12-31"
                 val time = activity.startTime ?: when (activity.timeSlot) {
-                    TimeSlot.MORNING -> "08:00:00"
-                    TimeSlot.AFTERNOON -> "14:00:00"
-                    TimeSlot.EVENING -> "18:00:00"
-                    TimeSlot.FULL_DAY -> "06:00:00"
+                    TimeSlot.MORNING -> "09:00:00"
+                    TimeSlot.AFTERNOON -> "13:00:00"
+                    TimeSlot.EVENING -> "17:00:00"
+                    TimeSlot.FULL_DAY -> "09:00:00"
                     null -> "12:00:00"
                 }
                 "${date}T${time}:4"
             }
 
-            is NothingPlanned -> "${date}T12:00:00:5"
+            is NothingPlanned -> "${date}T06:00:00:5"
             is HotelCheckOut -> "${booking.endDateTime}:6"
             is CityGoodbye -> "${departureDateTime}:7"
             is TransitDeparture -> "${departureDateTime}:8"
@@ -269,7 +269,18 @@ private sealed class TimelineItem {
             is TransitArrival -> arrivalDateTime
             is CityWelcome -> arrivalDateTime
             is HotelCheckIn -> booking.startDateTime
-            is ActivityItem -> activity.date?.let { "${it}T06:00:00" }
+            is ActivityItem -> {
+                activity.date?.let { date ->
+                    val time = activity.startTime ?: when (activity.timeSlot) {
+                        TimeSlot.MORNING -> "09:00:00"
+                        TimeSlot.AFTERNOON -> "13:00:00"
+                        TimeSlot.EVENING -> "17:00:00"
+                        TimeSlot.FULL_DAY -> "09:00:00"
+                        null -> "12:00:00"
+                    }
+                    "${date}T${time}"
+                }
+            }
             is NothingPlanned -> "${date}T06:00:00"
             is HotelCheckOut -> booking.endDateTime
             is CityGoodbye -> departureDateTime
@@ -295,6 +306,7 @@ private sealed class TimelineItem {
 
 /**
  * Build complete timeline with all dates in range
+ * Shows "Nothing Planned" for days with no activities or bookings
  */
 private fun buildCompleteTimeline(
     daySchedules: List<DaySchedule>,
@@ -315,43 +327,6 @@ private fun buildCompleteTimeline(
     val hotelBookings = bookings.filter { it.type == BookingType.HOTEL }
     val otherBookings = bookings.filter {
         it.type in listOf(BookingType.TICKET, BookingType.OTHER)
-    }
-
-    // Get trip date range
-    val tripStartDate = daySchedules.minByOrNull { it.date }?.date
-    val tripEndDate = daySchedules.maxByOrNull { it.date }?.date
-
-    if (tripStartDate != null && tripEndDate != null) {
-        val start = LocalDate.parse(tripStartDate)
-        val end = LocalDate.parse(tripEndDate)
-
-        // Generate all dates in range
-        var currentDate = start
-        while (!currentDate.isAfter(end)) {
-            val dateString = currentDate.toString()
-
-            // Find activities for this date
-            val activitiesForDate = allActivities.filter { it.date == dateString }
-
-            // Add activities or "Nothing Planned"
-            if (activitiesForDate.isNotEmpty()) {
-                activitiesForDate.sortedBy { activity ->
-                    activity.startTime ?: when (activity.timeSlot) {
-                        TimeSlot.MORNING -> "08:00"
-                        TimeSlot.AFTERNOON -> "14:00"
-                        TimeSlot.EVENING -> "18:00"
-                        TimeSlot.FULL_DAY -> "06:00"
-                        null -> "12:00"
-                    }
-                }.forEach { activity ->
-                    items.add(TimelineItem.ActivityItem(activity))
-                }
-            } else {
-                items.add(TimelineItem.NothingPlanned(dateString))
-            }
-
-            currentDate = currentDate.plusDays(1)
-        }
     }
 
     // Add city transitions and hotels for each location
@@ -394,18 +369,58 @@ private fun buildCompleteTimeline(
         items.add(TimelineItem.BookingItem(booking))
     }
 
-    // Sort chronologically
-    return items.sortedBy { item ->
-        try {
-            val timestamp = item.getSortableTimestamp()
-            val dateTimePart = timestamp.substringBeforeLast(":")
-            ZonedDateTime.parse(dateTimePart, DateTimeFormatter.ISO_DATE_TIME).toInstant()
-                .toString() +
-                    timestamp.substringAfterLast(":")
-        } catch (e: Exception) {
-            "9999-12-31T23:59:59Z:${item.getSortableTimestamp().substringAfterLast(":")}"
+    // Add all activities
+    allActivities.forEach { activity ->
+        items.add(TimelineItem.ActivityItem(activity))
+    }
+
+    // Get trip date range
+    val tripStartDate = daySchedules.minByOrNull { it.date }?.date
+    val tripEndDate = daySchedules.maxByOrNull { it.date }?.date
+
+    // Fill in "Nothing Planned" for empty days
+    if (tripStartDate != null && tripEndDate != null) {
+        val start = LocalDate.parse(tripStartDate)
+        val end = LocalDate.parse(tripEndDate)
+
+        // Get all dates that have items
+        val datesWithItems = items.mapNotNull { item ->
+            item.getDateTime()?.let { extractDate(it) }
+        }.toSet()
+
+        // Generate all dates in range
+        var currentDate = start
+        while (!currentDate.isAfter(end)) {
+            val dateString = currentDate.toString()
+
+            // If no items exist for this date, add "Nothing Planned"
+            if (dateString !in datesWithItems) {
+                items.add(TimelineItem.NothingPlanned(dateString))
+            }
+
+            currentDate = currentDate.plusDays(1)
         }
     }
+
+    // Sort chronologically
+    return items.sortedWith(compareBy(
+        { item ->
+            try {
+                val timestamp = item.getSortableTimestamp()
+                val dateTimePart = timestamp.substringBeforeLast(":")
+                // Try parsing as ZonedDateTime first (bookings with timezone)
+                try {
+                    ZonedDateTime.parse(dateTimePart).toInstant().toEpochMilli()
+                } catch (e: Exception) {
+                    // If that fails, parse as LocalDateTime (activities without timezone)
+                    java.time.LocalDateTime.parse(dateTimePart).atZone(java.time.ZoneId.systemDefault()).toInstant().toEpochMilli()
+                }
+            } catch (e: Exception) {
+                Long.MAX_VALUE
+            }
+        },
+        { item -> item.getSortableTimestamp().substringAfterLast(":").toIntOrNull() ?: 99 }
+    ))
 }
 
 @Composable

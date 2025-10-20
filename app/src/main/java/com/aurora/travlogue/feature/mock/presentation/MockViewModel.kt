@@ -84,7 +84,9 @@ class MockViewModel @Inject constructor(
                         description = "Explore Tokyo's oldest temple",
                         date = "2025-07-01",
                         timeSlot = TimeSlot.MORNING,
-                        type = ActivityType.ATTRACTION
+                        type = ActivityType.ATTRACTION,
+                        startTime = "09:00",
+                        endTime = "11:30"
                     ),
                     Activity(
                         locationId = tokyoId,
@@ -92,7 +94,9 @@ class MockViewModel @Inject constructor(
                         description = "Experience the famous scramble crossing",
                         date = "2025-07-02",
                         timeSlot = TimeSlot.AFTERNOON,
-                        type = ActivityType.ATTRACTION
+                        type = ActivityType.ATTRACTION,
+                        startTime = "13:00",
+                        endTime = "15:00"
                     ),
                     Activity(
                         locationId = tokyoId,
@@ -100,7 +104,9 @@ class MockViewModel @Inject constructor(
                         description = "Fresh sushi breakfast",
                         date = "2025-07-03",
                         timeSlot = TimeSlot.MORNING,
-                        type = ActivityType.FOOD
+                        type = ActivityType.FOOD,
+                        startTime = "09:00",
+                        endTime = "10:30"
                     ),
                     Activity(
                         locationId = kyotoId,
@@ -108,7 +114,9 @@ class MockViewModel @Inject constructor(
                         description = "Walk through thousands of torii gates",
                         date = "2025-07-05",
                         timeSlot = TimeSlot.MORNING,
-                        type = ActivityType.ATTRACTION
+                        type = ActivityType.ATTRACTION,
+                        startTime = "09:00",
+                        endTime = "12:00"
                     ),
                     Activity(
                         locationId = kyotoId,
@@ -116,7 +124,9 @@ class MockViewModel @Inject constructor(
                         description = "Stroll through bamboo grove",
                         date = "2025-07-06",
                         timeSlot = TimeSlot.AFTERNOON,
-                        type = ActivityType.ATTRACTION
+                        type = ActivityType.ATTRACTION,
+                        startTime = "13:00",
+                        endTime = "15:30"
                     ),
                     Activity(
                         locationId = osakaId,
@@ -124,7 +134,9 @@ class MockViewModel @Inject constructor(
                         description = "Visit historic castle",
                         date = "2025-07-08",
                         timeSlot = TimeSlot.MORNING,
-                        type = ActivityType.ATTRACTION
+                        type = ActivityType.ATTRACTION,
+                        startTime = "09:00",
+                        endTime = "11:30"
                     ),
                     Activity(
                         locationId = osakaId,
@@ -132,7 +144,9 @@ class MockViewModel @Inject constructor(
                         description = "Try street food",
                         date = "2025-07-09",
                         timeSlot = TimeSlot.EVENING,
-                        type = ActivityType.FOOD
+                        type = ActivityType.FOOD,
+                        startTime = "17:00",
+                        endTime = "19:00"
                     )
                 )
 
@@ -321,7 +335,9 @@ class MockViewModel @Inject constructor(
                         description = "Tour the ancient amphitheater",
                         date = "2025-08-01",
                         timeSlot = TimeSlot.MORNING,
-                        type = ActivityType.ATTRACTION
+                        type = ActivityType.ATTRACTION,
+                        startTime = "09:00",
+                        endTime = "11:30"
                     ),
                     Activity(
                         locationId = florenceId,
@@ -329,7 +345,9 @@ class MockViewModel @Inject constructor(
                         description = "Renaissance art museum",
                         date = "2025-08-08",
                         timeSlot = TimeSlot.AFTERNOON,
-                        type = ActivityType.ATTRACTION
+                        type = ActivityType.ATTRACTION,
+                        startTime = "13:00",
+                        endTime = "16:00"
                     ),
                     Activity(
                         locationId = veniceId,
@@ -337,7 +355,9 @@ class MockViewModel @Inject constructor(
                         description = "Tour canals by gondola",
                         date = "2025-08-12",
                         timeSlot = TimeSlot.EVENING,
-                        type = ActivityType.ATTRACTION
+                        type = ActivityType.ATTRACTION,
+                        startTime = "17:00",
+                        endTime = "18:30"
                     )
                 )
 

@@ -128,13 +128,23 @@ private fun CircularDateBadge(
  */
 private fun parseDateToDisplay(isoDateTime: String): Pair<String, String> {
     return try {
+        // First try parsing as ZonedDateTime (with timezone)
         val zonedDateTime = ZonedDateTime.parse(isoDateTime)
         val day = zonedDateTime.format(DateTimeFormatter.ofPattern("d"))
         val weekday = zonedDateTime.format(DateTimeFormatter.ofPattern("EEE"))
         Pair(day, weekday.uppercase())
     } catch (e: Exception) {
-        // Fallback
-        Pair("--", "---")
+        try {
+            // If that fails, try parsing as just date or date-time without timezone
+            val datePart = isoDateTime.substringBefore('T')
+            val localDate = LocalDate.parse(datePart)
+            val day = localDate.format(DateTimeFormatter.ofPattern("d"))
+            val weekday = localDate.format(DateTimeFormatter.ofPattern("EEE"))
+            Pair(day, weekday.uppercase())
+        } catch (e2: Exception) {
+            // Fallback
+            Pair("--", "---")
+        }
     }
 }
 

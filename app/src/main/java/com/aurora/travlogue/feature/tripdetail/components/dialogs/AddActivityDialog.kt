@@ -200,6 +200,15 @@ fun AddActivityDialog(
                             text = { Text(timeSlot.name.replace("_", " ").lowercase().replaceFirstChar { it.uppercase() }) },
                             onClick = {
                                 selectedTimeSlot = timeSlot
+                                // Auto-set time based on time slot if specific time is enabled
+                                if (useSpecificTime) {
+                                    startTime = when (timeSlot) {
+                                        TimeSlot.MORNING -> LocalTime.of(9, 0)
+                                        TimeSlot.AFTERNOON -> LocalTime.of(13, 0)
+                                        TimeSlot.EVENING -> LocalTime.of(17, 0)
+                                        TimeSlot.FULL_DAY -> LocalTime.of(9, 0)
+                                    }
+                                }
                                 showTimeSlotDropdown = false
                             }
                         )

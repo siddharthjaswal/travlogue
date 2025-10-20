@@ -13,7 +13,9 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.aurora.travlogue.core.common.PreviewData
 import com.aurora.travlogue.core.data.local.entities.Activity
 import com.aurora.travlogue.core.data.local.entities.TimeSlot
 import com.aurora.travlogue.feature.tripdetail.domain.models.DaySchedule
@@ -267,5 +269,71 @@ private fun formatDate(dateString: String): String {
         }
     } catch (e: Exception) {
         dateString
+    }
+}
+
+// ==================== Previews ====================
+
+@Preview(name = "Day Card - Collapsed", showBackground = true)
+@Composable
+private fun DayCardPreview_Collapsed() {
+    MaterialTheme {
+        DayCard(
+            daySchedule = DaySchedule(
+                date = "2025-07-01",
+                dayNumber = 1,
+                location = PreviewData.locationTokyo,
+                activitiesByTimeSlot = mapOf(
+                    TimeSlot.MORNING to listOf(PreviewData.activitySensoJi),
+                    TimeSlot.AFTERNOON to listOf(PreviewData.activityShibuya)
+                ),
+                dayNotes = null
+            ),
+            isExpanded = false,
+            onDayClicked = {},
+            onActivityClick = {}
+        )
+    }
+}
+
+@Preview(name = "Day Card - Expanded", showBackground = true)
+@Composable
+private fun DayCardPreview_Expanded() {
+    MaterialTheme {
+        DayCard(
+            daySchedule = DaySchedule(
+                date = "2025-07-01",
+                dayNumber = 1,
+                location = PreviewData.locationTokyo,
+                activitiesByTimeSlot = mapOf(
+                    TimeSlot.MORNING to listOf(PreviewData.activitySensoJi),
+                    TimeSlot.AFTERNOON to listOf(PreviewData.activityShibuya),
+                    TimeSlot.EVENING to listOf(PreviewData.activityRamen)
+                ),
+                dayNotes = "Don't forget to buy a Suica card at the airport!"
+            ),
+            isExpanded = true,
+            onDayClicked = {},
+            onActivityClick = {}
+        )
+    }
+}
+
+@Preview(name = "Day Card - Empty", showBackground = true)
+@Composable
+private fun DayCardPreview_Empty() {
+    MaterialTheme {
+        DayCard(
+            daySchedule = DaySchedule(
+                date = "2025-07-02",
+                dayNumber = 2,
+                location = PreviewData.locationKyoto,
+                activitiesByTimeSlot = emptyMap(),
+                dayNotes = null
+            ),
+            isExpanded = true,
+            onDayClicked = {},
+            onActivityClick = {}
+        )
     }
 }
