@@ -273,12 +273,16 @@ The Trip Detail feature serves as the central hub for viewing and managing all a
 - ✅ Show trip statistics (locations, activities, bookings count)
 - ✅ Tab navigation setup
 
-#### 1.2 Timeline View ✅ COMPLETE (v0.3.0)
+#### 1.2 Timeline View ✅ COMPLETE (v0.3.0 + v0.9.0)
 - ✅ Day-by-day expandable cards
 - ✅ Display activities grouped by time slot
 - ✅ Show linked bookings on relevant days
 - ✅ Empty states for days without activities
 - ✅ Tap activity to edit (v0.5.0)
+- ✅ Origin departure cards for non-Location cities (v0.9.0)
+- ✅ Transit cards with timezone transition display (v0.9.0)
+- ✅ Complete journey flow: Departure → In Transit → Arrival (v0.9.0)
+- ✅ Activity time validation within location windows (v0.9.0)
 
 #### 1.3 Locations List ✅ COMPLETE (v0.3.0 + v0.5.0)
 - ✅ Display all locations chronologically
@@ -569,18 +573,31 @@ TripDetailUiState:
 - Navigation system (type-safe)
 - Material 3 design system
 
-### New Components Needed
-1. TripDetailScreen (main screen)
-2. TimelineTab component
-3. LocationsTab component
-4. BookingsTab component
-5. OverviewTab component
-6. DayCard component
-7. ActivityCard component
-8. BookingCard component
-9. AddActivityDialog/Screen
-10. AddBookingDialog/Screen
-11. TripDetailViewModel
+### Implemented Components ✅
+1. ✅ TripDetailScreen (main screen)
+2. ✅ TimelineTab component with timeline items system
+3. ✅ LocationsTab component
+4. ✅ BookingsTab component
+5. ✅ OverviewTab component with gap detection
+6. ✅ Timeline Components:
+   - ActivityTimelineCard
+   - BookingTimelineCard
+   - CityTransitionCard (Arrival/Departure/Origin)
+   - TransitCard (with timezone transitions) ⭐ NEW in v0.9.0
+   - HotelCard (check-in/check-out)
+   - GapCard (gap detection)
+   - NothingPlannedCard
+   - WelcomeGoodbyeCard
+   - TimelineConnector
+7. ✅ CRUD Dialogs:
+   - AddActivityDialog with time validation ⭐ UPDATED in v0.9.0
+   - AddLocationDialog with timezone support
+   - AddBookingDialog with timezone support
+   - EditActivityDialog with time validation ⭐ UPDATED in v0.9.0
+   - EditLocationDialog with timezone support
+   - EditBookingDialog with timezone support
+8. ✅ TripDetailViewModel with full CRUD operations
+9. ✅ ActivityValidation utility ⭐ NEW in v0.9.0
 
 ### External Dependencies
 - Date/time formatting utilities

@@ -8,6 +8,167 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+### Added - Timeline Enhancements (v0.9.0) ✅ **Timeline Intelligence**
+
+**Complete Journey Visualization & Activity Validation**
+
+- **Origin Departure Cards** - Departure from non-Location cities
+  - Shows departure from origin city (e.g., home city not in trip locations)
+  - Displays departure time, provider, and destination
+  - Extracted city name from booking's fromLocation field
+  - Component: `OriginDepartureCard` in `CityTransitionCard.kt`
+
+- **Transit Cards with Timezone Transitions** - In-transit status display ⭐ **Key Feature**
+  - Shows "IN TRANSIT" status between departure and arrival
+  - Transit duration calculation (hours and minutes)
+  - Provider and booking information
+  - **Timezone Transition Box** (when crossing timezones):
+    - Source timezone abbreviation and UTC offset
+    - Destination timezone abbreviation and UTC offset
+    - Calculated hour shift (e.g., "+16 hours timezone shift")
+    - Visual arrow indicator showing transition direction
+    - Only appears when timezones differ between departure and arrival
+  - Component: `TransitCard` in `TransitCard.kt`
+
+- **Complete Journey Flow** - Departure → In Transit → Arrival sequence
+  - Full journey visualization from origin to destination
+  - Chronologically ordered timeline items
+  - Works for both origin departures and location-to-location transits
+  - Timeline flow example:
+    ```
+    Jul 1, 10:00 AM  │ Depart from San Francisco
+                     │ ✈ IN TRANSIT (11h 30m, +16hr timezone shift)
+    Jul 2, 2:30 PM   │ Arrive in Tokyo
+                     │ Welcome to Tokyo!
+    ```
+
+- **Activity Time Validation** - Prevent scheduling conflicts ⭐ **Key Feature**
+  - Activities can only be scheduled within location arrival/departure windows
+  - Real-time validation in Add/Edit Activity dialogs
+  - Clear error messages with valid time ranges
+  - Validation rules:
+    - Activity date must be within location dates
+    - Start time must be after location arrival
+    - End time must be before location departure
+  - Example error: "Activity cannot start before location arrival (Jul 2, 2:30 PM)"
+  - Utility: `ActivityValidation.kt` with `validateActivityTimeWindow()` function
+
+### Fixed - Timeline Sorting Bug 🐛
+
+**Problem:** Timeline items with colons in timestamps caused parsing errors
+- Previous delimiter: `:` (colon) conflicted with ISO 8601 format
+- Example problematic timestamp: `"2025-07-01T10:00:00-07:00:8:5"`
+- Parsing `substringBeforeLast(":")` gave `"2025-07-01T10:00:00-07:00:8"`
+- ZonedDateTime.parse() failed on trailing `:8`
+- Items sorted incorrectly or disappeared from timeline
+
+**Solution:** Changed delimiter from `:` to `|` (pipe character)
+- Updated `getSortableTimestamp()` to use `|` separator
+- Updated sorting logic: `substringBefore("|")` and `substringAfter("|")`
+- Changed sort order type from `Int` to `Double` for fractional ordering
+- InTransit now uses `|8.5` to sort between departure (8) and arrival (1)
+- File: `TimelineTab.kt` (lines 275-300, 489-507)
+
+### Changed
+
+- **MockViewModel** - Enhanced timezone documentation
+  - Added comprehensive timezone handling comments
+  - Trip-level timezone strategy explanation
+  - Outbound/return flight details with UTC offsets
+  - Dateline crossing notes
+  - Example: San Francisco (PDT/UTC-7) ↔ Tokyo (JST/UTC+9)
+
+- **TimelineTab** - Added new timeline item types
+  - `OriginDeparture` - For departures from non-Location cities
+  - `InTransit` - For transit status with timezone transitions
+  - Detection logic for origin city departures
+  - Duplicate prevention with `processedTransitBookings` set
+
+- **Activity Dialogs** - Added time window validation
+  - `AddActivityDialog.kt` - Time validation with error display
+  - `EditActivityDialog.kt` - Time validation with error display
+  - Helper text showing valid time ranges
+  - Real-time validation feedback
+
+### Features
+
+✅ **Complete Journey Flow** - Visual departure → transit → arrival sequence
+✅ **Timezone Awareness** - Clear timezone transition indicators
+✅ **Activity Safety** - Prevent impossible activity scheduling
+✅ **Timeline Accuracy** - Fixed sorting bug for correct chronological order
+✅ **User Guidance** - Clear error messages for validation failures
+
+### Technical Highlights
+
+- New timeline item sealed class members (OriginDeparture, InTransit)
+- Timezone shift calculation using ZonedDateTime offsets
+- Activity time window validation utility
+- Fixed sorting delimiter from `:` to `|`
+- Fractional sort order support (Double instead of Int)
+- Smart origin city detection from booking fromLocation
+
+### Files Created (2 new files)
+
+1. `feature/tripdetail/components/validation/ActivityValidation.kt` (80+ lines)
+   - Time window validation logic
+   - TimeValidationResult data class
+   - DateTime formatting utilities
+
+2. `feature/tripdetail/components/timeline/TransitCard.kt` (290 lines)
+   - Transit card with timezone transitions
+   - Duration calculation and formatting
+   - Timezone abbreviation extraction
+   - UTC offset formatting
+   - Preview functions
+
+### Files Updated (6 files)
+
+1. `TimelineTab.kt` - Timeline logic and sorting fix
+2. `CityTransitionCard.kt` - Added OriginDepartureCard
+3. `AddActivityDialog.kt` - Added time validation
+4. `EditActivityDialog.kt` - Added time validation
+5. `MockViewModel.kt` - Enhanced timezone documentation and return flight
+6. `PRD.md` - Updated with v0.9.0 features
+
+### User Experience Flow
+
+**Viewing Timeline:**
+1. User opens trip detail
+2. Timeline shows complete journey:
+   - Origin departure card (if applicable)
+   - In-transit card with timezone info (if crossing timezones)
+   - Arrival at destination
+   - Activities within location
+   - Departure from location
+   - Repeat for each location
+
+**Adding Activity:**
+1. User taps "Add Activity" for a location
+2. Selects location, date, and time
+3. If time is outside location window:
+   - Error message appears
+   - Shows valid time range
+   - Save button disabled
+4. User adjusts time to valid range
+5. Saves activity successfully
+
+### Benefits
+
+- **Journey Clarity:** Users see complete travel flow including origin departures
+- **Timezone Intelligence:** Clear indication of timezone changes helps with planning
+- **Scheduling Safety:** Prevents logically impossible activity scheduling
+- **Data Integrity:** Timeline items sort correctly in chronological order
+- **Better UX:** Clear visual indicators and helpful error messages
+
+### Migration Notes
+
+**No Database Changes Required**
+- ✅ Fully backward compatible with v0.8.0 data
+- ✅ Existing trips automatically show new timeline cards
+- ✅ No data migration needed
+
+---
+
 ### Added - Timezone Support & Booking Sync (v0.8.0) ✅ **Location Intelligence**
 
 **Automatic Location Timing & Timezone Management**
@@ -804,6 +965,10 @@ Phase 1 MVP is now complete! Moving to Phase 2:
 
 ## Version History
 
+- **0.9.0** - Timeline Enhancements (Origin Departures, Transit Cards, Activity Validation)
+- **0.8.0** - Timezone Support & Booking Sync (Location Intelligence)
+- **0.7.0** - Timeline Redesign (Compact Layout, Date Badges)
+- **0.6.0** - Gap Detection (Key Differentiator Feature)
 - **0.5.0** - Edit & Delete UI (Phase 1 MVP Complete!) 🎉
 - **0.4.0** - Activity & Booking Management (Full CRUD Operations)
 - **0.3.0** - Trip Detail Feature (Timeline, Locations, Bookings, Overview)
@@ -815,5 +980,6 @@ Phase 1 MVP is now complete! Moving to Phase 2:
 ---
 
 **Maintained by:** Sid
-**Project Status:** Active Development - Phase 1 Complete, Moving to Phase 2 🚀
-**Next Release:** 0.6.0 (Gap Detection & API Integrations)
+**Project Status:** Active Development - Phase 2 In Progress 🚀
+**Current Version:** 0.9.0 (Timeline Enhancements)
+**Next Release:** 1.0.0 (Transit Suggestions API Integration)

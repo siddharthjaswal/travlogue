@@ -470,19 +470,29 @@ app/src/main/java/com/aurora/travlogue/
 │           ├── header/
 │           │   └── TripHeaderSection.kt
 │           ├── tabs/
-│           │   ├── TimelineTab.kt
+│           │   ├── TimelineTab.kt                  # Timeline with origin departures & transits
 │           │   ├── LocationsTab.kt
 │           │   ├── BookingsTab.kt
 │           │   └── OverviewTab.kt
 │           ├── timeline/
-│           │   └── DayCard.kt
-│           └── dialogs/           # ✅ CRUD Dialogs
-│               ├── AddActivityDialog.kt   # Add activity with validation
-│               ├── AddLocationDialog.kt   # Add location with auto-order
-│               ├── AddBookingDialog.kt    # Add booking with timezone
-│               ├── EditActivityDialog.kt  # ✅ NEW in v0.5.0 - Edit activities
-│               ├── EditLocationDialog.kt  # ✅ NEW in v0.5.0 - Edit locations
-│               └── EditBookingDialog.kt   # ✅ NEW in v0.5.0 - Edit bookings
+│           │   ├── ActivityTimelineCard.kt         # Activity cards
+│           │   ├── BookingTimelineCard.kt          # Generic booking cards
+│           │   ├── CityTransitionCard.kt           # Arrival/Departure/Origin cards
+│           │   ├── GapCard.kt                      # Gap detection cards
+│           │   ├── HotelCard.kt                    # Hotel check-in/out cards
+│           │   ├── NothingPlannedCard.kt           # Empty day indicator
+│           │   ├── TimelineConnector.kt            # Timeline visual connectors
+│           │   ├── TransitCard.kt                  # ✅ NEW in v0.9.0 - Transit with timezone
+│           │   └── WelcomeGoodbyeCard.kt           # City welcome/goodbye cards
+│           ├── dialogs/           # ✅ CRUD Dialogs
+│           │   ├── AddActivityDialog.kt            # Add activity with time validation
+│           │   ├── AddLocationDialog.kt            # Add location with timezone
+│           │   ├── AddBookingDialog.kt             # Add booking with timezone
+│           │   ├── EditActivityDialog.kt           # Edit activities with time validation
+│           │   ├── EditLocationDialog.kt           # Edit locations with timezone
+│           │   └── EditBookingDialog.kt            # Edit bookings with timezone
+│           └── validation/
+│               └── ActivityValidation.kt           # ✅ NEW in v0.9.0 - Time window validation
 │
 ├── di/                            # Dependency injection
 │   ├── DatabaseModule.kt         # Room + DAOs
@@ -642,7 +652,21 @@ dependencies {
 - Type-safe navigation with Kotlin Serialization
 - Enhanced repository with JOIN queries for efficient data loading
 
-### Recent Additions (v0.8.0 - January 20, 2025) - **Timezone Support & Booking Sync** ⭐
+### Recent Additions (v0.9.0 - January 20, 2025) - **Timeline Enhancements** ⭐
+- **Origin Departure Cards**: Show departure from origin city (non-Location cities)
+- **Transit Cards**: Display in-transit status with timezone transition information
+- **Timezone Transition Display**: Visual indicator showing UTC offsets and hour shifts
+  - Shows timezone abbreviations (e.g., "PST → JST")
+  - Displays UTC offset changes (e.g., "UTC-7 → UTC+9")
+  - Calculates and shows hour shift (e.g., "+16 hours timezone shift")
+  - Only appears when timezone changes between departure and arrival
+- **Timeline Sorting Fix**: Changed delimiter from `:` to `|` to prevent parsing errors with ISO 8601 timestamps
+- **Complete Journey Flow**: Departure → In Transit → Arrival sequence for all transits
+- **Activity Time Validation**: Activities can only be scheduled within location arrival/departure windows
+- **Activity Validation UI**: Real-time error messages showing valid time ranges
+- **MockViewModel Documentation**: Comprehensive timezone handling comments
+
+### v0.8.0 (January 20, 2025) - **Timezone Support & Booking Sync** ⭐
 - **Location Timezone Fields**: Added timezone, arrivalDateTime, departureDateTime to Location entity
 - **Database Migration**: Room migration 2→3 for location timezone support
 - **Timezone Selector Dialog**: Searchable timezone picker with common timezones section
@@ -708,4 +732,4 @@ dependencies {
 **Document Owner:** Sid
 **Last Updated:** January 20, 2025
 **Status:** Phase 2 - In Progress (Intelligence Features) 🚀
-**Latest Version:** 0.8.0 (Timezone Support & Booking Sync)
+**Latest Version:** 0.9.0 (Timeline Enhancements - Origin Departures & Transit Cards)
