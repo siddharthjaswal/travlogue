@@ -15,6 +15,7 @@ import com.aurora.travlogue.core.data.local.entities.Location
 import com.aurora.travlogue.core.data.local.entities.TimeSlot
 import java.time.LocalDate
 import java.time.LocalTime
+import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -53,10 +54,20 @@ fun AddActivityDialog(
     var showStartTimePicker by remember { mutableStateOf(false) }
     var showEndTimePicker by remember { mutableStateOf(false) }
 
+    // Get selected location for validation
+    val selectedLocation = remember(selectedLocationId, locations) {
+        locations.find { it.id == selectedLocationId }
+    }
+
+    // Time window validation
+    val timeValidation = remember(selectedLocation, selectedDate, startTime, endTime) {
+        validateActivityTimeWindow(selectedLocation, selectedDate, startTime, endTime)
+    }
+
     // Validation
     val isTitleValid = title.isNotBlank()
     val isLocationValid = selectedLocationId.isNotBlank()
-    val isFormValid = isTitleValid && isLocationValid
+    val isFormValid = isTitleValid && isLocationValid && timeValidation.isValid
 
     Scaffold(
         topBar = {
@@ -167,6 +178,33 @@ fun AddActivityDialog(
                 readOnly = true,
                 label = { Text("Date (Optional)") },
                 placeholder = { Text("Select date") },
+                isError = !timeValidation.isValid && selectedDate.isNotBlank(),
+                supportingText = {
+                    when {
+                        !timeValidation.isValid && selectedDate.isNotBlank() -> {
+                            Text(
+                                text = timeValidation.errorMessage,
+                                color = MaterialTheme.colorScheme.error
+                            )
+                        }
+                        selectedLocation?.arrivalDateTime != null && selectedLocation.departureDateTime != null -> {
+                            val arrivalTime = try {
+                                ZonedDateTime.parse(selectedLocation.arrivalDateTime)
+                            } catch (e: Exception) { null }
+                            val departureTime = try {
+                                ZonedDateTime.parse(selectedLocation.departureDateTime)
+                            } catch (e: Exception) { null }
+
+                            if (arrivalTime != null && departureTime != null) {
+                                Text(
+                                    text = "Valid: ${formatDateTime(selectedLocation.arrivalDateTime)} - ${formatDateTime(selectedLocation.departureDateTime)}",
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                            }
+                        }
+                    }
+                },
                 trailingIcon = {
                     TextButton(onClick = { showDatePicker = true }) {
                         Text("Pick")

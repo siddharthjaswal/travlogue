@@ -255,6 +255,101 @@ private fun formatDateTime(isoDateTime: String): String {
 }
 
 /**
+ * Card showing departure from origin city (not a Location in the trip)
+ */
+@Composable
+fun OriginDepartureCard(
+    originCity: String,
+    departureDateTime: String,
+    departureBooking: Booking,
+    modifier: Modifier = Modifier
+) {
+    Card(
+        modifier = modifier.fillMaxWidth(),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.3f)
+        )
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            horizontalArrangement = Arrangement.spacedBy(12.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            // Icon
+            Icon(
+                imageVector = Icons.Default.FlightTakeoff,
+                contentDescription = "Departure",
+                tint = MaterialTheme.colorScheme.secondary,
+                modifier = Modifier.size(32.dp)
+            )
+
+            Column(
+                modifier = Modifier.weight(1f),
+                verticalArrangement = Arrangement.spacedBy(4.dp)
+            ) {
+                Text(
+                    text = "Depart from $originCity",
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+
+                // Time and booking info
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = formatDateTime(departureDateTime),
+                        style = MaterialTheme.typography.bodyLarge,
+                        color = MaterialTheme.colorScheme.secondary,
+                        fontWeight = FontWeight.SemiBold
+                    )
+                    Text(
+                        text = "•",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                    Icon(
+                        imageVector = getBookingIcon(departureBooking.type),
+                        contentDescription = null,
+                        modifier = Modifier.size(16.dp),
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                    Text(
+                        text = departureBooking.provider,
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+
+                // To location
+                if (departureBooking.toLocation != null) {
+                    Text(
+                        text = "To ${departureBooking.toLocation}",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Preview(name = "OriginDepartureCardPreview", showBackground = true)
+@Composable
+private fun OriginDepartureCardPreview() {
+    val departureBooking = bookingFlight
+    OriginDepartureCard(
+        originCity = "San Francisco",
+        departureDateTime = "2025-07-01T10:00:00-07:00",
+        departureBooking = departureBooking
+    )
+}
+
+/**
  * Get appropriate icon for booking type
  */
 private fun getBookingIcon(type: BookingType) = when (type) {

@@ -175,6 +175,30 @@ fun TimelineTab(
                         }
                     }
 
+                    is TimelineItem.InTransit -> {
+                        TimelineItem(
+                            dateTime = item.getDateTime(),
+                            showDate = showDate,
+                            dotColor = MaterialTheme.colorScheme.tertiary
+                        ) {
+                            TransitCard(booking = item.booking)
+                        }
+                    }
+
+                    is TimelineItem.OriginDeparture -> {
+                        TimelineItem(
+                            dateTime = item.getDateTime(),
+                            showDate = showDate,
+                            dotColor = MaterialTheme.colorScheme.secondary
+                        ) {
+                            OriginDepartureCard(
+                                originCity = item.originCity,
+                                departureDateTime = item.booking.startDateTime,
+                                departureBooking = item.booking
+                            )
+                        }
+                    }
+
                     is TimelineItem.BookingItem -> {
                         TimelineItem(
                             dateTime = item.getDateTime(),
@@ -235,15 +259,24 @@ private sealed class TimelineItem {
         val departureBooking: Booking
     ) : TimelineItem()
 
+    data class InTransit(
+        val booking: Booking
+    ) : TimelineItem()
+
+    data class OriginDeparture(
+        val booking: Booking,
+        val originCity: String
+    ) : TimelineItem()
+
     data class BookingItem(
         val booking: Booking
     ) : TimelineItem()
 
     fun getSortableTimestamp(): String {
         return when (this) {
-            is TransitArrival -> "${arrivalDateTime}:1"
-            is CityWelcome -> "${arrivalDateTime}:2"
-            is HotelCheckIn -> "${booking.startDateTime}:3"
+            is TransitArrival -> "${arrivalDateTime}|1"
+            is CityWelcome -> "${arrivalDateTime}|2"
+            is HotelCheckIn -> "${booking.startDateTime}|3"
             is ActivityItem -> {
                 val date = activity.date ?: "9999-12-31"
                 val time = activity.startTime ?: when (activity.timeSlot) {
@@ -253,14 +286,16 @@ private sealed class TimelineItem {
                     TimeSlot.FULL_DAY -> "09:00:00"
                     null -> "12:00:00"
                 }
-                "${date}T${time}:4"
+                "${date}T${time}|4"
             }
 
-            is NothingPlanned -> "${date}T06:00:00:5"
-            is HotelCheckOut -> "${booking.endDateTime}:6"
-            is CityGoodbye -> "${departureDateTime}:7"
-            is TransitDeparture -> "${departureDateTime}:8"
-            is BookingItem -> "${booking.startDateTime}:9"
+            is NothingPlanned -> "${date}T06:00:00|5"
+            is HotelCheckOut -> "${booking.endDateTime}|6"
+            is CityGoodbye -> "${departureDateTime}|7"
+            is TransitDeparture -> "${departureDateTime}|8"
+            is InTransit -> "${booking.startDateTime}|8.5" // Between departure and arrival
+            is OriginDeparture -> "${booking.startDateTime}|0" // Very first item
+            is BookingItem -> "${booking.startDateTime}|9"
         }
     }
 
@@ -285,6 +320,8 @@ private sealed class TimelineItem {
             is HotelCheckOut -> booking.endDateTime
             is CityGoodbye -> departureDateTime
             is TransitDeparture -> departureDateTime
+            is InTransit -> booking.startDateTime
+            is OriginDeparture -> booking.startDateTime
             is BookingItem -> booking.startDateTime
         }
     }
@@ -299,6 +336,8 @@ private sealed class TimelineItem {
             is HotelCheckOut -> "checkout-${booking.id}"
             is CityGoodbye -> "goodbye-${location.id}"
             is TransitDeparture -> "transit-departure-${location.id}-${departureBooking.id}"
+            is InTransit -> "in-transit-${booking.id}"
+            is OriginDeparture -> "origin-departure-${booking.id}"
             is BookingItem -> "booking-${booking.id}"
         }
     }
@@ -327,6 +366,36 @@ private fun buildCompleteTimeline(
     val hotelBookings = bookings.filter { it.type == BookingType.HOTEL }
     val otherBookings = bookings.filter {
         it.type in listOf(BookingType.TICKET, BookingType.OTHER)
+    }
+
+    // Track which transit bookings we've added to avoid duplicates
+    val processedTransitBookings = mutableSetOf<String>()
+
+    // Add any transit bookings that don't match locations (e.g., departing from origin city)
+    // These are typically the first and last legs of the journey
+    transitBookings.forEach { booking ->
+        val departureMatchesLocation = locations.any { location ->
+            booking.fromLocation?.contains(location.name, ignoreCase = true) == true
+        }
+        val arrivalMatchesLocation = locations.any { location ->
+            booking.toLocation?.contains(location.name, ignoreCase = true) == true
+        }
+
+        // If departing from a non-location (origin city), add departure card
+        if (!departureMatchesLocation && booking.fromLocation != null) {
+            // Extract origin city from fromLocation (e.g., "San Francisco (SFO)" -> "San Francisco")
+            val originCity = booking.fromLocation.substringBefore("(").trim()
+            items.add(TimelineItem.OriginDeparture(booking, originCity))
+            items.add(TimelineItem.InTransit(booking))
+            processedTransitBookings.add(booking.id)
+        }
+        // If arriving at a non-location (return to origin), just add transit card
+        else if (!arrivalMatchesLocation && booking.toLocation != null) {
+            if (booking.id !in processedTransitBookings) {
+                items.add(TimelineItem.InTransit(booking))
+                processedTransitBookings.add(booking.id)
+            }
+        }
     }
 
     // Add city transitions and hotels for each location
@@ -361,6 +430,12 @@ private fun buildCompleteTimeline(
         departureBooking?.let { departure ->
             items.add(TimelineItem.CityGoodbye(location, departure.startDateTime))
             items.add(TimelineItem.TransitDeparture(location, departure.startDateTime, departure))
+
+            // Add InTransit card after departure (only once per booking)
+            if (departure.id !in processedTransitBookings) {
+                items.add(TimelineItem.InTransit(departure))
+                processedTransitBookings.add(departure.id)
+            }
         }
     }
 
@@ -407,7 +482,7 @@ private fun buildCompleteTimeline(
         { item ->
             try {
                 val timestamp = item.getSortableTimestamp()
-                val dateTimePart = timestamp.substringBeforeLast(":")
+                val dateTimePart = timestamp.substringBefore("|")
                 // Try parsing as ZonedDateTime first (bookings with timezone)
                 try {
                     ZonedDateTime.parse(dateTimePart).toInstant().toEpochMilli()
@@ -419,7 +494,7 @@ private fun buildCompleteTimeline(
                 Long.MAX_VALUE
             }
         },
-        { item -> item.getSortableTimestamp().substringAfterLast(":").toIntOrNull() ?: 99 }
+        { item -> item.getSortableTimestamp().substringAfter("|").toDoubleOrNull() ?: 99.0 }
     ))
 }
 

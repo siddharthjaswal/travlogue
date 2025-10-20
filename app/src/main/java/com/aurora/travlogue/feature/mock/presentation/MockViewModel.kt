@@ -16,19 +16,26 @@ class MockViewModel @Inject constructor(
 
     /**
      * Creates a complete trip with all details filled in (no gaps)
+     *
+     * TIMEZONE HANDLING:
+     * - Trip dates: July 1-10, 2025 (San Francisco timezone - origin city)
+     * - Outbound flight: Departs SFO July 1 10:00 AM PDT, arrives Tokyo July 2 2:30 PM JST
+     * - Return flight: Departs Osaka July 10 6:00 PM JST, arrives SFO July 10 11:30 AM PDT
+     * - Demonstrates timezone transition with +16 hour shift (PDT to JST)
+     * - Shows dateline crossing on return (leave evening, arrive same day morning)
      */
     fun createCompleteTrip(onComplete: (String) -> Unit) {
         viewModelScope.launch {
             try {
-                // Create trip
+                // Create trip (dates in origin timezone - San Francisco)
                 val tripId = UUID.randomUUID().toString()
                 val trip = Trip(
                     id = tripId,
                     name = "Complete Japan Adventure",
                     originCity = "San Francisco",
                     dateType = DateType.FIXED,
-                    startDate = "2025-07-01",
-                    endDate = "2025-07-10",
+                    startDate = "2025-07-01", // Departure day from SFO
+                    endDate = "2025-07-10", // Return day to SFO
                     flexibleMonth = null,
                     flexibleDuration = null
                 )
@@ -78,20 +85,31 @@ class MockViewModel @Inject constructor(
                     order = 3,
                     timezone = "Asia/Tokyo",
                     arrivalDateTime = "2025-07-08T10:00:00+09:00", // Train arrival from Kyoto (JR789 endDateTime)
-                    departureDateTime = "2025-07-10T18:00:00+09:00" // End of trip (estimated checkout/departure)
+                    departureDateTime = "2025-07-10T18:00:00+09:00" // Return flight departure (JAL124 startDateTime)
                 )
 
                 tripRepository.insertLocation(tokyo)
                 tripRepository.insertLocation(kyoto)
                 tripRepository.insertLocation(osaka)
 
-                // Create activities
+                // Create activities (all within location time windows)
                 val activities = listOf(
+                    // Tokyo: Arrival Jul 2 at 2:30 PM, Departure Jul 5 at 9:00 AM
+                    Activity(
+                        locationId = tokyoId,
+                        title = "Shibuya Crossing",
+                        description = "Experience the famous scramble crossing",
+                        date = "2025-07-02",
+                        timeSlot = TimeSlot.EVENING,
+                        type = ActivityType.ATTRACTION,
+                        startTime = "17:00", // After 2:30 PM arrival
+                        endTime = "19:00"
+                    ),
                     Activity(
                         locationId = tokyoId,
                         title = "Visit Senso-ji Temple",
                         description = "Explore Tokyo's oldest temple",
-                        date = "2025-07-01",
+                        date = "2025-07-03",
                         timeSlot = TimeSlot.MORNING,
                         type = ActivityType.ATTRACTION,
                         startTime = "09:00",
@@ -99,33 +117,24 @@ class MockViewModel @Inject constructor(
                     ),
                     Activity(
                         locationId = tokyoId,
-                        title = "Shibuya Crossing",
-                        description = "Experience the famous scramble crossing",
-                        date = "2025-07-02",
-                        timeSlot = TimeSlot.AFTERNOON,
-                        type = ActivityType.ATTRACTION,
-                        startTime = "13:00",
-                        endTime = "15:00"
-                    ),
-                    Activity(
-                        locationId = tokyoId,
                         title = "Tsukiji Fish Market",
                         description = "Fresh sushi breakfast",
-                        date = "2025-07-03",
+                        date = "2025-07-04",
                         timeSlot = TimeSlot.MORNING,
                         type = ActivityType.FOOD,
-                        startTime = "09:00",
-                        endTime = "10:30"
+                        startTime = "07:00",
+                        endTime = "09:00"
                     ),
+                    // Kyoto: Arrival Jul 5 at 11:15 AM, Departure Jul 8 at 9:30 AM
                     Activity(
                         locationId = kyotoId,
                         title = "Fushimi Inari Shrine",
                         description = "Walk through thousands of torii gates",
                         date = "2025-07-05",
-                        timeSlot = TimeSlot.MORNING,
+                        timeSlot = TimeSlot.AFTERNOON,
                         type = ActivityType.ATTRACTION,
-                        startTime = "09:00",
-                        endTime = "12:00"
+                        startTime = "14:00", // After 11:15 AM arrival
+                        endTime = "17:00"
                     ),
                     Activity(
                         locationId = kyotoId,
@@ -137,15 +146,16 @@ class MockViewModel @Inject constructor(
                         startTime = "13:00",
                         endTime = "15:30"
                     ),
+                    // Osaka: Arrival Jul 8 at 10:00 AM, Departure Jul 10 at 6:00 PM
                     Activity(
                         locationId = osakaId,
                         title = "Osaka Castle",
                         description = "Visit historic castle",
                         date = "2025-07-08",
-                        timeSlot = TimeSlot.MORNING,
+                        timeSlot = TimeSlot.AFTERNOON,
                         type = ActivityType.ATTRACTION,
-                        startTime = "09:00",
-                        endTime = "11:30"
+                        startTime = "14:00", // After 10:00 AM arrival
+                        endTime = "16:30"
                     ),
                     Activity(
                         locationId = osakaId,
@@ -161,16 +171,16 @@ class MockViewModel @Inject constructor(
 
                 activities.forEach { tripRepository.insertActivity(it) }
 
-                // Create bookings (all transit covered!)
+                // Create bookings (all transit covered with timezone info!)
                 val bookings = listOf(
-                    // Flight to Tokyo
+                    // Outbound Flight: SFO → Tokyo (Crossing Pacific, +16 hour timezone shift)
                     Booking(
                         tripId = tripId,
                         type = BookingType.FLIGHT,
                         confirmationNumber = "JAL123",
                         provider = "Japan Airlines",
-                        startDateTime = "2025-07-01T10:00:00-07:00",
-                        endDateTime = "2025-07-02T14:30:00+09:00",
+                        startDateTime = "2025-07-01T10:00:00-07:00", // Jul 1, 10:00 AM PDT (UTC-7)
+                        endDateTime = "2025-07-02T14:30:00+09:00", // Jul 2, 2:30 PM JST (UTC+9) - Next day!
                         timezone = "Asia/Tokyo",
                         fromLocation = "San Francisco (SFO)",
                         toLocation = "Tokyo Narita (NRT)",
@@ -185,7 +195,7 @@ class MockViewModel @Inject constructor(
                         type = BookingType.HOTEL,
                         confirmationNumber = "HTL001",
                         provider = "Tokyo Bay Hotel",
-                        startDateTime = "2025-07-01T15:00:00+09:00",
+                        startDateTime = "2025-07-02T15:00:00+09:00", // Check-in after flight arrival
                         endDateTime = "2025-07-05T11:00:00+09:00",
                         timezone = "Asia/Tokyo",
                         fromLocation = null,
@@ -258,6 +268,22 @@ class MockViewModel @Inject constructor(
                         currency = "USD",
                         notes = null,
                         imageUri = null
+                    ),
+                    // Return Flight: Osaka → SFO (Crossing dateline, -16 hour timezone shift)
+                    Booking(
+                        tripId = tripId,
+                        type = BookingType.FLIGHT,
+                        confirmationNumber = "JAL124",
+                        provider = "Japan Airlines",
+                        startDateTime = "2025-07-10T18:00:00+09:00", // Jul 10, 6:00 PM JST (UTC+9)
+                        endDateTime = "2025-07-10T11:30:00-07:00", // Jul 10, 11:30 AM PDT (UTC-7) - Same day!
+                        timezone = "America/Los_Angeles",
+                        fromLocation = "Osaka Kansai (KIX)",
+                        toLocation = "San Francisco (SFO)",
+                        price = 920.00,
+                        currency = "USD",
+                        notes = "Return flight - crosses International Date Line",
+                        imageUri = null
                     )
                 )
 
@@ -272,19 +298,26 @@ class MockViewModel @Inject constructor(
 
     /**
      * Creates a trip with missing details that will trigger gap detection
+     *
+     * TIMEZONE HANDLING:
+     * - Trip dates: August 1-15, 2025 (New York timezone - origin city)
+     * - Outbound flight: Departs JFK August 1 8:00 AM EDT, arrives Rome August 1 10:30 PM CEST
+     * - No return flight booked (demonstrates gap in transit)
+     * - Demonstrates timezone transition with +6 hour shift (EDT to CEST)
+     * - Missing transit between cities (Rome→Florence, Florence→Venice)
      */
     fun createTripWithGaps(onComplete: (String) -> Unit) {
         viewModelScope.launch {
             try {
-                // Create trip
+                // Create trip (dates in origin timezone - New York)
                 val tripId = UUID.randomUUID().toString()
                 val trip = Trip(
                     id = tripId,
                     name = "Italy Trip (Incomplete)",
                     originCity = "New York",
                     dateType = DateType.FIXED,
-                    startDate = "2025-08-01",
-                    endDate = "2025-08-15",
+                    startDate = "2025-08-01", // Departure day from JFK
+                    endDate = "2025-08-15", // Planned return day to JFK (no booking)
                     flexibleMonth = null,
                     flexibleDuration = null
                 )
@@ -345,18 +378,20 @@ class MockViewModel @Inject constructor(
                 tripRepository.insertLocation(florence)
                 tripRepository.insertLocation(venice)
 
-                // Create some activities (but not for all days)
+                // Create some activities (but not for all days - gaps remain intentional)
                 val activities = listOf(
+                    // Rome: Arrival Aug 1 at 10:30 PM
                     Activity(
                         locationId = romeId,
                         title = "Visit Colosseum",
                         description = "Tour the ancient amphitheater",
-                        date = "2025-08-01",
+                        date = "2025-08-02", // Next day after 10:30 PM arrival
                         timeSlot = TimeSlot.MORNING,
                         type = ActivityType.ATTRACTION,
                         startTime = "09:00",
                         endTime = "11:30"
                     ),
+                    // Florence: Arrival Aug 8 at 12:00 PM
                     Activity(
                         locationId = florenceId,
                         title = "Uffizi Gallery",
@@ -364,18 +399,19 @@ class MockViewModel @Inject constructor(
                         date = "2025-08-08",
                         timeSlot = TimeSlot.AFTERNOON,
                         type = ActivityType.ATTRACTION,
-                        startTime = "13:00",
-                        endTime = "16:00"
+                        startTime = "14:00", // After 12:00 PM arrival
+                        endTime = "17:00"
                     ),
+                    // Venice: Arrival Aug 12 at 11:00 AM
                     Activity(
                         locationId = veniceId,
                         title = "Gondola Ride",
                         description = "Tour canals by gondola",
                         date = "2025-08-12",
-                        timeSlot = TimeSlot.EVENING,
+                        timeSlot = TimeSlot.AFTERNOON,
                         type = ActivityType.ATTRACTION,
-                        startTime = "17:00",
-                        endTime = "18:30"
+                        startTime = "14:00", // After 11:00 AM arrival
+                        endTime = "15:30"
                     )
                 )
 
@@ -383,14 +419,14 @@ class MockViewModel @Inject constructor(
 
                 // Create bookings (but MISSING transit between cities!)
                 val bookings = listOf(
-                    // Flight to Rome
+                    // Outbound Flight: JFK → Rome (Crossing Atlantic, +6 hour timezone shift)
                     Booking(
                         tripId = tripId,
                         type = BookingType.FLIGHT,
                         confirmationNumber = "AA456",
                         provider = "American Airlines",
-                        startDateTime = "2025-08-01T08:00:00-04:00",
-                        endDateTime = "2025-08-01T22:30:00+02:00",
+                        startDateTime = "2025-08-01T08:00:00-04:00", // Aug 1, 8:00 AM EDT (UTC-4)
+                        endDateTime = "2025-08-01T22:30:00+02:00", // Aug 1, 10:30 PM CEST (UTC+2) - Same day!
                         timezone = "Europe/Rome",
                         fromLocation = "New York (JFK)",
                         toLocation = "Rome (FCO)",
