@@ -44,10 +44,13 @@ class MockViewModel @Inject constructor(
                     tripId = tripId,
                     name = "Tokyo",
                     country = "Japan",
-                    date = "2025-07-01",
+                    date = "2025-07-02", // Updated to match actual arrival date
                     latitude = 35.6762,
                     longitude = 139.6503,
-                    order = 1
+                    order = 1,
+                    timezone = "Asia/Tokyo",
+                    arrivalDateTime = "2025-07-02T14:30:00+09:00", // Flight arrival (JAL123 endDateTime)
+                    departureDateTime = "2025-07-05T09:00:00+09:00" // Train departure to Kyoto (JR456 startDateTime)
                 )
 
                 val kyoto = Location(
@@ -58,7 +61,10 @@ class MockViewModel @Inject constructor(
                     date = "2025-07-05",
                     latitude = 35.0116,
                     longitude = 135.7681,
-                    order = 2
+                    order = 2,
+                    timezone = "Asia/Tokyo",
+                    arrivalDateTime = "2025-07-05T11:15:00+09:00", // Train arrival from Tokyo (JR456 endDateTime)
+                    departureDateTime = "2025-07-08T09:30:00+09:00" // Train departure to Osaka (JR789 startDateTime)
                 )
 
                 val osaka = Location(
@@ -69,7 +75,10 @@ class MockViewModel @Inject constructor(
                     date = "2025-07-08",
                     latitude = 34.6937,
                     longitude = 135.5023,
-                    order = 3
+                    order = 3,
+                    timezone = "Asia/Tokyo",
+                    arrivalDateTime = "2025-07-08T10:00:00+09:00", // Train arrival from Kyoto (JR789 endDateTime)
+                    departureDateTime = "2025-07-10T18:00:00+09:00" // End of trip (estimated checkout/departure)
                 )
 
                 tripRepository.insertLocation(tokyo)
@@ -294,7 +303,10 @@ class MockViewModel @Inject constructor(
                     date = "2025-08-01",
                     latitude = 41.9028,
                     longitude = 12.4964,
-                    order = 1
+                    order = 1,
+                    timezone = "Europe/Rome",
+                    arrivalDateTime = "2025-08-01T22:30:00+02:00", // Arrival from flight
+                    departureDateTime = "2025-08-08T10:00:00+02:00" // Leaving for Florence (no booking)
                 )
 
                 // Gap: Days Aug 2-7 are unplanned!
@@ -307,7 +319,10 @@ class MockViewModel @Inject constructor(
                     date = "2025-08-08",
                     latitude = 43.7696,
                     longitude = 11.2558,
-                    order = 2
+                    order = 2,
+                    timezone = "Europe/Rome",
+                    arrivalDateTime = "2025-08-08T12:00:00+02:00", // Estimated arrival (no booking)
+                    departureDateTime = "2025-08-12T09:00:00+02:00" // Leaving for Venice (no booking)
                 )
 
                 // Gap: Days Aug 9-11 are unplanned!
@@ -320,7 +335,10 @@ class MockViewModel @Inject constructor(
                     date = "2025-08-12",
                     latitude = 45.4408,
                     longitude = 12.3155,
-                    order = 3
+                    order = 3,
+                    timezone = "Europe/Rome",
+                    arrivalDateTime = "2025-08-12T11:00:00+02:00", // Estimated arrival (no booking)
+                    departureDateTime = "2025-08-15T18:00:00+02:00" // End of trip
                 )
 
                 tripRepository.insertLocation(rome)

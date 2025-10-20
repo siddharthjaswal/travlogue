@@ -12,6 +12,7 @@ import com.aurora.travlogue.core.data.local.entities.Gap
 import com.aurora.travlogue.core.data.local.entities.Location
 import com.aurora.travlogue.core.data.local.entities.TimeSlot
 import com.aurora.travlogue.core.data.repository.TripRepository
+import com.aurora.travlogue.core.domain.BookingSyncService
 import com.aurora.travlogue.core.domain.GapDetectionService
 import com.aurora.travlogue.feature.tripdetail.domain.models.DaySchedule
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -32,6 +33,7 @@ import javax.inject.Inject
 class TripDetailViewModel @Inject constructor(
     private val tripRepository: TripRepository,
     private val gapDetectionService: GapDetectionService,
+    private val bookingSyncService: BookingSyncService,
     savedStateHandle: SavedStateHandle
 ) : ViewModel() {
 
@@ -253,6 +255,7 @@ class TripDetailViewModel @Inject constructor(
         name: String,
         country: String,
         date: String?,
+        timezone: String?,
         order: Int
     ) {
         viewModelScope.launch {
@@ -264,7 +267,10 @@ class TripDetailViewModel @Inject constructor(
                     date = date,
                     latitude = null,
                     longitude = null,
-                    order = order
+                    order = order,
+                    timezone = timezone,
+                    arrivalDateTime = null, // Will be set by booking sync logic
+                    departureDateTime = null // Will be set by booking sync logic
                 )
                 tripRepository.insertLocation(location)
                 _uiEvents.emit(TripDetailUiEvent.ShowSnackbar("Location added successfully"))
@@ -331,6 +337,10 @@ class TripDetailViewModel @Inject constructor(
                     imageUri = null
                 )
                 tripRepository.insertBooking(booking)
+
+                // Sync booking times with location arrival/departure times
+                bookingSyncService.syncBookingsWithLocations(tripId)
+
                 _uiEvents.emit(TripDetailUiEvent.ShowSnackbar("Booking added successfully"))
             } catch (e: Exception) {
                 _uiEvents.emit(TripDetailUiEvent.ShowError(e.message ?: "Failed to add booking"))
@@ -342,6 +352,10 @@ class TripDetailViewModel @Inject constructor(
         viewModelScope.launch {
             try {
                 tripRepository.updateBooking(booking)
+
+                // Sync booking times with location arrival/departure times
+                bookingSyncService.syncBookingsWithLocations(tripId)
+
                 _uiEvents.emit(TripDetailUiEvent.ShowSnackbar("Booking updated successfully"))
             } catch (e: Exception) {
                 _uiEvents.emit(TripDetailUiEvent.ShowError(e.message ?: "Failed to update booking"))
@@ -353,6 +367,11 @@ class TripDetailViewModel @Inject constructor(
         viewModelScope.launch {
             try {
                 tripRepository.deleteBooking(booking)
+
+                // Sync booking times with location arrival/departure times
+                // This will clear arrival/departure times if no other bookings reference the location
+                bookingSyncService.syncBookingsWithLocations(tripId)
+
                 _uiEvents.emit(TripDetailUiEvent.ShowSnackbar("Booking deleted successfully"))
             } catch (e: Exception) {
                 _uiEvents.emit(TripDetailUiEvent.ShowError(e.message ?: "Failed to delete booking"))

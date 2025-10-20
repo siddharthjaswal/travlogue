@@ -12,6 +12,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.aurora.travlogue.core.data.local.entities.Location
 import java.time.LocalDate
+import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -27,7 +28,13 @@ fun EditLocationDialog(
     var name by remember { mutableStateOf(location.name) }
     var country by remember { mutableStateOf(location.country) }
     var selectedDate by remember { mutableStateOf(location.date ?: "") }
+    var selectedTimezone by remember {
+        mutableStateOf<ZoneId?>(
+            location.timezone?.let { ZoneId.of(it) }
+        )
+    }
     var showDatePicker by remember { mutableStateOf(false) }
+    var showTimezonePicker by remember { mutableStateOf(false) }
     var showDeleteConfirmation by remember { mutableStateOf(false) }
 
     // Validation
@@ -68,7 +75,8 @@ fun EditLocationDialog(
                             location.copy(
                                 name = name,
                                 country = country,
-                                date = selectedDate.takeIf { it.isNotBlank() }
+                                date = selectedDate.takeIf { it.isNotBlank() },
+                                timezone = selectedTimezone?.id
                             )
                         )
                     }
@@ -141,6 +149,27 @@ fun EditLocationDialog(
                 modifier = Modifier.fillMaxWidth()
             )
 
+            // Timezone Field (Optional)
+            OutlinedTextField(
+                value = selectedTimezone?.id?.replace("_", " ") ?: "",
+                onValueChange = { },
+                readOnly = true,
+                label = { Text("Timezone (Optional)") },
+                placeholder = { Text("Select timezone") },
+                trailingIcon = {
+                    TextButton(onClick = { showTimezonePicker = true }) {
+                        Text("Pick")
+                    }
+                },
+                supportingText = {
+                    Text(
+                        "Used for accurate activity scheduling",
+                        style = MaterialTheme.typography.bodySmall
+                    )
+                },
+                modifier = Modifier.fillMaxWidth()
+            )
+
             // Info Card
             Card(
                 colors = CardDefaults.cardColors(
@@ -201,6 +230,18 @@ fun EditLocationDialog(
         ) {
             DatePicker(state = datePickerState)
         }
+    }
+
+    // Timezone Picker Dialog
+    if (showTimezonePicker) {
+        TimezoneSelectorDialog(
+            currentZone = selectedTimezone ?: ZoneId.systemDefault(),
+            onZoneSelected = { zone ->
+                selectedTimezone = zone
+                showTimezonePicker = false
+            },
+            onDismiss = { showTimezonePicker = false }
+        )
     }
 
     // Delete Confirmation Dialog

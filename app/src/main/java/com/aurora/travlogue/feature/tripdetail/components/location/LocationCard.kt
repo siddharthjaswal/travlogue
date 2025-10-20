@@ -2,6 +2,8 @@ package com.aurora.travlogue.feature.tripdetail.components.location
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.FlightLand
+import androidx.compose.material.icons.filled.FlightTakeoff
 import androidx.compose.material.icons.filled.Place
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
@@ -12,6 +14,7 @@ import androidx.compose.ui.unit.dp
 import com.aurora.travlogue.core.common.PreviewData
 import com.aurora.travlogue.core.data.local.entities.Location
 import java.time.LocalDate
+import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
 
 /**
@@ -84,6 +87,51 @@ fun LocationCard(
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
+
+                // Arrival and Departure times
+                if (location.arrivalDateTime != null || location.departureDateTime != null) {
+                    Spacer(modifier = Modifier.height(4.dp))
+
+                    // Arrival time
+                    if (location.arrivalDateTime != null) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(6.dp)
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.FlightLand,
+                                contentDescription = "Arrival",
+                                modifier = Modifier.size(16.dp),
+                                tint = MaterialTheme.colorScheme.primary
+                            )
+                            Text(
+                                text = "Arrival: ${formatDateTime(location.arrivalDateTime)}",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+                    }
+
+                    // Departure time
+                    if (location.departureDateTime != null) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(6.dp)
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.FlightTakeoff,
+                                contentDescription = "Departure",
+                                modifier = Modifier.size(16.dp),
+                                tint = MaterialTheme.colorScheme.secondary
+                            )
+                            Text(
+                                text = "Departure: ${formatDateTime(location.departureDateTime)}",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+                    }
+                }
             }
         }
     }
@@ -95,6 +143,21 @@ private fun formatLocationDate(dateString: String): String {
         date.format(DateTimeFormatter.ofPattern("MMM d, yyyy"))
     } catch (e: Exception) {
         dateString
+    }
+}
+
+/**
+ * Formats ISO 8601 datetime with timezone to a readable format
+ * Input: "2025-07-02T14:30:00+09:00"
+ * Output: "Jul 2, 2:30 PM"
+ */
+private fun formatDateTime(dateTimeString: String): String {
+    return try {
+        val zonedDateTime = ZonedDateTime.parse(dateTimeString)
+        zonedDateTime.format(DateTimeFormatter.ofPattern("MMM d, h:mm a"))
+    } catch (e: Exception) {
+        // Fallback to showing just the string if parsing fails
+        dateTimeString
     }
 }
 

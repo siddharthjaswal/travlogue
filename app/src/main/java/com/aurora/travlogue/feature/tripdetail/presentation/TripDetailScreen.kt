@@ -97,8 +97,8 @@ fun TripDetailScreen(
     if (uiState.showAddLocationDialog) {
         AddLocationDialog(
             onDismiss = viewModel::hideAddLocationDialog,
-            onSave = { name, country, date, order ->
-                viewModel.addLocation(name, country, date, order)
+            onSave = { name, country, date, timezone, order ->
+                viewModel.addLocation(name, country, date, timezone, order)
                 viewModel.hideAddLocationDialog()
             },
             currentLocationCount = uiState.locationCount,

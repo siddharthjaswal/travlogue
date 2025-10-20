@@ -11,6 +11,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import java.time.LocalDate
+import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -21,6 +22,7 @@ fun AddLocationDialog(
         name: String,
         country: String,
         date: String?,
+        timezone: String?,
         order: Int
     ) -> Unit,
     currentLocationCount: Int,
@@ -30,7 +32,9 @@ fun AddLocationDialog(
     var name by remember { mutableStateOf("") }
     var country by remember { mutableStateOf("") }
     var selectedDate by remember { mutableStateOf("") }
+    var selectedTimezone by remember { mutableStateOf<ZoneId?>(null) }
     var showDatePicker by remember { mutableStateOf(false) }
+    var showTimezonePicker by remember { mutableStateOf(false) }
 
     // Validation
     val isNameValid = name.isNotBlank()
@@ -70,6 +74,7 @@ fun AddLocationDialog(
                             name,
                             country,
                             selectedDate.takeIf { it.isNotBlank() },
+                            selectedTimezone?.id,
                             currentLocationCount + 1 // Next order number
                         )
                     }
@@ -141,6 +146,27 @@ fun AddLocationDialog(
                 modifier = Modifier.fillMaxWidth()
             )
 
+            // Timezone Field (Optional)
+            OutlinedTextField(
+                value = selectedTimezone?.id?.replace("_", " ") ?: "",
+                onValueChange = { },
+                readOnly = true,
+                label = { Text("Timezone (Optional)") },
+                placeholder = { Text("Select timezone") },
+                trailingIcon = {
+                    TextButton(onClick = { showTimezonePicker = true }) {
+                        Text("Pick")
+                    }
+                },
+                supportingText = {
+                    Text(
+                        "Used for accurate activity scheduling",
+                        style = MaterialTheme.typography.bodySmall
+                    )
+                },
+                modifier = Modifier.fillMaxWidth()
+            )
+
             // Info Card
             Card(
                 colors = CardDefaults.cardColors(
@@ -201,6 +227,18 @@ fun AddLocationDialog(
         ) {
             DatePicker(state = datePickerState)
         }
+    }
+
+    // Timezone Picker Dialog
+    if (showTimezonePicker) {
+        TimezoneSelectorDialog(
+            currentZone = selectedTimezone ?: ZoneId.systemDefault(),
+            onZoneSelected = { zone ->
+                selectedTimezone = zone
+                showTimezonePicker = false
+            },
+            onDismiss = { showTimezonePicker = false }
+        )
     }
 }
 

@@ -17,7 +17,7 @@ import com.aurora.travlogue.core.data.local.entities.*
         Gap::class,
         TransitOption::class
     ],
-    version = 2,
+    version = 3,
     exportSchema = false
 )
 @TypeConverters(Converters::class)
@@ -39,6 +39,26 @@ abstract class TravlogueDatabase : RoomDatabase() {
                 // Add endTimezone column to bookings table
                 database.execSQL(
                     "ALTER TABLE bookings ADD COLUMN endTimezone TEXT DEFAULT NULL"
+                )
+            }
+        }
+
+        /**
+         * Migration from version 2 to 3: Add timezone, arrivalDateTime, and departureDateTime to Location table
+         */
+        val MIGRATION_2_3 = object : Migration(2, 3) {
+            override fun migrate(database: SupportSQLiteDatabase) {
+                // Add timezone column to locations table
+                database.execSQL(
+                    "ALTER TABLE locations ADD COLUMN timezone TEXT DEFAULT NULL"
+                )
+                // Add arrivalDateTime column to locations table
+                database.execSQL(
+                    "ALTER TABLE locations ADD COLUMN arrivalDateTime TEXT DEFAULT NULL"
+                )
+                // Add departureDateTime column to locations table
+                database.execSQL(
+                    "ALTER TABLE locations ADD COLUMN departureDateTime TEXT DEFAULT NULL"
                 )
             }
         }

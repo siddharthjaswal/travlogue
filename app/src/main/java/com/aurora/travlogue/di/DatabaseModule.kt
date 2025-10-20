@@ -25,7 +25,10 @@ object DatabaseModule {
             TravlogueDatabase::class.java,
             "travlogue_database"
         )
-            .addMigrations(TravlogueDatabase.MIGRATION_1_2)
+            .addMigrations(
+                TravlogueDatabase.MIGRATION_1_2,
+                TravlogueDatabase.MIGRATION_2_3
+            )
             .fallbackToDestructiveMigration() // For development - remove for production
             .build()
     }
