@@ -164,10 +164,13 @@ data class Location(
     val tripId: String,
     val name: String,
     val country: String,
-    val date: LocalDate?,
+    val date: String?, // ISO format: yyyy-MM-dd (arrival date)
     val latitude: Double?,
     val longitude: Double?,
-    val order: Int
+    val order: Int,
+    val timezone: String? = null, // IANA timezone: "Asia/Tokyo", "Europe/Paris"
+    val arrivalDateTime: String? = null, // ISO 8601 with timezone: "2025-07-01T14:30:00+09:00"
+    val departureDateTime: String? = null // ISO 8601 with timezone: "2025-07-05T09:00:00+09:00"
 )
 
 @Entity
@@ -337,9 +340,17 @@ enum class TransitMode { FLIGHT, TRAIN, BUS, CAR, FERRY }
   - ✅ Overview tab integration with warning section
   - ✅ One-click actions to resolve gaps
   - ✅ Mark as resolved / dismiss functionality
-- ⏳ **TODO (v0.7.0):** Transit Suggestions via Rome2Rio API
-- ⏳ **TODO (v0.8.0):** Weather & Attractions integration
-- ⏳ **TODO (v0.9.0):** Flight price integration
+- ✅ **COMPLETED (v0.8.0):** Timezone Support & Booking Sync - **Location Intelligence!** ⭐
+  - ✅ Location timezone awareness (IANA format)
+  - ✅ Arrival and departure datetime tracking
+  - ✅ Timezone selector dialog with search
+  - ✅ BookingSyncService for automatic time synchronization
+  - ✅ Smart location name matching algorithm
+  - ✅ LocationCard visual indicators for arrival/departure
+  - ✅ Database migration (v2→v3) with data preservation
+- ⏳ **TODO (v0.9.0):** Transit Suggestions via Rome2Rio API
+- ⏳ **TODO (v1.0.0):** Weather & Attractions integration
+- ⏳ **TODO (v1.1.0):** Flight price integration
 - ⏳ **TODO:** AI-powered recommendations
 
 ### Phase 3: Polish (Month 4)
@@ -631,7 +642,19 @@ dependencies {
 - Type-safe navigation with Kotlin Serialization
 - Enhanced repository with JOIN queries for efficient data loading
 
-### Recent Additions (v0.7.0 - January 18, 2025) - **Timeline Redesign** ✨
+### Recent Additions (v0.8.0 - January 20, 2025) - **Timezone Support & Booking Sync** ⭐
+- **Location Timezone Fields**: Added timezone, arrivalDateTime, departureDateTime to Location entity
+- **Database Migration**: Room migration 2→3 for location timezone support
+- **Timezone Selector Dialog**: Searchable timezone picker with common timezones section
+- **Add/Edit Location UI**: Integrated timezone picker in location dialogs
+- **BookingSyncService**: Automatic synchronization of booking times with location arrival/departure
+- **Smart Name Matching**: Fuzzy matching algorithm (e.g., "Tokyo" matches "Tokyo (NRT)")
+- **LocationCard Enhancement**: Visual indicators for arrival (✈️↓) and departure (✈️↑) times
+- **DateTime Formatting**: Readable format "Jul 2, 2:30 PM" for location times
+- **PreviewData Update**: All location previews now include timezone information
+- **MockViewModel Update**: Corrected location times to match booking data
+
+### v0.7.0 Additions (January 18, 2025) - **Timeline Redesign** ✨
 - **Timeline Layout**: Fixed 80/20 width split (20% date badge, 80% content)
 - **Compact Text Sizes**: Reduced all text sizes across timeline cards for better space utilization
 - **Redesigned Date Badges**: Weekday on top, day number in wrapping circle with adaptive sizing
@@ -683,6 +706,6 @@ dependencies {
 ---
 
 **Document Owner:** Sid
-**Last Updated:** January 18, 2025
-**Status:** Phase 2 - In Progress (Gap Detection + Timeline Polish) 🚀
-**Latest Version:** 0.7.0 (Timeline Redesign + Cross-Timezone Bookings)
+**Last Updated:** January 20, 2025
+**Status:** Phase 2 - In Progress (Intelligence Features) 🚀
+**Latest Version:** 0.8.0 (Timezone Support & Booking Sync)

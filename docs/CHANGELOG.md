@@ -8,6 +8,152 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+### Added - Timezone Support & Booking Sync (v0.8.0) ✅ **Location Intelligence**
+
+**Automatic Location Timing & Timezone Management**
+
+- **Location Timezone Support** - Full timezone awareness for locations
+  - Added `timezone` field (IANA format: "Asia/Tokyo", "Europe/Paris")
+  - Added `arrivalDateTime` field (ISO 8601 with timezone)
+  - Added `departureDateTime` field (ISO 8601 with timezone)
+  - Database migration from version 2 to 3
+  - Preserves existing data during migration
+
+- **Timezone Selector Dialog** - User-friendly timezone picker
+  - Searchable timezone list with city names
+  - Common timezones section for quick access
+  - World regions grouped display
+  - Real-time search filtering
+  - Reusable across Add/Edit Location dialogs
+
+- **Add/Edit Location Enhancements**
+  - Optional timezone selection with "Pick" button
+  - Helpful supporting text explaining timezone usage
+  - Form validation maintains required fields
+  - Timezone displayed in readable format (underscores replaced with spaces)
+
+- **Booking Sync Service** - Automatic arrival/departure sync ⭐ **Key Feature**
+  - `BookingSyncService` automatically updates location times from transit bookings
+  - Smart name matching (handles "Tokyo" matching "Tokyo (NRT)")
+  - Case-insensitive and partial match support
+  - Syncs on booking add, update, and delete operations
+  - Transit bookings (FLIGHT, TRAIN, BUS) trigger location updates
+  - Arrival time = booking's endDateTime (destination)
+  - Departure time = booking's startDateTime (origin)
+
+- **LocationCard Visual Enhancements** - Display arrival/departure times
+  - Flight landing icon (✈️↓) for arrival times in primary color
+  - Flight takeoff icon (✈️↑) for departure times in secondary color
+  - Readable time format: "Jul 2, 2:30 PM"
+  - Only shows times when they exist (null-safe)
+  - Helps users see at-a-glance when they arrive/leave each location
+
+- **Updated Preview Data** - Complete timezone information
+  - All location previews now include timezone data
+  - Arrival/departure times synced with booking data
+  - Consistent across all preview components
+  - Better preview experience for developers
+
+### Changed
+
+- **Location Entity** - Extended with timezone fields
+  - `timezone: String?` - IANA timezone identifier
+  - `arrivalDateTime: String?` - ISO 8601 with timezone
+  - `departureDateTime: String?` - ISO 8601 with timezone
+  - `date` field maintained for backward compatibility
+
+- **TripDetailViewModel** - Integrated BookingSyncService
+  - Injected BookingSyncService dependency
+  - Calls sync after all booking CRUD operations
+  - Automatic location time updates
+
+- **MockViewModel** - Accurate timezone data
+  - Tokyo location updated with correct arrival date
+  - All location times match corresponding bookings
+  - Detailed comments explaining booking relationships
+
+- **Database Schema** - Version 3
+  - Added three new nullable columns to locations table
+  - Safe migration preserving existing data
+  - No data loss during upgrade
+
+### Features
+
+✅ **Timezone Awareness** - Locations now timezone-aware for accurate scheduling
+✅ **Automatic Sync** - Booking times automatically update location arrival/departure
+✅ **Smart Matching** - Intelligent location name matching for transit bookings
+✅ **Visual Indicators** - Clear icons showing when you arrive and leave locations
+✅ **User-Friendly Picker** - Easy timezone selection with search
+✅ **Data Consistency** - All preview and mock data updated with timezones
+
+### Technical Highlights
+
+- Database migration framework (Room Migration 2→3)
+- New domain service: `BookingSyncService`
+- Extension function for transit booking identification
+- ZonedDateTime parsing and formatting
+- Reusable TimezoneSelectorDialog component
+- Smart name matching algorithm with fuzzy logic
+
+### Files Created (1 new service)
+
+1. `core/domain/BookingSyncService.kt` (120+ lines)
+   - Service for syncing booking times with locations
+   - Transit booking detection
+   - Location name matching logic
+   - Automatic time synchronization
+
+### Files Updated (8 files)
+
+1. `Location.kt` - Added timezone, arrivalDateTime, departureDateTime fields
+2. `TravlogueDatabase.kt` - Added MIGRATION_2_3, bumped version to 3
+3. `DatabaseModule.kt` - Added MIGRATION_2_3 to migrations list
+4. `AddLocationDialog.kt` - Added timezone picker UI
+5. `EditLocationDialog.kt` - Added timezone picker UI
+6. `TripDetailViewModel.kt` - Integrated BookingSyncService
+7. `LocationCard.kt` - Added arrival/departure time display
+8. `PreviewData.kt` - Updated locations with timezone data
+9. `MockViewModel.kt` - Fixed location times to match bookings
+
+### User Experience Flow
+
+1. **Adding a Location:**
+   - User fills in location name and country
+   - Optionally selects timezone from searchable picker
+   - Saves location with timezone info
+
+2. **Adding a Transit Booking:**
+   - User adds flight/train/bus booking
+   - Specifies "From" and "To" locations
+   - BookingSyncService automatically runs
+   - Matches booking locations to trip locations
+   - Updates location arrival/departure times
+
+3. **Viewing Locations:**
+   - LocationCard shows location details
+   - If arrival time exists, shows "✈️↓ Arrival: Jul 2, 2:30 PM"
+   - If departure time exists, shows "✈️↑ Departure: Jul 5, 9:00 AM"
+   - Clear visual indicators for travel timing
+
+### Benefits
+
+- **Accurate Scheduling:** Timezone-aware bookings prevent confusion
+- **Automatic Updates:** No manual entry of arrival/departure times
+- **Time Conflict Detection:** Ready foundation for gap detection improvements
+- **Better UX:** Visual indicators help users understand their itinerary at a glance
+- **Data Integrity:** Booking times and location times stay synchronized
+
+### Next Steps
+
+Phase 2 Intelligence features:
+- Enhanced gap detection using location arrival/departure times
+- Time conflict detection (bookings vs activities)
+- Transit option suggestions via API
+- Weather integration
+- Attractions discovery
+
+---
+
 ### Added - Testing Infrastructure (v0.6.0-dev) ✅
 
 **Week 1: Foundation & Setup Complete**

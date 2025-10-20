@@ -64,10 +64,13 @@ object PreviewData {
         tripId = "trip-1",
         name = "Tokyo",
         country = "Japan",
-        date = "2025-07-01",
+        date = "2025-07-02", // Arrival date (matches flight arrival)
         latitude = 35.6762,
         longitude = 139.6503,
-        order = 1
+        order = 1,
+        timezone = "Asia/Tokyo",
+        arrivalDateTime = "2025-07-02T14:30:00+09:00", // From flight booking
+        departureDateTime = "2025-07-05T09:00:00+09:00" // From train booking
     )
 
     val locationKyoto = Location(
@@ -78,7 +81,10 @@ object PreviewData {
         date = "2025-07-05",
         latitude = 35.0116,
         longitude = 135.7681,
-        order = 2
+        order = 2,
+        timezone = "Asia/Tokyo",
+        arrivalDateTime = "2025-07-05T11:15:00+09:00", // From train booking
+        departureDateTime = "2025-07-08T09:30:00+09:00" // Estimated departure
     )
 
     val locationOsaka = Location(
@@ -89,7 +95,10 @@ object PreviewData {
         date = "2025-07-08",
         latitude = 34.6937,
         longitude = 135.5023,
-        order = 3
+        order = 3,
+        timezone = "Asia/Tokyo",
+        arrivalDateTime = "2025-07-08T10:00:00+09:00", // Estimated arrival
+        departureDateTime = "2025-07-10T18:00:00+09:00" // End of trip
     )
 
     val sampleLocations = listOf(locationTokyo, locationKyoto, locationOsaka)
