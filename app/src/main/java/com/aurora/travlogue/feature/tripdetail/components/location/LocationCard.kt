@@ -1,7 +1,6 @@
 package com.aurora.travlogue.feature.tripdetail.components.location
 
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
-import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CalendarToday
@@ -82,40 +81,55 @@ fun LocationCard(
                 fallbackDate = location.date
             )
 
-            if (stayInfo != null) {
-                FlowRow(
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    verticalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    InfoChip(
-                        icon = Icons.Default.CalendarToday,
-                        contentDescription = "Stay",
-                        label = stayInfo.label,
-                        supportingLabel = stayInfo.supporting
-                    )
-                }
-            }
+            val hasTimingInfo =
+                location.arrivalDateTime != null || location.departureDateTime != null
 
-            if (location.arrivalDateTime != null || location.departureDateTime != null) {
+            if (hasTimingInfo) {
                 Divider(color = MaterialTheme.colorScheme.surfaceVariant)
-                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    location.arrivalDateTime?.let { arrival ->
-                        TimingRow(
-                            icon = Icons.Default.FlightLand,
-                            iconTint = MaterialTheme.colorScheme.primary,
-                            label = "Arrival",
-                            value = formatDateTime(arrival)
-                        )
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(12.dp),
+                    verticalAlignment = Alignment.Top
+                ) {
+                    Column(
+                        modifier = Modifier.weight(1f),
+                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        location.arrivalDateTime?.let { arrival ->
+                            TimingRow(
+                                icon = Icons.Default.FlightLand,
+                                iconTint = MaterialTheme.colorScheme.primary,
+                                label = "Arrival",
+                                value = formatDateTime(arrival)
+                            )
+                        }
+                        location.departureDateTime?.let { departure ->
+                            TimingRow(
+                                icon = Icons.Default.FlightTakeoff,
+                                iconTint = MaterialTheme.colorScheme.secondary,
+                                label = "Departure",
+                                value = formatDateTime(departure)
+                            )
+                        }
                     }
-                    location.departureDateTime?.let { departure ->
-                        TimingRow(
-                            icon = Icons.Default.FlightTakeoff,
-                            iconTint = MaterialTheme.colorScheme.secondary,
-                            label = "Departure",
-                            value = formatDateTime(departure)
+                    stayInfo?.let {
+                        InfoChip(
+                            icon = Icons.Default.CalendarToday,
+                            contentDescription = "Stay",
+                            label = it.label,
+                            supportingLabel = it.supporting,
+                            modifier = Modifier
+                                .align(Alignment.CenterVertically)
                         )
                     }
                 }
+            } else if (stayInfo != null) {
+                InfoChip(
+                    icon = Icons.Default.CalendarToday,
+                    contentDescription = "Stay",
+                    label = stayInfo.label,
+                    supportingLabel = stayInfo.supporting
+                )
             }
         }
     }
@@ -161,7 +175,8 @@ private fun InfoChip(
     icon: androidx.compose.ui.graphics.vector.ImageVector,
     contentDescription: String,
     label: String,
-    supportingLabel: String? = null
+    supportingLabel: String? = null,
+    modifier: Modifier = Modifier
 ) {
     val displayText = supportingLabel?.takeIf { it.isNotBlank() }?.let {
         "$label • $it"
@@ -189,7 +204,7 @@ private fun InfoChip(
                 overflow = TextOverflow.Ellipsis
             )
         },
-        modifier = Modifier.defaultMinSize(minHeight = 32.dp)
+        modifier = modifier.defaultMinSize(minHeight = 32.dp)
     )
 }
 
