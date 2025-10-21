@@ -87,22 +87,22 @@ fun CityArrivalCard(
                         color = MaterialTheme.colorScheme.primary,
                         fontWeight = FontWeight.SemiBold
                     )
-                    Text(
-                        text = "•",
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                    Icon(
-                        imageVector = getBookingIcon(arrivalBooking.type),
-                        contentDescription = null,
-                        modifier = Modifier.size(16.dp),
-                        tint = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                    Text(
-                        text = arrivalBooking.provider,
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
+//                    Text(
+//                        text = "•",
+//                        style = MaterialTheme.typography.bodyMedium,
+//                        color = MaterialTheme.colorScheme.onSurfaceVariant
+//                    )
+//                    Icon(
+//                        imageVector = getBookingIcon(arrivalBooking.type),
+//                        contentDescription = null,
+//                        modifier = Modifier.size(16.dp),
+//                        tint = MaterialTheme.colorScheme.onSurfaceVariant
+//                    )
+//                    Text(
+//                        text = arrivalBooking.provider,
+//                        style = MaterialTheme.typography.bodyMedium,
+//                        color = MaterialTheme.colorScheme.onSurfaceVariant
+//                    )
                 }
 
                 // From location
@@ -191,22 +191,22 @@ fun CityDepartureCard(
                         color = MaterialTheme.colorScheme.secondary,
                         fontWeight = FontWeight.SemiBold
                     )
-                    Text(
-                        text = "•",
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                    Icon(
-                        imageVector = getBookingIcon(departureBooking.type),
-                        contentDescription = null,
-                        modifier = Modifier.size(16.dp),
-                        tint = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                    Text(
-                        text = departureBooking.provider,
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
+//                    Text(
+//                        text = "•",
+//                        style = MaterialTheme.typography.bodyMedium,
+//                        color = MaterialTheme.colorScheme.onSurfaceVariant
+//                    )
+//                    Icon(
+//                        imageVector = getBookingIcon(departureBooking.type),
+//                        contentDescription = null,
+//                        modifier = Modifier.size(16.dp),
+//                        tint = MaterialTheme.colorScheme.onSurfaceVariant
+//                    )
+//                    Text(
+//                        text = departureBooking.provider,
+//                        style = MaterialTheme.typography.bodyMedium,
+//                        color = MaterialTheme.colorScheme.onSurfaceVariant
+//                    )
                 }
 
                 // To location
@@ -307,22 +307,22 @@ fun OriginDepartureCard(
                         color = MaterialTheme.colorScheme.secondary,
                         fontWeight = FontWeight.SemiBold
                     )
-                    Text(
-                        text = "•",
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                    Icon(
-                        imageVector = getBookingIcon(departureBooking.type),
-                        contentDescription = null,
-                        modifier = Modifier.size(16.dp),
-                        tint = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                    Text(
-                        text = departureBooking.provider,
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
+//                    Text(
+//                        text = "•",
+//                        style = MaterialTheme.typography.bodyMedium,
+//                        color = MaterialTheme.colorScheme.onSurfaceVariant
+//                    )
+//                    Icon(
+//                        imageVector = getBookingIcon(departureBooking.type),
+//                        contentDescription = null,
+//                        modifier = Modifier.size(16.dp),
+//                        tint = MaterialTheme.colorScheme.onSurfaceVariant
+//                    )
+//                    Text(
+//                        text = departureBooking.provider,
+//                        style = MaterialTheme.typography.bodyMedium,
+//                        color = MaterialTheme.colorScheme.onSurfaceVariant
+//                    )
                 }
 
                 // To location
