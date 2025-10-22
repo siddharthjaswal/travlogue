@@ -89,7 +89,9 @@ fun TripDetailScreen(
             },
             locations = uiState.locations,
             preselectedLocationId = uiState.preselectedLocationId,
-            preselectedDate = uiState.preselectedDate
+            preselectedDate = uiState.preselectedDate,
+            tripStartDate = uiState.trip?.startDate,
+            tripEndDate = uiState.trip?.endDate
         )
     }
 
@@ -125,7 +127,9 @@ fun TripDetailScreen(
                     notes
                 )
                 viewModel.hideAddBookingDialog()
-            }
+            },
+            tripStartDate = uiState.trip?.startDate,
+            tripEndDate = uiState.trip?.endDate
         )
     }
 
@@ -143,7 +147,9 @@ fun TripDetailScreen(
                     viewModel.deleteActivity(activity.id)
                     viewModel.hideEditActivityDialog()
                 },
-                locations = uiState.locations
+                locations = uiState.locations,
+                tripStartDate = uiState.trip?.startDate,
+                tripEndDate = uiState.trip?.endDate
             )
         }
     }
@@ -179,7 +185,9 @@ fun TripDetailScreen(
                 onDelete = {
                     viewModel.deleteBooking(booking)
                     viewModel.hideEditBookingDialog()
-                }
+                },
+                tripStartDate = uiState.trip?.startDate,
+                tripEndDate = uiState.trip?.endDate
             )
         }
     }
@@ -350,13 +358,15 @@ private fun TripDetailScreenContent(
                                 onDayClicked = onDayClicked,
                                 onActivityClick = onActivityClick,
                                 onBookingClick = onBookingClick,
-                                onGapClick = onGapClick
+                                onGapClick = onGapClick,
+                                onAddActivity = { onAddActivity(null, null) }
                             )
                         }
 
                         TripDetailTab.LOCATIONS -> {
                             LocationsTab(
                                 locations = uiState.locations,
+                                onAddLocation = onAddLocation,
                                 onLocationClick = onLocationClick
                             )
                         }
@@ -364,6 +374,7 @@ private fun TripDetailScreenContent(
                         TripDetailTab.BOOKINGS -> {
                             BookingsTab(
                                 bookings = uiState.bookings,
+                                onAddBooking = onAddBooking,
                                 onBookingClick = onBookingClick
                             )
                         }
@@ -392,7 +403,17 @@ private fun LoadingState() {
         modifier = Modifier.fillMaxSize(),
         contentAlignment = androidx.compose.ui.Alignment.Center
     ) {
-        CircularProgressIndicator()
+        Column(
+            horizontalAlignment = androidx.compose.ui.Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(16.dp)
+        ) {
+            CircularProgressIndicator()
+            Text(
+                text = "Loading trip details...",
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
     }
 }
 

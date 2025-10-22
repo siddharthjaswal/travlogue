@@ -3,6 +3,8 @@ package com.aurora.travlogue.feature.tripdetail.components.tabs
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -23,10 +25,14 @@ import java.time.format.DateTimeFormatter
 fun BookingsTab(
     bookings: List<Booking>,
     onBookingClick: (Booking) -> Unit,
+    onAddBooking: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     if (bookings.isEmpty()) {
-        EmptyBookingsState(modifier = modifier)
+        EmptyBookingsState(
+            onAddBooking = onAddBooking,
+            modifier = modifier
+        )
     } else {
         LazyColumn(
             modifier = modifier.fillMaxSize(),
@@ -176,7 +182,10 @@ private fun BookingCard(
 }
 
 @Composable
-private fun EmptyBookingsState(modifier: Modifier = Modifier) {
+private fun EmptyBookingsState(
+    onAddBooking: () -> Unit,
+    modifier: Modifier = Modifier
+) {
     Box(
         modifier = modifier
             .fillMaxSize()
@@ -188,6 +197,11 @@ private fun EmptyBookingsState(modifier: Modifier = Modifier) {
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             Text(
+                text = "🎫",
+                style = MaterialTheme.typography.displayLarge
+            )
+            Spacer(modifier = Modifier.height(8.dp))
+            Text(
                 text = "No bookings yet",
                 style = MaterialTheme.typography.titleMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
@@ -197,6 +211,16 @@ private fun EmptyBookingsState(modifier: Modifier = Modifier) {
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
+            Spacer(modifier = Modifier.height(16.dp))
+            Button(onClick = onAddBooking) {
+                Icon(
+                    imageVector = Icons.Default.Add,
+                    contentDescription = null,
+                    modifier = Modifier.size(20.dp)
+                )
+                Spacer(modifier = Modifier.width(8.dp))
+                Text("Add Booking")
+            }
         }
     }
 }
@@ -230,7 +254,8 @@ private fun BookingsTabPreview_WithBookings() {
     AppTheme {
         BookingsTab(
             bookings = PreviewData.sampleBookings,
-            onBookingClick = {}
+            onBookingClick = {},
+            onAddBooking = {}
         )
     }
 }
@@ -241,7 +266,8 @@ private fun BookingsTabPreview_Empty() {
     AppTheme {
         BookingsTab(
             bookings = emptyList(),
-            onBookingClick = {}
+            onBookingClick = {},
+            onAddBooking = {}
         )
     }
 }

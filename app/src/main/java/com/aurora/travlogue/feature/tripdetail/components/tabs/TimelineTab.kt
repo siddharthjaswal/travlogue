@@ -3,6 +3,10 @@ package com.aurora.travlogue.feature.tripdetail.components.tabs
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material3.Button
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -39,10 +43,14 @@ fun TimelineTab(
     onActivityClick: (Activity) -> Unit,
     onBookingClick: (Booking) -> Unit,
     onGapClick: (Gap) -> Unit,
+    onAddActivity: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     if (daySchedules.isEmpty() && bookings.isEmpty()) {
-        EmptyTimelineState(modifier = modifier)
+        EmptyTimelineState(
+            onAddActivity = onAddActivity,
+            modifier = modifier
+        )
     } else {
         // Build complete timeline with all dates
         val timelineItems = buildCompleteTimeline(
@@ -499,7 +507,10 @@ private fun buildCompleteTimeline(
 }
 
 @Composable
-private fun EmptyTimelineState(modifier: Modifier = Modifier) {
+private fun EmptyTimelineState(
+    onAddActivity: () -> Unit,
+    modifier: Modifier = Modifier
+) {
     Box(
         modifier = modifier
             .fillMaxSize()
@@ -511,6 +522,11 @@ private fun EmptyTimelineState(modifier: Modifier = Modifier) {
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             Text(
+                text = "📅",
+                style = MaterialTheme.typography.displayLarge
+            )
+            Spacer(modifier = Modifier.height(8.dp))
+            Text(
                 text = "No schedule yet",
                 style = MaterialTheme.typography.titleMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
@@ -520,6 +536,16 @@ private fun EmptyTimelineState(modifier: Modifier = Modifier) {
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
+            Spacer(modifier = Modifier.height(16.dp))
+            Button(onClick = onAddActivity) {
+                Icon(
+                    imageVector = Icons.Default.Add,
+                    contentDescription = null,
+                    modifier = Modifier.size(20.dp)
+                )
+                Spacer(modifier = Modifier.width(8.dp))
+                Text("Add Activity")
+            }
         }
     }
 }
