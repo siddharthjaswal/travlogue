@@ -17,7 +17,7 @@ An Android app that consolidates trip planning, detects gaps in your itinerary, 
 
 ## 📊 Current Status
 
-**Version:** 0.8.0 (Phase 2 - Intelligence Features)
+**Version:** 0.9.0 (Phase 2 - Timeline Intelligence)
 **Last Updated:** January 2025
 
 ### ✅ Completed (Phase 1 MVP + Phase 2 Intelligence)
@@ -27,16 +27,18 @@ An Android app that consolidates trip planning, detects gaps in your itinerary, 
 - ✅ Home Screen with trip management
 - ✅ Trip Detail Screen (Timeline, Locations, Bookings, Overview)
 - ✅ Full CRUD operations (Create, Read, Update, Delete)
-- ✅ Material 3 design system
+- ✅ Material 3 design system with Compose previews
 - ✅ Comprehensive DateTimeUtils
-- ✅ Full preview system
 - ✅ Gap Detection (MISSING_TRANSIT, UNPLANNED_DAY)
 - ✅ Timezone Support for Locations
 - ✅ Automatic Booking Sync (BookingSyncService)
+- ✅ Origin Departure Cards (departures from home city)
+- ✅ Transit Cards with Timezone Transitions
+- ✅ Activity Time Validation (prevent scheduling conflicts)
+- ✅ Feature-organized dialog components
 
 ### 🚧 In Progress (Phase 2)
-- 🚧 Enhanced gap detection with timezone awareness
-- 🚧 Transit option suggestions
+- 🚧 Transit option suggestions (API integration)
 
 ### ⏳ Next Up
 - API integrations (Weather, Places, Transit)
@@ -59,15 +61,16 @@ An Android app that consolidates trip planning, detects gaps in your itinerary, 
 
 ## 🎯 Key Features
 
-### Current (v0.8.0)
+### Current (v0.9.0)
 - 📝 Create trips (Fixed or Flexible dates)
 - 📋 View all trips with timeline visualization
 - ✏️ Full CRUD for activities, locations, and bookings
 - ⭐ **Intelligent Gap Detection** - Identifies missing transits and unplanned days
-- 🌍 **Timezone-Aware Locations** - Track arrival/departure times
+- 🌍 **Timezone-Aware Locations** - Track arrival/departure times with timezone transitions
 - 🔄 **Automatic Booking Sync** - Times sync between bookings and locations
-- ✈️ Visual indicators for travel timing
-- 🎨 Beautiful Material 3 UI
+- ✈️ **Complete Journey Flow** - Origin departures, in-transit status, arrivals
+- ⏰ **Activity Validation** - Prevents scheduling conflicts
+- 🎨 Beautiful Material 3 UI with comprehensive previews
 - 💾 Offline-first with Room
 
 ### Planned
@@ -171,25 +174,26 @@ Then suggests smart solutions:
 
 ## 📝 Recent Updates
 
-### v0.8.0 - Timezone Support & Booking Sync ⭐
+### v0.9.0 - Timeline Enhancements ⭐
+- Origin departure cards (departures from home city)
+- Transit cards with timezone transition indicators
+- Activity time validation (prevent scheduling conflicts)
+- Feature-organized dialog structure (activity/, booking/, location/)
+- Delete buttons moved to top app bar
+- Comprehensive Compose previews
+- Timeline sorting bug fixes
+
+### v0.8.0 - Timezone Support & Booking Sync
 - Added timezone awareness to locations
 - Implemented BookingSyncService for automatic time synchronization
-- LocationCard now shows arrival/departure times with visual icons
+- LocationCard shows arrival/departure times with visual icons
 - Smart location name matching for transit bookings
 - Database migration (v2→v3) with data preservation
-- Updated all preview data with timezone information
 
 ### v0.6.0 - Gap Detection (Key Differentiator!)
 - Intelligent gap detection (MISSING_TRANSIT, UNPLANNED_DAY)
 - Beautiful gap UI components with Material 3
 - Timeline and Overview tab integration
-- One-click gap resolution actions
-
-### v0.5.0 - Phase 1 MVP Complete 🎉
-- Full CRUD operations for all entities
-- Edit dialogs with pre-populated forms
-- Delete confirmations with cascade warnings
-- Tap-to-edit functionality
 
 See [CHANGELOG.md](docs/CHANGELOG.md) for full history.
 

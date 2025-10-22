@@ -22,21 +22,30 @@ feature/tripdetail/
 │   │   └── OverviewTab.kt           # Trip notes & info
 │   │
 │   ├── timeline/
-│   │   ├── DayCard.kt               # Day container
-│   │   ├── ActivityItem.kt          # Activity card
-│   │   ├── TimeSlotSection.kt       # Morning/Afternoon/Evening sections
-│   │   └── DayNotes.kt              # Notes for specific day
+│   │   ├── ActivityTimelineCard.kt  # Activity timeline display
+│   │   ├── CityTransitionCard.kt    # City departure/arrival cards
+│   │   ├── HotelCard.kt             # Hotel booking card
+│   │   ├── TimelineConnector.kt     # Visual connectors
+│   │   ├── TransitCard.kt           # In-transit status with timezone
+│   │   └── WelcomeCard.kt           # Welcome to city card
+│   │
+│   ├── activity/
+│   │   ├── ActivityValidation.kt    # Activity time validation
+│   │   ├── AddActivityDialog.kt     # Add activity dialog
+│   │   └── EditActivityDialog.kt    # Edit activity dialog
 │   │
 │   ├── location/
-│   │   └── LocationCard.kt          # Location list item
+│   │   ├── LocationCard.kt          # Location list item
+│   │   ├── AddLocationDialog.kt     # Add location dialog
+│   │   └── EditLocationDialog.kt    # Edit location dialog
 │   │
 │   ├── booking/
-│   │   ├── BookingCard.kt           # Booking list item
-│   │   └── BookingTypeIcon.kt       # Icon for booking type
+│   │   ├── AddBookingDialog.kt      # Add booking dialog
+│   │   └── EditBookingDialog.kt     # Edit booking dialog
 │   │
 │   └── dialogs/
-│       ├── AddActivityDialog.kt     # Add/Edit activity
-│       └── AddBookingDialog.kt      # Add/Edit booking
+│       ├── DateTimePickerField.kt   # Shared datetime picker
+│       └── TimezoneSelectorDialog.kt # Timezone selection dialog
 │
 ├── domain/
 │   └── models/
