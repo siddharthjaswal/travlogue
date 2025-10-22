@@ -1,4 +1,4 @@
-package com.aurora.travlogue.feature.tripdetail.components.dialogs
+package com.aurora.travlogue.feature.tripdetail.components.activity
 
 import com.aurora.travlogue.core.data.local.entities.Location
 import java.time.LocalDate

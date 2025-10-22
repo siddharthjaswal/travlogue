@@ -1,98 +1,72 @@
-package com.aurora.travlogue.feature.tripdetail.components.dialogs
+package com.aurora.travlogue.feature.tripdetail.components.booking
 
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.navigationBarsPadding
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.DropdownMenuItem
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.ExposedDropdownMenuBox
-import androidx.compose.material3.ExposedDropdownMenuDefaults
-import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Surface
-import androidx.compose.material3.Switch
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.aurora.travlogue.core.common.PreviewData
-import com.aurora.travlogue.core.data.local.entities.Booking
 import com.aurora.travlogue.core.data.local.entities.BookingType
-import java.time.ZoneId
+import com.aurora.travlogue.feature.tripdetail.components.dialogs.DateTimePickerField
 import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun EditBookingDialog(
-    booking: Booking,
+fun AddBookingDialog(
     onDismiss: () -> Unit,
-    onSave: (Booking) -> Unit,
-    onDelete: () -> Unit
+    onSave: (
+        type: BookingType,
+        confirmationNumber: String?,
+        provider: String,
+        startDateTime: String,
+        endDateTime: String?,
+        timezone: String,
+        endTimezone: String?,
+        fromLocation: String?,
+        toLocation: String?,
+        price: Double?,
+        currency: String?,
+        notes: String?
+    ) -> Unit
 ) {
-    var selectedType by remember { mutableStateOf(booking.type) }
-    var confirmationNumber by remember { mutableStateOf(booking.confirmationNumber ?: "") }
-    var provider by remember { mutableStateOf(booking.provider) }
-    var fromLocation by remember { mutableStateOf(booking.fromLocation ?: "") }
-    var toLocation by remember { mutableStateOf(booking.toLocation ?: "") }
-    var price by remember { mutableStateOf(booking.price?.toString() ?: "") }
-    var currency by remember { mutableStateOf(booking.currency ?: "USD") }
-    var notes by remember { mutableStateOf(booking.notes ?: "") }
+    var selectedType by remember { mutableStateOf(BookingType.FLIGHT) }
+    var confirmationNumber by remember { mutableStateOf("") }
+    var provider by remember { mutableStateOf("") }
+    var fromLocation by remember { mutableStateOf("") }
+    var toLocation by remember { mutableStateOf("") }
+    var price by remember { mutableStateOf("") }
+    var currency by remember { mutableStateOf("USD") }
+    var notes by remember { mutableStateOf("") }
     var showTypeDropdown by remember { mutableStateOf(false) }
-    var showDeleteConfirmation by remember { mutableStateOf(false) }
 
     // DateTime state with timezone support
     var startDateTime by remember {
-        mutableStateOf(
-            parseDateTime(booking.startDateTime, booking.timezone)
-        )
+        mutableStateOf<ZonedDateTime>(ZonedDateTime.now())
     }
     var endDateTime by remember {
-        mutableStateOf(
-            booking.endDateTime?.let {
-                parseDateTime(it, booking.endTimezone ?: booking.timezone)
-            }
-        )
+        mutableStateOf<ZonedDateTime?>(null)
     }
-    var useEndDateTime by remember { mutableStateOf(booking.endDateTime != null) }
+    var useEndDateTime by remember { mutableStateOf(false) }
 
     // Validation
     val isProviderValid = provider.isNotBlank()
+    val isFormValid = isProviderValid
 
     Scaffold(
         topBar = {
             TopAppBar(
                 title = {
                     Text(
-                        text = "Edit Booking",
+                        text = "Add Booking",
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis
                     )
@@ -102,15 +76,6 @@ fun EditBookingDialog(
                         Icon(
                             imageVector = Icons.Default.Close,
                             contentDescription = "Close"
-                        )
-                    }
-                },
-                actions = {
-                    IconButton(onClick = { showDeleteConfirmation = true }) {
-                        Icon(
-                            imageVector = Icons.Default.Delete,
-                            contentDescription = "Delete Booking",
-                            tint = MaterialTheme.colorScheme.error
                         )
                     }
                 },
@@ -124,27 +89,25 @@ fun EditBookingDialog(
             BottomActionBar(
                 onCancelClick = onDismiss,
                 onSaveClick = {
-                    if (isProviderValid) {
+                    if (isFormValid) {
                         val priceValue = price.toDoubleOrNull()
                         onSave(
-                            booking.copy(
-                                type = selectedType,
-                                confirmationNumber = confirmationNumber.takeIf { it.isNotBlank() },
-                                provider = provider,
-                                startDateTime = startDateTime.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME),
-                                endDateTime = endDateTime?.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME),
-                                timezone = startDateTime.zone.id,
-                                endTimezone = endDateTime?.zone?.id?.takeIf { it != startDateTime.zone.id },
-                                fromLocation = fromLocation.takeIf { it.isNotBlank() },
-                                toLocation = toLocation.takeIf { it.isNotBlank() },
-                                price = priceValue,
-                                currency = currency.takeIf { priceValue != null && it.isNotBlank() },
-                                notes = notes.takeIf { it.isNotBlank() }
-                            )
+                            selectedType,
+                            confirmationNumber.takeIf { it.isNotBlank() },
+                            provider,
+                            startDateTime.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME),
+                            endDateTime?.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME),
+                            startDateTime.zone.id,
+                            endDateTime?.zone?.id?.takeIf { it != startDateTime.zone.id },
+                            fromLocation.takeIf { it.isNotBlank() },
+                            toLocation.takeIf { it.isNotBlank() },
+                            priceValue,
+                            currency.takeIf { priceValue != null && it.isNotBlank() },
+                            notes.takeIf { it.isNotBlank() }
                         )
                     }
                 },
-                isSaveEnabled = isProviderValid
+                isSaveEnabled = isFormValid
             )
         }
     ) { paddingValues ->
@@ -281,7 +244,7 @@ fun EditBookingDialog(
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = androidx.compose.ui.Alignment.CenterVertically
+                verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
                     text = "Add End Date & Time",
@@ -343,35 +306,6 @@ fun EditBookingDialog(
             )
         }
     }
-
-    // Delete Confirmation Dialog
-    if (showDeleteConfirmation) {
-        AlertDialog(
-            onDismissRequest = { showDeleteConfirmation = false },
-            title = { Text("Delete Booking?") },
-            text = {
-                Text("Are you sure you want to delete this booking from $provider? This action cannot be undone.")
-            },
-            confirmButton = {
-                TextButton(
-                    onClick = {
-                        showDeleteConfirmation = false
-                        onDelete()
-                    },
-                    colors = ButtonDefaults.textButtonColors(
-                        contentColor = MaterialTheme.colorScheme.error
-                    )
-                ) {
-                    Text("Delete")
-                }
-            },
-            dismissButton = {
-                TextButton(onClick = { showDeleteConfirmation = false }) {
-                    Text("Cancel")
-                }
-            }
-        )
-    }
 }
 
 @Composable
@@ -384,29 +318,25 @@ private fun BottomActionBar(
         tonalElevation = 3.dp,
         shadowElevation = 3.dp
     ) {
-        Column(
+        Row(
             modifier = Modifier
                 .fillMaxWidth()
                 .navigationBarsPadding()
-                .padding(16.dp)
+                .padding(16.dp),
+            horizontalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(12.dp)
+            OutlinedButton(
+                onClick = onCancelClick,
+                modifier = Modifier.weight(1f)
             ) {
-                OutlinedButton(
-                    onClick = onCancelClick,
-                    modifier = Modifier.weight(1f)
-                ) {
-                    Text("Cancel")
-                }
-                Button(
-                    onClick = onSaveClick,
-                    enabled = isSaveEnabled,
-                    modifier = Modifier.weight(1f)
-                ) {
-                    Text("Save Changes")
-                }
+                Text("Cancel")
+            }
+            Button(
+                onClick = onSaveClick,
+                enabled = isSaveEnabled,
+                modifier = Modifier.weight(1f)
+            ) {
+                Text("Save")
             }
         }
     }
@@ -423,39 +353,25 @@ private fun getBookingTypeDisplay(type: BookingType): String {
     }
 }
 
-@Preview(name = "Edit Booking Dialog", showBackground = true, widthDp = 360)
+@Preview(name = "Add Booking Dialog", showBackground = true, widthDp = 360)
 @Composable
-private fun EditBookingDialogPreview() {
+private fun AddBookingDialogPreview() {
     MaterialTheme {
-        EditBookingDialog(
-            booking = PreviewData.bookingFlight,
+        AddBookingDialog(
             onDismiss = {},
-            onSave = { _ -> },
-            onDelete = {}
+            onSave = { _, _, _, _, _, _, _, _, _, _, _, _ -> }
         )
     }
 }
 
-@Preview(name = "Edit Booking Bottom Bar", showBackground = true, widthDp = 360)
+@Preview(name = "Booking Bottom Action Bar", showBackground = true, widthDp = 360)
 @Composable
-private fun EditBookingBottomActionBarPreview() {
+private fun AddBookingBottomActionBarPreview() {
     MaterialTheme {
         BottomActionBar(
             onCancelClick = {},
             onSaveClick = {},
             isSaveEnabled = true
         )
-    }
-}
-
-/**
- * Parse ISO datetime string with timezone into ZonedDateTime
- */
-private fun parseDateTime(isoDateTime: String, timezoneId: String): ZonedDateTime {
-    return try {
-        ZonedDateTime.parse(isoDateTime, DateTimeFormatter.ISO_OFFSET_DATE_TIME)
-    } catch (e: Exception) {
-        // Fallback: use current time with specified timezone
-        ZonedDateTime.now(ZoneId.of(timezoneId))
     }
 }

@@ -1,4 +1,4 @@
-package com.aurora.travlogue.feature.tripdetail.components.dialogs
+package com.aurora.travlogue.feature.tripdetail.components.location
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -11,6 +11,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.aurora.travlogue.feature.tripdetail.components.dialogs.TimezoneSelectorDialog
+import java.time.Instant
 import java.time.LocalDate
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
@@ -196,9 +198,9 @@ fun AddLocationDialog(
     if (showDatePicker) {
         val datePickerState = rememberDatePickerState(
             initialSelectedDateMillis = if (selectedDate.isNotBlank()) {
-                LocalDate.parse(selectedDate).atStartOfDay(java.time.ZoneId.systemDefault()).toInstant().toEpochMilli()
+                LocalDate.parse(selectedDate).atStartOfDay(ZoneId.systemDefault()).toInstant().toEpochMilli()
             } else if (tripStartDate != null) {
-                LocalDate.parse(tripStartDate).atStartOfDay(java.time.ZoneId.systemDefault()).toInstant().toEpochMilli()
+                LocalDate.parse(tripStartDate).atStartOfDay(ZoneId.systemDefault()).toInstant().toEpochMilli()
             } else {
                 System.currentTimeMillis()
             }
@@ -210,8 +212,8 @@ fun AddLocationDialog(
                 TextButton(
                     onClick = {
                         datePickerState.selectedDateMillis?.let { millis ->
-                            val instant = java.time.Instant.ofEpochMilli(millis)
-                            val localDate = instant.atZone(java.time.ZoneId.systemDefault()).toLocalDate()
+                            val instant = Instant.ofEpochMilli(millis)
+                            val localDate = instant.atZone(ZoneId.systemDefault()).toLocalDate()
                             selectedDate = localDate.format(DateTimeFormatter.ISO_LOCAL_DATE)
                         }
                         showDatePicker = false
