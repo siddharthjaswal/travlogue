@@ -17,10 +17,10 @@ An Android app that consolidates trip planning, detects gaps in your itinerary, 
 
 ## 📊 Current Status
 
-**Version:** 0.9.0 (Phase 2 - Timeline Intelligence)
+**Version:** 0.10.0 (UX Polish & Date Intelligence)
 **Last Updated:** January 2025
 
-### ✅ Completed (Phase 1 MVP + Phase 2 Intelligence)
+### ✅ Completed (Phase 1 MVP + Phase 2 Intelligence + UX Polish)
 - ✅ Feature-First Clean Architecture
 - ✅ Room database (6 entities) with migrations
 - ✅ Hilt dependency injection
@@ -36,6 +36,9 @@ An Android app that consolidates trip planning, detects gaps in your itinerary, 
 - ✅ Transit Cards with Timezone Transitions
 - ✅ Activity Time Validation (prevent scheduling conflicts)
 - ✅ Feature-organized dialog components
+- ✅ Empty State CTAs (guided user actions)
+- ✅ Date Range Constraints (trip date validation)
+- ✅ Smart Default Dates (trip start date defaulting)
 
 ### 🚧 In Progress (Phase 2)
 - 🚧 Transit option suggestions (API integration)
@@ -61,7 +64,7 @@ An Android app that consolidates trip planning, detects gaps in your itinerary, 
 
 ## 🎯 Key Features
 
-### Current (v0.9.0)
+### Current (v0.10.0)
 - 📝 Create trips (Fixed or Flexible dates)
 - 📋 View all trips with timeline visualization
 - ✏️ Full CRUD for activities, locations, and bookings
@@ -70,6 +73,8 @@ An Android app that consolidates trip planning, detects gaps in your itinerary, 
 - 🔄 **Automatic Booking Sync** - Times sync between bookings and locations
 - ✈️ **Complete Journey Flow** - Origin departures, in-transit status, arrivals
 - ⏰ **Activity Validation** - Prevents scheduling conflicts
+- 📅 **Smart Date Constraints** - Date pickers constrained to trip date range
+- 🎯 **Empty State Guidance** - Clear CTAs guide users to add content
 - 🎨 Beautiful Material 3 UI with comprehensive previews
 - 💾 Offline-first with Room
 
@@ -174,7 +179,15 @@ Then suggests smart solutions:
 
 ## 📝 Recent Updates
 
-### v0.9.0 - Timeline Enhancements ⭐
+### v0.10.0 - UX Polish & Date Intelligence ⭐ **NEW**
+- Empty state CTAs (action buttons guide users)
+- Date range constraints (prevents selecting dates outside trip range)
+- Smart default dates (date pickers default to trip start date)
+- Improved loading states with descriptive messages
+- Enhanced user guidance across all dialogs
+- Complete documentation for date constraints
+
+### v0.9.0 - Timeline Enhancements
 - Origin departure cards (departures from home city)
 - Transit cards with timezone transition indicators
 - Activity time validation (prevent scheduling conflicts)

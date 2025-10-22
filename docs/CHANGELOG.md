@@ -8,6 +8,174 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+### Added - UX Polish & Date Intelligence (v0.10.0) ✅ **User Experience**
+
+**Empty State CTAs & Smart Date Constraints**
+
+- **Empty State CTAs** - Action buttons in empty states ⭐ **Quick Win #1**
+  - Added call-to-action buttons to all empty states
+  - Visual emojis for each tab (📅 Timeline, 📍 Locations, 🎫 Bookings)
+  - Direct "Add" buttons guide users to create content
+  - Improved first-time user experience
+  - Components: `TimelineTab.kt`, `LocationsTab.kt`, `BookingsTab.kt`
+  - Before: Empty states only showed text messages
+  - After: Empty states include prominent action buttons
+
+- **Date Range Constraints** - Prevent invalid date selection ⭐ **Key Feature**
+  - All date pickers now constrained to trip date range
+  - Material 3 `SelectableDates` interface implementation
+  - Applies to all 6 dialogs (Add/Edit for Location, Activity, Booking)
+  - Visual feedback - dates outside range are grayed out
+  - Behavior:
+    - Both trip dates set → Only dates within range selectable
+    - Only start date → Only dates on or after start
+    - Only end date → Only dates on or before end
+    - No trip dates → All dates selectable
+  - Affected files:
+    - `AddLocationDialog.kt` - Direct date picker constraints
+    - `EditLocationDialog.kt` - Direct date picker constraints
+    - `AddActivityDialog.kt` - Direct date picker constraints
+    - `EditActivityDialog.kt` - Direct date picker constraints
+    - `DateTimePickerField.kt` - Reusable constraint logic
+    - `AddBookingDialog.kt` - Passes constraints to DateTimePickerField
+    - `EditBookingDialog.kt` - Passes constraints to DateTimePickerField
+    - `TripDetailScreen.kt` - Wires trip dates to all dialogs
+
+- **Smart Default Dates** - Intelligent date picker defaults ⭐ **UX Enhancement**
+  - Date pickers now default to trip start date instead of today
+  - More logical starting point for trip planning
+  - Falls back to today if no trip dates set
+  - Applies to all date/datetime pickers
+  - Implementation in `DateTimePickerField.kt`:
+    ```kotlin
+    var currentDate by remember(selectedDateTime, tripStartDate) {
+        mutableStateOf(
+            selectedDateTime?.toLocalDate()
+                ?: tripStartDate?.let { LocalDate.parse(it) }
+                ?: LocalDate.now()
+        )
+    }
+    ```
+
+- **Improved Loading States** - Better user feedback ⭐ **Quick Win #5**
+  - Enhanced loading indicators with descriptive messages
+  - "Loading trip details..." text with spinner
+  - Consistent spacing and alignment
+  - Better visual hierarchy
+  - Component: `TripDetailScreen.kt` LoadingState composable
+
+### Changed
+
+- **TripDetailScreen** - Empty state improvements
+  - All tabs now have action buttons in empty states
+  - Consistent emoji usage for visual appeal
+  - Better user guidance
+
+- **All Dialogs** - Date constraint integration
+  - Added `tripStartDate` and `tripEndDate` parameters
+  - Implemented `SelectableDates` constraint logic
+  - Updated initial date calculation
+
+### Features
+
+✅ **Empty State Guidance** - Clear CTAs guide users to add content
+✅ **Date Validation** - Prevents selecting dates outside trip range
+✅ **Smart Defaults** - Date pickers start at trip start date
+✅ **Visual Feedback** - Grayed-out dates communicate constraints
+✅ **Data Integrity** - Prevents invalid date entry across all dialogs
+✅ **Better UX** - Improved loading states and user guidance
+
+### Technical Highlights
+
+- Material 3 `SelectableDates` interface for date constraints
+- Reusable constraint pattern across all dialogs
+- Smart date defaulting with fallback logic
+- LocalDate parsing and comparison for validation
+- Null-safe handling of optional trip dates
+- Consistent empty state pattern with CTAs
+
+### Documentation Created
+
+1. **UX_IMPROVEMENTS_PLAN.md** (600+ lines)
+   - 8 Quick Wins identified
+   - 4-week implementation roadmap
+   - Code examples for each improvement
+   - Priority matrix and success metrics
+
+2. **UX_IMPROVEMENTS_COMPLETED.md** (300+ lines)
+   - Detailed before/after for Quick Wins #1, #2, #5
+   - Implementation details
+   - User impact analysis
+
+3. **DATE_PICKER_CONSTRAINTS.md** (300+ lines)
+   - Complete implementation guide
+   - Use cases and edge cases
+   - Technical details with code examples
+   - Testing checklist
+   - Future enhancements roadmap
+
+4. **TRANSIT_API_RESEARCH.md** (500+ lines)
+   - Comprehensive API comparison
+   - Pricing analysis
+   - Implementation recommendations
+   - Future reference for API integration
+
+### Files Created (1 reusable component)
+
+1. `feature/tripdetail/components/dialogs/DateTimePickerField.kt`
+   - Reusable datetime picker with timezone support
+   - Built-in date range constraint logic
+   - Smart default date handling
+   - Used by booking dialogs
+
+### Files Updated (10 files)
+
+1. `TimelineTab.kt` - Added empty state CTA
+2. `LocationsTab.kt` - Added empty state CTA
+3. `BookingsTab.kt` - Added empty state CTA
+4. `AddLocationDialog.kt` - Date constraints + smart defaults
+5. `EditLocationDialog.kt` - Date constraints + smart defaults
+6. `AddActivityDialog.kt` - Date constraints + smart defaults
+7. `EditActivityDialog.kt` - Date constraints + smart defaults
+8. `AddBookingDialog.kt` - Pass constraints to DateTimePickerField
+9. `EditBookingDialog.kt` - Pass constraints to DateTimePickerField
+10. `TripDetailScreen.kt` - Wire trip dates to all dialogs + improved loading state
+
+### User Experience Flow
+
+**Empty State → Action:**
+1. User opens trip detail with no content
+2. Sees empty state with emoji and descriptive text
+3. Prominent "Add" button guides next action
+4. Taps button to create first item
+5. Dialog opens immediately
+
+**Date Selection:**
+1. User opens any dialog with date picker
+2. Date picker opens defaulting to trip start date (not today)
+3. Invalid dates (outside trip range) are grayed out
+4. User can only select valid dates
+5. Prevents data entry errors
+6. No error messages needed
+
+### Benefits
+
+- **Better Onboarding:** Empty states guide new users
+- **Data Integrity:** Invalid dates can't be selected
+- **Fewer Errors:** Users can't make invalid date choices
+- **Logical Defaults:** Trip start date makes more sense than today
+- **Visual Clarity:** Grayed-out dates communicate constraints clearly
+- **Consistent UX:** Same pattern across all 6 dialogs
+
+### Migration Notes
+
+**No Database Changes Required**
+- ✅ Fully backward compatible with v0.9.0 data
+- ✅ UI-only changes
+- ✅ No data migration needed
+
+---
+
 ### Added - Timeline Enhancements (v0.9.0) ✅ **Timeline Intelligence**
 
 **Complete Journey Visualization & Activity Validation**
@@ -965,6 +1133,7 @@ Phase 1 MVP is now complete! Moving to Phase 2:
 
 ## Version History
 
+- **0.10.0** - UX Polish & Date Intelligence (Empty State CTAs, Date Constraints, Smart Defaults)
 - **0.9.0** - Timeline Enhancements (Origin Departures, Transit Cards, Activity Validation)
 - **0.8.0** - Timezone Support & Booking Sync (Location Intelligence)
 - **0.7.0** - Timeline Redesign (Compact Layout, Date Badges)
@@ -981,5 +1150,5 @@ Phase 1 MVP is now complete! Moving to Phase 2:
 
 **Maintained by:** Sid
 **Project Status:** Active Development - Phase 2 In Progress 🚀
-**Current Version:** 0.9.0 (Timeline Enhancements)
+**Current Version:** 0.10.0 (UX Polish & Date Intelligence)
 **Next Release:** 1.0.0 (Transit Suggestions API Integration)
