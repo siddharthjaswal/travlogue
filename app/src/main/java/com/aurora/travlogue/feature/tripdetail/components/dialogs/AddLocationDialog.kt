@@ -9,6 +9,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import java.time.LocalDate
 import java.time.ZoneId
@@ -282,5 +283,31 @@ private fun formatDate(isoDate: String): String {
         date.format(DateTimeFormatter.ofPattern("MMM d, yyyy"))
     } catch (e: Exception) {
         isoDate
+    }
+}
+
+@Preview(name = "Add Location Dialog", showBackground = true, widthDp = 360)
+@Composable
+private fun AddLocationDialogPreview() {
+    MaterialTheme {
+        AddLocationDialog(
+            onDismiss = {},
+            onSave = { _, _, _, _, _ -> },
+            currentLocationCount = 2,
+            tripStartDate = "2025-07-01",
+            tripEndDate = "2025-07-10"
+        )
+    }
+}
+
+@Preview(name = "Location Bottom Action Bar", showBackground = true, widthDp = 360)
+@Composable
+private fun AddLocationBottomActionBarPreview() {
+    MaterialTheme {
+        BottomActionBar(
+            onCancelClick = {},
+            onSaveClick = {},
+            isSaveEnabled = true
+        )
     }
 }

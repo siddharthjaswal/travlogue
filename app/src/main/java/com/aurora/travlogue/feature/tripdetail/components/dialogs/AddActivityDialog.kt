@@ -9,7 +9,9 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.aurora.travlogue.core.common.PreviewData
 import com.aurora.travlogue.core.data.local.entities.ActivityType
 import com.aurora.travlogue.core.data.local.entities.Location
 import com.aurora.travlogue.core.data.local.entities.TimeSlot
@@ -499,5 +501,32 @@ private fun getActivityTypeDisplay(type: ActivityType): String {
         ActivityType.BOOKING -> "🎫 Booking"
         ActivityType.TRANSIT -> "🚗 Transit"
         ActivityType.OTHER -> "📝 Other"
+    }
+}
+
+@Preview(name = "Add Activity Dialog", showBackground = true, widthDp = 360)
+@Composable
+private fun AddActivityDialogPreview() {
+    val locations = PreviewData.sampleLocations
+    MaterialTheme {
+        AddActivityDialog(
+            onDismiss = {},
+            onSave = { _, _, _, _, _, _, _, _ -> },
+            locations = locations,
+            preselectedLocationId = locations.first().id,
+            preselectedDate = locations.first().date
+        )
+    }
+}
+
+@Preview(name = "Bottom Action Bar", showBackground = true, widthDp = 360)
+@Composable
+private fun BottomActionBarPreview() {
+    MaterialTheme {
+        BottomActionBar(
+            onCancelClick = {},
+            onSaveClick = {},
+            isSaveEnabled = true
+        )
     }
 }

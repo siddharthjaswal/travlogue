@@ -9,7 +9,9 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.aurora.travlogue.core.common.PreviewData
 import com.aurora.travlogue.core.data.local.entities.Location
 import java.time.LocalDate
 import java.time.ZoneId
@@ -338,5 +340,33 @@ private fun formatDate(isoDate: String): String {
         date.format(DateTimeFormatter.ofPattern("MMM d, yyyy"))
     } catch (e: Exception) {
         isoDate
+    }
+}
+
+@Preview(name = "Edit Location Dialog", showBackground = true, widthDp = 360)
+@Composable
+private fun EditLocationDialogPreview() {
+    MaterialTheme {
+        EditLocationDialog(
+            location = PreviewData.locationTokyo,
+            onDismiss = {},
+            onSave = { _ -> },
+            onDelete = {},
+            tripStartDate = "2025-07-01",
+            tripEndDate = "2025-07-10"
+        )
+    }
+}
+
+@Preview(name = "Edit Location Bottom Bar", showBackground = true, widthDp = 360)
+@Composable
+private fun EditLocationBottomActionBarPreview() {
+    MaterialTheme {
+        BottomActionBar(
+            onCancelClick = {},
+            onSaveClick = {},
+            onDeleteClick = {},
+            isSaveEnabled = true
+        )
     }
 }

@@ -9,6 +9,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.tooling.preview.Preview
 import java.time.LocalDate
 import java.time.LocalTime
 import java.time.ZonedDateTime
@@ -194,6 +195,19 @@ fun DateTimePickerField(
                 showTimezonePicker = false
             },
             onDismiss = { showTimezonePicker = false }
+        )
+    }
+}
+
+@Preview(name = "Date Time Picker Field", showBackground = true, widthDp = 360)
+@Composable
+private fun DateTimePickerFieldPreview() {
+    MaterialTheme {
+        DateTimePickerField(
+            label = "Departure",
+            selectedDateTime = ZonedDateTime.now(),
+            onDateTimeSelected = {},
+            showTimezone = true
         )
     }
 }

@@ -9,7 +9,9 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.aurora.travlogue.core.common.PreviewData
 import com.aurora.travlogue.core.data.local.entities.Activity
 import com.aurora.travlogue.core.data.local.entities.ActivityType
 import com.aurora.travlogue.core.data.local.entities.Location
@@ -537,6 +539,34 @@ private fun BottomActionBar(
                 Text("Delete Activity")
             }
         }
+    }
+}
+
+@Preview(name = "Edit Activity Dialog", showBackground = true, widthDp = 360)
+@Composable
+private fun EditActivityDialogPreview() {
+    val locations = PreviewData.sampleLocations
+    MaterialTheme {
+        EditActivityDialog(
+            activity = PreviewData.activitySensoJi,
+            onDismiss = {},
+            onSave = { _ -> },
+            onDelete = {},
+            locations = locations
+        )
+    }
+}
+
+@Preview(name = "Edit Activity Bottom Bar", showBackground = true, widthDp = 360)
+@Composable
+private fun EditActivityBottomActionBarPreview() {
+    MaterialTheme {
+        BottomActionBar(
+            onCancelClick = {},
+            onSaveClick = {},
+            onDeleteClick = {},
+            isSaveEnabled = true
+        )
     }
 }
 

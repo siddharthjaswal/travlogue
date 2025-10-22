@@ -11,6 +11,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import java.time.ZoneId
 import java.time.ZonedDateTime
@@ -233,6 +234,30 @@ private fun TimezoneItem(
                 }
             )
         }
+    }
+}
+
+@Preview(name = "Timezone Selector Dialog", showBackground = true, widthDp = 360, heightDp = 640)
+@Composable
+private fun TimezoneSelectorDialogPreview() {
+    MaterialTheme {
+        TimezoneSelectorDialog(
+            currentZone = ZoneId.of("Asia/Tokyo"),
+            onZoneSelected = {},
+            onDismiss = {}
+        )
+    }
+}
+
+@Preview(name = "Timezone Item", showBackground = true, widthDp = 360)
+@Composable
+private fun TimezoneItemPreview() {
+    MaterialTheme {
+        TimezoneItem(
+            zone = ZoneId.of("Europe/London"),
+            isSelected = true,
+            onClick = {}
+        )
     }
 }
 

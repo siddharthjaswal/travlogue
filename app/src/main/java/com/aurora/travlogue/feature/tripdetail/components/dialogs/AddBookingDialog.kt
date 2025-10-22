@@ -11,6 +11,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.aurora.travlogue.core.data.local.entities.BookingType
 import java.time.LocalDate
@@ -350,5 +351,28 @@ private fun getBookingTypeDisplay(type: BookingType): String {
         BookingType.BUS -> "🚌 Bus"
         BookingType.TICKET -> "🎫 Ticket"
         BookingType.OTHER -> "📝 Other"
+    }
+}
+
+@Preview(name = "Add Booking Dialog", showBackground = true, widthDp = 360)
+@Composable
+private fun AddBookingDialogPreview() {
+    MaterialTheme {
+        AddBookingDialog(
+            onDismiss = {},
+            onSave = { _, _, _, _, _, _, _, _, _, _, _, _ -> }
+        )
+    }
+}
+
+@Preview(name = "Booking Bottom Action Bar", showBackground = true, widthDp = 360)
+@Composable
+private fun AddBookingBottomActionBarPreview() {
+    MaterialTheme {
+        BottomActionBar(
+            onCancelClick = {},
+            onSaveClick = {},
+            isSaveEnabled = true
+        )
     }
 }
