@@ -5,6 +5,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
@@ -90,6 +91,15 @@ fun EditActivityDialog(
                         )
                     }
                 },
+                actions = {
+                    IconButton(onClick = { showDeleteConfirmation = true }) {
+                        Icon(
+                            imageVector = Icons.Default.Delete,
+                            contentDescription = "Delete Activity",
+                            tint = MaterialTheme.colorScheme.error
+                        )
+                    }
+                },
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = MaterialTheme.colorScheme.primaryContainer,
                     titleContentColor = MaterialTheme.colorScheme.onPrimaryContainer
@@ -115,7 +125,6 @@ fun EditActivityDialog(
                         )
                     }
                 },
-                onDeleteClick = { showDeleteConfirmation = true },
                 isSaveEnabled = isFormValid
             )
         }
@@ -495,7 +504,6 @@ fun EditActivityDialog(
 private fun BottomActionBar(
     onCancelClick: () -> Unit,
     onSaveClick: () -> Unit,
-    onDeleteClick: () -> Unit,
     isSaveEnabled: Boolean
 ) {
     Surface(
@@ -526,18 +534,6 @@ private fun BottomActionBar(
                     Text("Save Changes")
                 }
             }
-
-            Spacer(modifier = Modifier.height(8.dp))
-
-            OutlinedButton(
-                onClick = onDeleteClick,
-                modifier = Modifier.fillMaxWidth(),
-                colors = ButtonDefaults.outlinedButtonColors(
-                    contentColor = MaterialTheme.colorScheme.error
-                )
-            ) {
-                Text("Delete Activity")
-            }
         }
     }
 }
@@ -564,7 +560,6 @@ private fun EditActivityBottomActionBarPreview() {
         BottomActionBar(
             onCancelClick = {},
             onSaveClick = {},
-            onDeleteClick = {},
             isSaveEnabled = true
         )
     }
