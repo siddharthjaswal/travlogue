@@ -6,6 +6,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.*
+import androidx.compose.material3.SelectableDates
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextOverflow
@@ -203,6 +204,33 @@ fun AddLocationDialog(
                 LocalDate.parse(tripStartDate).atStartOfDay(ZoneId.systemDefault()).toInstant().toEpochMilli()
             } else {
                 System.currentTimeMillis()
+            },
+            yearRange = IntRange(
+                LocalDate.now().year - 1,
+                LocalDate.now().year + 10
+            ),
+            selectableDates = object : SelectableDates {
+                override fun isSelectableDate(utcTimeMillis: Long): Boolean {
+                    // Convert millis to LocalDate
+                    val date = Instant.ofEpochMilli(utcTimeMillis)
+                        .atZone(ZoneId.systemDefault())
+                        .toLocalDate()
+
+                    // If trip has date range, constrain to it
+                    val startDate = tripStartDate?.let { LocalDate.parse(it) }
+                    val endDate = tripEndDate?.let { LocalDate.parse(it) }
+
+                    return when {
+                        startDate != null && endDate != null -> {
+                            !date.isBefore(startDate) && !date.isAfter(endDate)
+                        }
+                        startDate != null -> !date.isBefore(startDate)
+                        endDate != null -> !date.isAfter(endDate)
+                        else -> true // No constraints if no trip dates
+                    }
+                }
+
+                override fun isSelectableYear(year: Int): Boolean = true
             }
         )
 

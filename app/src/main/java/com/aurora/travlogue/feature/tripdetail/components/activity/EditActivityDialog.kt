@@ -7,6 +7,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.*
+import androidx.compose.material3.SelectableDates
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -32,7 +33,9 @@ fun EditActivityDialog(
     onDismiss: () -> Unit,
     onSave: (Activity) -> Unit,
     onDelete: () -> Unit,
-    locations: List<Location>
+    locations: List<Location>,
+    tripStartDate: String? = null,
+    tripEndDate: String? = null
 ) {
     var title by remember { mutableStateOf(activity.title) }
     var description by remember { mutableStateOf(activity.description ?: "") }
@@ -376,8 +379,35 @@ fun EditActivityDialog(
         val datePickerState = rememberDatePickerState(
             initialSelectedDateMillis = if (selectedDate.isNotBlank()) {
                 LocalDate.parse(selectedDate).atStartOfDay(ZoneId.systemDefault()).toInstant().toEpochMilli()
+            } else if (tripStartDate != null) {
+                LocalDate.parse(tripStartDate).atStartOfDay(ZoneId.systemDefault()).toInstant().toEpochMilli()
             } else {
                 System.currentTimeMillis()
+            },
+            yearRange = IntRange(
+                LocalDate.now().year - 1,
+                LocalDate.now().year + 10
+            ),
+            selectableDates = object : SelectableDates {
+                override fun isSelectableDate(utcTimeMillis: Long): Boolean {
+                    val date = Instant.ofEpochMilli(utcTimeMillis)
+                        .atZone(ZoneId.systemDefault())
+                        .toLocalDate()
+
+                    val startDate = tripStartDate?.let { LocalDate.parse(it) }
+                    val endDate = tripEndDate?.let { LocalDate.parse(it) }
+
+                    return when {
+                        startDate != null && endDate != null -> {
+                            !date.isBefore(startDate) && !date.isAfter(endDate)
+                        }
+                        startDate != null -> !date.isBefore(startDate)
+                        endDate != null -> !date.isAfter(endDate)
+                        else -> true
+                    }
+                }
+
+                override fun isSelectableYear(year: Int): Boolean = true
             }
         )
 

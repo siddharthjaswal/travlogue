@@ -5,11 +5,13 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CalendarToday
 import androidx.compose.material.icons.filled.Schedule
 import androidx.compose.material3.*
+import androidx.compose.material3.SelectableDates
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.tooling.preview.Preview
+import java.time.Instant
 import java.time.LocalDate
 import java.time.LocalTime
 import java.time.ZonedDateTime
@@ -27,15 +29,21 @@ fun DateTimePickerField(
     selectedDateTime: ZonedDateTime?,
     onDateTimeSelected: (ZonedDateTime) -> Unit,
     modifier: Modifier = Modifier,
-    showTimezone: Boolean = true
+    showTimezone: Boolean = true,
+    tripStartDate: String? = null,
+    tripEndDate: String? = null
 ) {
     var showDatePicker by remember { mutableStateOf(false) }
     var showTimePicker by remember { mutableStateOf(false) }
     var showTimezonePicker by remember { mutableStateOf(false) }
 
     // Current values
-    var currentDate by remember(selectedDateTime) {
-        mutableStateOf(selectedDateTime?.toLocalDate() ?: LocalDate.now())
+    var currentDate by remember(selectedDateTime, tripStartDate) {
+        mutableStateOf(
+            selectedDateTime?.toLocalDate()
+                ?: tripStartDate?.let { LocalDate.parse(it) }
+                ?: LocalDate.now()
+        )
     }
     var currentTime by remember(selectedDateTime) {
         mutableStateOf(selectedDateTime?.toLocalTime() ?: LocalTime.now())
@@ -111,7 +119,32 @@ fun DateTimePickerField(
     // Date Picker Dialog
     if (showDatePicker) {
         val datePickerState = rememberDatePickerState(
-            initialSelectedDateMillis = currentDate.toEpochDay() * 86400000
+            initialSelectedDateMillis = currentDate.toEpochDay() * 86400000,
+            yearRange = IntRange(
+                LocalDate.now().year - 1,
+                LocalDate.now().year + 10
+            ),
+            selectableDates = object : SelectableDates {
+                override fun isSelectableDate(utcTimeMillis: Long): Boolean {
+                    val date = Instant.ofEpochMilli(utcTimeMillis)
+                        .atZone(ZoneId.systemDefault())
+                        .toLocalDate()
+
+                    val startDate = tripStartDate?.let { LocalDate.parse(it) }
+                    val endDate = tripEndDate?.let { LocalDate.parse(it) }
+
+                    return when {
+                        startDate != null && endDate != null -> {
+                            !date.isBefore(startDate) && !date.isAfter(endDate)
+                        }
+                        startDate != null -> !date.isBefore(startDate)
+                        endDate != null -> !date.isAfter(endDate)
+                        else -> true
+                    }
+                }
+
+                override fun isSelectableYear(year: Int): Boolean = true
+            }
         )
 
         DatePickerDialog(

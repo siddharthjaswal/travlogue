@@ -58,7 +58,9 @@ fun EditBookingDialog(
     booking: Booking,
     onDismiss: () -> Unit,
     onSave: (Booking) -> Unit,
-    onDelete: () -> Unit
+    onDelete: () -> Unit,
+    tripStartDate: String? = null,
+    tripEndDate: String? = null
 ) {
     var selectedType by remember { mutableStateOf(booking.type) }
     var confirmationNumber by remember { mutableStateOf(booking.confirmationNumber ?: "") }
@@ -276,6 +278,8 @@ fun EditBookingDialog(
                 onDateTimeSelected = { newDateTime ->
                     startDateTime = newDateTime
                 },
+                tripStartDate = tripStartDate,
+                tripEndDate = tripEndDate,
                 showTimezone = true
             )
 
@@ -316,6 +320,8 @@ fun EditBookingDialog(
                     onDateTimeSelected = { newDateTime ->
                         endDateTime = newDateTime
                     },
+                    tripStartDate = tripStartDate,
+                    tripEndDate = tripEndDate,
                     showTimezone = isCrossTimezoneBooking // Show timezone for cross-timezone bookings
                 )
 

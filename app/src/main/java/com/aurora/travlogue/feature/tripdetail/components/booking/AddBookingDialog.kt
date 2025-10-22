@@ -36,7 +36,9 @@ fun AddBookingDialog(
         price: Double?,
         currency: String?,
         notes: String?
-    ) -> Unit
+    ) -> Unit,
+    tripStartDate: String? = null,
+    tripEndDate: String? = null
 ) {
     var selectedType by remember { mutableStateOf(BookingType.FLIGHT) }
     var confirmationNumber by remember { mutableStateOf("") }
@@ -237,6 +239,8 @@ fun AddBookingDialog(
                 onDateTimeSelected = { newDateTime ->
                     startDateTime = newDateTime
                 },
+                tripStartDate = tripStartDate,
+                tripEndDate = tripEndDate,
                 showTimezone = true
             )
 
@@ -277,6 +281,8 @@ fun AddBookingDialog(
                     onDateTimeSelected = { newDateTime ->
                         endDateTime = newDateTime
                     },
+                    tripStartDate = tripStartDate,
+                    tripEndDate = tripEndDate,
                     showTimezone = isCrossTimezoneBooking // Show timezone for cross-timezone bookings
                 )
 
