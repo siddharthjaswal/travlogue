@@ -392,46 +392,115 @@ struct BookingCardView: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
-            HStack {
-                Image(systemName: bookingIcon)
-                    .font(.title2)
-                    .foregroundColor(bookingColor)
+            // Type and provider header
+            HStack(spacing: 12) {
+                // Type icon
+                Text(bookingEmoji)
+                    .font(.title)
+                    .frame(width: 48, height: 48)
+                    .background(Color.purple.opacity(0.12))
+                    .cornerRadius(8)
 
-                VStack(alignment: .leading, spacing: 4) {
-                    Text(booking.confirmationNumber ?? "No confirmation")
-                        .font(.headline)
-
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(booking.type.name.replacingOccurrences(of: "_", with: " "))
+                        .font(.caption)
+                        .foregroundColor(.blue)
+                        .textCase(.uppercase)
                     Text(booking.provider)
-                        .font(.subheadline)
+                        .font(.headline)
+                }
+
+                Spacer()
+            }
+
+            // Date and time
+            VStack(alignment: .leading, spacing: 4) {
+                Text(formatBookingDateTime(booking.startDateTime, booking.timezone))
+                    .font(.subheadline)
+                    .foregroundColor(.secondary)
+
+                // From/To locations
+                if let from = booking.fromLocation, let to = booking.toLocation {
+                    HStack(spacing: 4) {
+                        Text(from)
+                        Image(systemName: "arrow.right")
+                            .font(.caption)
+                        Text(to)
+                    }
+                    .font(.subheadline)
+                }
+
+                // End time if different day
+                if let endTime = booking.endDateTime {
+                    Text("Until: \(formatBookingDateTime(endTime, booking.timezone))")
+                        .font(.caption)
                         .foregroundColor(.secondary)
+                }
+            }
+
+            // Confirmation and price
+            HStack {
+                if let confirmation = booking.confirmationNumber {
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text("Confirmation")
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                        Text(confirmation)
+                            .font(.subheadline)
+                    }
                 }
 
                 Spacer()
 
-                if let price = booking.price {
-                    Text("$\(String(format: "%.2f", price))")
-                        .font(.headline)
-                        .foregroundColor(.blue)
+                if let price = booking.price, let currency = booking.currency {
+                    VStack(alignment: .trailing, spacing: 2) {
+                        Text("Price")
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                        Text("\(currency) \(String(format: "%.2f", price))")
+                            .font(.subheadline)
+                            .fontWeight(.medium)
+                    }
                 }
             }
 
-            if let from = booking.fromLocation, let to = booking.toLocation {
-                HStack {
-                    Text(from)
-                    Image(systemName: "arrow.right")
-                    Text(to)
-                }
-                .font(.caption)
-                .foregroundColor(.secondary)
-            } else if let to = booking.toLocation {
-                Text(to)
+            // Notes section
+            if let notes = booking.notes, !notes.isEmpty {
+                Text(notes)
                     .font(.caption)
-                    .foregroundColor(.secondary)
+                    .padding(12)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .background(Color.gray.opacity(0.1))
+                    .cornerRadius(8)
             }
         }
         .padding()
-        .background(Color(.systemGray6))
+        .background(Color(.systemBackground))
         .cornerRadius(12)
+        .shadow(color: Color.black.opacity(0.05), radius: 2, x: 0, y: 1)
+    }
+
+    var bookingEmoji: String {
+        switch booking.type {
+        case BookingType.flight: return "✈️"
+        case BookingType.hotel: return "🏨"
+        case BookingType.train: return "🚂"
+        case BookingType.bus: return "🚌"
+        case BookingType.ticket: return "🎫"
+        default: return "📝"
+        }
+    }
+
+    func formatBookingDateTime(_ isoString: String?, _ timezone: String?) -> String {
+        guard let isoString = isoString else { return "N/A" }
+        let formatter = ISO8601DateFormatter()
+        formatter.formatOptions = [.withFullDate, .withTime, .withTimeZone]
+        if let date = formatter.date(from: isoString) {
+            let displayFormatter = DateFormatter()
+            displayFormatter.dateFormat = "MMM d, yyyy 'at' h:mm a"
+            return displayFormatter.string(from: date)
+        }
+        return isoString
     }
 
     var bookingIcon: String {
@@ -462,34 +531,85 @@ struct ActivityCardView: View {
     let activity: Activity
 
     var body: some View {
-        HStack(spacing: 12) {
-            Image(systemName: activityIcon)
-                .font(.title2)
-                .foregroundColor(.blue)
+        HStack(alignment: .top, spacing: 12) {
+            // Activity icon with colored background
+            ZStack {
+                Circle()
+                    .fill(activityColor.opacity(0.15))
+                    .frame(width: 40, height: 40)
+                Image(systemName: activityIcon)
+                    .font(.system(size: 18))
+                    .foregroundColor(activityColor)
+            }
 
-            VStack(alignment: .leading, spacing: 4) {
+            VStack(alignment: .leading, spacing: 6) {
+                // Title
                 Text(activity.title)
                     .font(.headline)
 
-                if let description = activity.description_ {
+                // Time info
+                if let startTime = activity.startTime, let endTime = activity.endTime {
+                    HStack(spacing: 4) {
+                        Image(systemName: "clock")
+                            .font(.caption)
+                        Text("\(startTime) - \(endTime)")
+                            .font(.subheadline)
+                    }
+                    .foregroundColor(.secondary)
+                } else if let timeSlot = activity.timeSlot {
+                    HStack(spacing: 4) {
+                        Image(systemName: "clock")
+                            .font(.caption)
+                        Text(timeSlotDisplay(timeSlot))
+                            .font(.subheadline)
+                    }
+                    .foregroundColor(.secondary)
+                }
+
+                // Description
+                if let description = activity.description_, !description.isEmpty {
                     Text(description)
                         .font(.caption)
                         .foregroundColor(.secondary)
                         .lineLimit(2)
                 }
 
-                if let startTime = activity.startTime, let endTime = activity.endTime {
-                    Text("\(activity.date) • \(startTime) - \(endTime)")
-                        .font(.caption2)
-                        .foregroundColor(.secondary)
-                }
+                // Activity type badge
+                Text(activity.type.name.replacingOccurrences(of: "_", with: " "))
+                    .font(.caption2)
+                    .fontWeight(.medium)
+                    .padding(.horizontal, 8)
+                    .padding(.vertical, 4)
+                    .background(activityColor.opacity(0.15))
+                    .cornerRadius(12)
             }
 
             Spacer()
         }
         .padding()
-        .background(Color(.systemGray6))
+        .background(Color(.systemBackground))
         .cornerRadius(12)
+        .shadow(color: Color.black.opacity(0.05), radius: 2, x: 0, y: 1)
+    }
+
+    var activityColor: Color {
+        switch activity.type {
+        case ActivityType.attraction: return .blue
+        case ActivityType.food: return .orange
+        case ActivityType.booking: return .purple
+        case ActivityType.transit: return .green
+        default: return .gray
+        }
+    }
+
+    func timeSlotDisplay(_ timeSlot: TimeSlot) -> String {
+        switch timeSlot {
+        case .morning: return "Morning (6 AM - 12 PM)"
+        case .afternoon: return "Afternoon (12 PM - 6 PM)"
+        case .evening: return "Evening (6 PM - 12 AM)"
+        case .fullDay: return "All day"
+        default: return "All day"
+        }
     }
 
     var activityIcon: String {
@@ -509,58 +629,164 @@ struct LocationCardView: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
-            HStack {
-                Image(systemName: "mappin.circle.fill")
-                    .font(.title2)
-                    .foregroundColor(.red)
+            // Header with date badge and location name
+            HStack(alignment: .top, spacing: 16) {
+                // Date Badge
+                VStack(spacing: 2) {
+                    Text(getDateDay(from: location.arrivalDateTime ?? location.date))
+                        .font(.title)
+                        .fontWeight(.bold)
+                    Text(getDateAbbreviation(from: location.arrivalDateTime ?? location.date))
+                        .font(.caption)
+                }
+                .frame(minWidth: 60)
+                .padding(.vertical, 8)
+                .padding(.horizontal, 12)
+                .background(Color.blue.opacity(0.15))
+                .cornerRadius(8)
 
                 VStack(alignment: .leading, spacing: 4) {
-                    Text(location.name)
-                        .font(.headline)
-
+                    HStack(spacing: 6) {
+                        Image(systemName: "mappin")
+                            .font(.system(size: 16))
+                            .foregroundColor(.blue)
+                        Text(location.name)
+                            .font(.headline)
+                    }
                     Text(location.country)
                         .font(.subheadline)
                         .foregroundColor(.secondary)
                 }
 
                 Spacer()
-
-                Text("Day \(location.order)")
-                    .font(.caption)
-                    .padding(.horizontal, 8)
-                    .padding(.vertical, 4)
-                    .background(Color.blue.opacity(0.2))
-                    .cornerRadius(8)
             }
 
-            if let arrival = location.arrivalDateTime, let departure = location.departureDateTime {
-                VStack(alignment: .leading, spacing: 4) {
-                    HStack {
-                        Text("Arrival:")
-                            .font(.caption)
-                            .foregroundColor(.secondary)
-                        Text(formatDateTime(arrival))
-                            .font(.caption)
+            // Timing info if available
+            if location.arrivalDateTime != nil || location.departureDateTime != nil {
+                Divider()
+
+                HStack(alignment: .top, spacing: 12) {
+                    VStack(alignment: .leading, spacing: 8) {
+                        if let arrival = location.arrivalDateTime {
+                            TimingRow(
+                                icon: "airplane.arrival",
+                                iconColor: .blue,
+                                label: "Arrival",
+                                value: formatDateTime(arrival)
+                            )
+                        }
+
+                        if let departure = location.departureDateTime {
+                            TimingRow(
+                                icon: "airplane.departure",
+                                iconColor: .orange,
+                                label: "Departure",
+                                value: formatDateTime(departure)
+                            )
+                        }
                     }
 
-                    HStack {
-                        Text("Departure:")
-                            .font(.caption)
-                            .foregroundColor(.secondary)
-                        Text(formatDateTime(departure))
-                            .font(.caption)
+                    Spacer()
+
+                    // Stay duration chip
+                    if let arrival = location.arrivalDateTime,
+                       let departure = location.departureDateTime {
+                        let nights = calculateNights(from: arrival, to: departure)
+                        HStack(spacing: 4) {
+                            Image(systemName: "calendar")
+                                .font(.system(size: 12))
+                            Text(nights == 0 ? "Same-day" : "\(nights) \(nights == 1 ? "night" : "nights")")
+                                .font(.caption)
+                                .fontWeight(.medium)
+                        }
+                        .padding(.horizontal, 10)
+                        .padding(.vertical, 6)
+                        .background(Color.green.opacity(0.15))
+                        .cornerRadius(16)
                     }
                 }
             }
         }
         .padding()
-        .background(Color(.systemGray6))
+        .background(Color(.systemBackground))
         .cornerRadius(12)
+        .shadow(color: Color.black.opacity(0.05), radius: 2, x: 0, y: 1)
+    }
+
+    func getDateDay(from isoString: String?) -> String {
+        guard let isoString = isoString else { return "\(location.order)" }
+        let formatter = ISO8601DateFormatter()
+        formatter.formatOptions = [.withFullDate, .withTime, .withTimeZone]
+        if let date = formatter.date(from: isoString) {
+            let dayFormatter = DateFormatter()
+            dayFormatter.dateFormat = "d"
+            return dayFormatter.string(from: date)
+        }
+        return "\(location.order)"
+    }
+
+    func getDateAbbreviation(from isoString: String?) -> String {
+        guard let isoString = isoString else { return "" }
+        let formatter = ISO8601DateFormatter()
+        formatter.formatOptions = [.withFullDate, .withTime, .withTimeZone]
+        if let date = formatter.date(from: isoString) {
+            let dayFormatter = DateFormatter()
+            dayFormatter.dateFormat = "EEE"
+            return dayFormatter.string(from: date)
+        }
+        return ""
     }
 
     func formatDateTime(_ isoString: String) -> String {
-        // Simple formatting - in production use proper ISO8601 parsing
+        let formatter = ISO8601DateFormatter()
+        formatter.formatOptions = [.withFullDate, .withTime, .withTimeZone]
+        if let date = formatter.date(from: isoString) {
+            let displayFormatter = DateFormatter()
+            displayFormatter.dateFormat = "MMM d, h:mm a"
+            return displayFormatter.string(from: date)
+        }
         return isoString.prefix(16).replacingOccurrences(of: "T", with: " ")
+    }
+
+    func calculateNights(from arrival: String, to departure: String) -> Int {
+        let formatter = ISO8601DateFormatter()
+        formatter.formatOptions = [.withFullDate, .withTime, .withTimeZone]
+        guard let arrivalDate = formatter.date(from: arrival),
+              let departureDate = formatter.date(from: departure) else {
+            return 0
+        }
+        let calendar = Calendar.current
+        let components = calendar.dateComponents([.day], from: arrivalDate, to: departureDate)
+        return max(components.day ?? 0, 0)
+    }
+}
+
+// Helper view for timing rows
+struct TimingRow: View {
+    let icon: String
+    let iconColor: Color
+    let label: String
+    let value: String
+
+    var body: some View {
+        HStack(spacing: 12) {
+            ZStack {
+                RoundedRectangle(cornerRadius: 6)
+                    .fill(iconColor.opacity(0.12))
+                    .frame(width: 32, height: 32)
+                Image(systemName: icon)
+                    .font(.system(size: 14))
+                    .foregroundColor(iconColor)
+            }
+
+            VStack(alignment: .leading, spacing: 2) {
+                Text(label)
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+                Text(value)
+                    .font(.subheadline)
+            }
+        }
     }
 }
 
