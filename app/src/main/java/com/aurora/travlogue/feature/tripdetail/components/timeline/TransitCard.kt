@@ -25,8 +25,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.aurora.travlogue.core.data.local.entities.Booking
-import com.aurora.travlogue.core.data.local.entities.BookingType
+import com.aurora.travlogue.core.domain.model.Booking
+import com.aurora.travlogue.core.domain.model.BookingType
 import java.time.Duration
 import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter

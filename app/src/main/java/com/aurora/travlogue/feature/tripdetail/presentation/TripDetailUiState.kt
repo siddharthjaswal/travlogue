@@ -1,9 +1,10 @@
 package com.aurora.travlogue.feature.tripdetail.presentation
 
-import com.aurora.travlogue.core.data.local.entities.Booking
-import com.aurora.travlogue.core.data.local.entities.Gap
-import com.aurora.travlogue.core.data.local.entities.Location
-import com.aurora.travlogue.core.data.local.entities.Trip
+import com.aurora.travlogue.core.domain.model.Activity
+import com.aurora.travlogue.core.domain.model.Booking
+import com.aurora.travlogue.core.domain.model.Gap
+import com.aurora.travlogue.core.domain.model.Location
+import com.aurora.travlogue.core.domain.model.Trip
 import com.aurora.travlogue.feature.tripdetail.domain.models.DaySchedule
 
 /**
@@ -29,7 +30,7 @@ data class TripDetailUiState(
     val showEditActivityDialog: Boolean = false,
     val showEditLocationDialog: Boolean = false,
     val showEditBookingDialog: Boolean = false,
-    val editingActivity: com.aurora.travlogue.core.data.local.entities.Activity? = null,
+    val editingActivity: Activity? = null,
     val editingLocation: Location? = null,
     val editingBooking: Booking? = null,
     // Gap detail dialog

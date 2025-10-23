@@ -13,12 +13,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.aurora.travlogue.core.data.local.entities.Activity
-import com.aurora.travlogue.core.data.local.entities.Booking
-import com.aurora.travlogue.core.data.local.entities.BookingType
-import com.aurora.travlogue.core.data.local.entities.Gap
-import com.aurora.travlogue.core.data.local.entities.Location
-import com.aurora.travlogue.core.data.local.entities.TimeSlot
+import com.aurora.travlogue.core.domain.model.Activity
+import com.aurora.travlogue.core.domain.model.Booking
+import com.aurora.travlogue.core.domain.model.BookingType
+import com.aurora.travlogue.core.domain.model.Gap
+import com.aurora.travlogue.core.domain.model.Location
+import com.aurora.travlogue.core.domain.model.TimeSlot
 import com.aurora.travlogue.feature.tripdetail.components.timeline.*
 import com.aurora.travlogue.feature.tripdetail.domain.models.DaySchedule
 import java.time.LocalDate
@@ -390,9 +390,10 @@ private fun buildCompleteTimeline(
         }
 
         // If departing from a non-location (origin city), add departure card
-        if (!departureMatchesLocation && booking.fromLocation != null) {
+        val fromLocation = booking.fromLocation
+        if (!departureMatchesLocation && fromLocation != null) {
             // Extract origin city from fromLocation (e.g., "San Francisco (SFO)" -> "San Francisco")
-            val originCity = booking.fromLocation.substringBefore("(").trim()
+            val originCity = fromLocation.substringBefore("(").trim()
             items.add(TimelineItem.OriginDeparture(booking, originCity))
             items.add(TimelineItem.InTransit(booking))
             processedTransitBookings.add(booking.id)

@@ -1,7 +1,7 @@
 package com.aurora.travlogue.feature.createtrip.presentation
 
-import com.aurora.travlogue.core.data.local.entities.DateType
-import java.time.LocalDate
+import com.aurora.travlogue.core.domain.model.DateType
+import kotlinx.datetime.LocalDate
 
 /**
  * UI State for Create Trip Screen
@@ -40,7 +40,7 @@ data class CreateTripUiState(
                 originCity.isNotBlank() &&
                 when (selectedDateType) {
                     DateType.FIXED -> startDate != null && endDate != null &&
-                                     (endDate == null || !endDate.isBefore(startDate))
+                                     (endDate == null || endDate >= startDate!!)
                     DateType.FLEXIBLE -> flexibleMonth.isNotBlank()
                 }
 }

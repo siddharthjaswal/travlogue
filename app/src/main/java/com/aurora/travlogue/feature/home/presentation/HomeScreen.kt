@@ -11,14 +11,15 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.aurora.travlogue.core.data.local.entities.Trip
-import com.aurora.travlogue.core.data.local.entities.TripMockData
+import com.aurora.travlogue.core.domain.model.Trip
+import com.aurora.travlogue.core.domain.model.TripMockData
 import com.aurora.travlogue.feature.home.components.EmptyState
 import com.aurora.travlogue.feature.home.components.TripList
+import org.koin.compose.viewmodel.koinViewModel
 
 @Composable
 fun HomeScreen(
-    viewModel: HomeViewModel = hiltViewModel(),
+    viewModel: HomeViewModel = koinViewModel(),
     onNavigateToCreateTrip: () -> Unit,
     onNavigateToPlan: (String) -> Unit,
     onNavigateToMock: () -> Unit = {}

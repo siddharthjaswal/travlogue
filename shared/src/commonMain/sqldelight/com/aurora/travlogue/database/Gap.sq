@@ -1,0 +1,65 @@
+-- Gap table schema
+CREATE TABLE gaps (
+    id TEXT PRIMARY KEY NOT NULL,
+    tripId TEXT NOT NULL,
+    gapType TEXT NOT NULL, -- 'MISSING_TRANSIT', 'UNPLANNED_DAY', 'TIME_CONFLICT'
+    fromLocationId TEXT NOT NULL,
+    toLocationId TEXT NOT NULL,
+    fromDate TEXT NOT NULL, -- ISO format: yyyy-MM-dd
+    toDate TEXT NOT NULL, -- ISO format: yyyy-MM-dd
+    isResolved INTEGER NOT NULL DEFAULT 0, -- 0 = false, 1 = true
+    FOREIGN KEY (tripId) REFERENCES trips(id) ON DELETE CASCADE,
+    FOREIGN KEY (fromLocationId) REFERENCES locations(id) ON DELETE CASCADE,
+    FOREIGN KEY (toLocationId) REFERENCES locations(id) ON DELETE CASCADE
+);
+
+-- Indexes for faster lookups
+CREATE INDEX gaps_tripId ON gaps(tripId);
+CREATE INDEX gaps_fromLocationId ON gaps(fromLocationId);
+CREATE INDEX gaps_toLocationId ON gaps(toLocationId);
+
+-- Queries
+
+-- Get all gaps for a trip
+getGapsByTripId:
+SELECT * FROM gaps
+WHERE tripId = ?
+ORDER BY fromDate ASC;
+
+-- Get unresolved gaps for a trip
+getUnresolvedGapsByTripId:
+SELECT * FROM gaps
+WHERE tripId = ? AND isResolved = 0
+ORDER BY fromDate ASC;
+
+-- Get gap by ID
+getGapById:
+SELECT * FROM gaps
+WHERE id = ?;
+
+-- Insert gap
+insertGap:
+INSERT INTO gaps (id, tripId, gapType, fromLocationId, toLocationId, fromDate, toDate, isResolved)
+VALUES (?, ?, ?, ?, ?, ?, ?, ?);
+
+-- Update gap
+updateGap:
+UPDATE gaps
+SET gapType = ?, fromLocationId = ?, toLocationId = ?, fromDate = ?, toDate = ?, isResolved = ?
+WHERE id = ?;
+
+-- Mark gap as resolved
+markGapAsResolved:
+UPDATE gaps
+SET isResolved = 1
+WHERE id = ?;
+
+-- Delete gap
+deleteGap:
+DELETE FROM gaps
+WHERE id = ?;
+
+-- Delete all gaps for a trip
+deleteGapsByTripId:
+DELETE FROM gaps
+WHERE tripId = ?;

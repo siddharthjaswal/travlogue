@@ -21,8 +21,10 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.aurora.travlogue.core.common.DateTimeUtils.toIsoString
-import java.time.LocalDate
+import kotlinx.datetime.LocalDate
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.atStartOfDayIn
+import kotlinx.datetime.toLocalDateTime
 
 /**
  * Date picker field component
@@ -50,14 +52,14 @@ fun DatePickerField(
         )
         Spacer(modifier = Modifier.width(8.dp))
         Text(
-            text = selectedDate?.toIsoString() ?: "Select $label",
+            text = selectedDate?.toString() ?: "Select $label",
             modifier = Modifier.weight(1f)
         )
     }
 
     if (showDatePicker) {
         val datePickerState = rememberDatePickerState(
-            initialSelectedDateMillis = selectedDate?.toEpochDay()?.times(86400000)
+            initialSelectedDateMillis = selectedDate?.atStartOfDayIn(TimeZone.UTC)?.toEpochMilliseconds()
                 ?: System.currentTimeMillis()
         )
 
@@ -67,8 +69,9 @@ fun DatePickerField(
                 TextButton(
                     onClick = {
                         datePickerState.selectedDateMillis?.let { millis ->
-                            val date = LocalDate.ofEpochDay(millis / 86400000)
-                            if (minDate == null || !date.isBefore(minDate)) {
+                            val instant = kotlinx.datetime.Instant.fromEpochMilliseconds(millis)
+                            val date = instant.toLocalDateTime(TimeZone.UTC).date
+                            if (minDate == null || date >= minDate) {
                                 onDateSelected(date)
                             }
                         }

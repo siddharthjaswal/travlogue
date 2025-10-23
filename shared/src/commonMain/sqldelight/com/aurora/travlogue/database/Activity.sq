@@ -1,0 +1,57 @@
+-- Activity table schema
+CREATE TABLE activities (
+    id TEXT PRIMARY KEY NOT NULL,
+    locationId TEXT NOT NULL,
+    title TEXT NOT NULL,
+    description TEXT,
+    date TEXT, -- ISO format: yyyy-MM-dd
+    timeSlot TEXT, -- 'MORNING', 'AFTERNOON', 'EVENING', 'FULL_DAY'
+    type TEXT NOT NULL, -- 'ATTRACTION', 'FOOD', 'BOOKING', 'TRANSIT', 'OTHER'
+    startTime TEXT, -- HH:mm or ISO_LOCAL_TIME
+    endTime TEXT, -- HH:mm or ISO_LOCAL_TIME
+    FOREIGN KEY (locationId) REFERENCES locations(id) ON DELETE CASCADE
+);
+
+-- Index for faster lookups
+CREATE INDEX activities_locationId ON activities(locationId);
+
+-- Queries
+
+-- Get all activities for a location
+getActivitiesByLocationId:
+SELECT * FROM activities
+WHERE locationId = ?
+ORDER BY date ASC, startTime ASC;
+
+-- Get all activities for a trip (via locations)
+getActivitiesByTripId:
+SELECT a.* FROM activities a
+INNER JOIN locations l ON a.locationId = l.id
+WHERE l.tripId = ?
+ORDER BY l.`order` ASC, a.date ASC, a.startTime ASC;
+
+-- Get activity by ID
+getActivityById:
+SELECT * FROM activities
+WHERE id = ?;
+
+-- Insert activity
+insertActivity:
+INSERT INTO activities (id, locationId, title, description, date, timeSlot, type, startTime, endTime)
+VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?);
+
+-- Update activity
+updateActivity:
+UPDATE activities
+SET title = ?, description = ?, date = ?, timeSlot = ?, type = ?, startTime = ?, endTime = ?
+WHERE id = ?;
+
+-- Delete activity
+deleteActivity:
+DELETE FROM activities
+WHERE id = ?;
+
+-- Delete all activities for a location
+deleteActivitiesByLocationId:
+DELETE FROM activities
+WHERE locationId = ?;

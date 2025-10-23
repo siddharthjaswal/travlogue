@@ -16,9 +16,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.aurora.travlogue.core.common.PreviewData
-import com.aurora.travlogue.core.data.local.entities.Activity
-import com.aurora.travlogue.core.data.local.entities.ActivityType
-import com.aurora.travlogue.core.data.local.entities.TimeSlot
+import com.aurora.travlogue.core.domain.model.Activity
+import com.aurora.travlogue.core.domain.model.ActivityType
+import com.aurora.travlogue.core.domain.model.TimeSlot
 import java.time.LocalTime
 import java.time.format.DateTimeFormatter
 
@@ -100,9 +100,10 @@ fun ActivityTimelineCard(
                 }
 
                 // Description
-                if (!activity.description.isNullOrBlank()) {
+                val description = activity.description
+                if (!description.isNullOrBlank()) {
                     Text(
-                        text = activity.description,
+                        text = description,
                         style = MaterialTheme.typography.labelSmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         maxLines = 2

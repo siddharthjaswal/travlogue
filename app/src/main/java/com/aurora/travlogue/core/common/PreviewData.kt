@@ -1,15 +1,15 @@
 package com.aurora.travlogue.core.common
 
-import com.aurora.travlogue.core.data.local.entities.Activity
-import com.aurora.travlogue.core.data.local.entities.ActivityType
-import com.aurora.travlogue.core.data.local.entities.Booking
-import com.aurora.travlogue.core.data.local.entities.BookingType
-import com.aurora.travlogue.core.data.local.entities.DateType
-import com.aurora.travlogue.core.data.local.entities.Gap
-import com.aurora.travlogue.core.data.local.entities.GapType
-import com.aurora.travlogue.core.data.local.entities.Location
-import com.aurora.travlogue.core.data.local.entities.TimeSlot
-import com.aurora.travlogue.core.data.local.entities.Trip
+import com.aurora.travlogue.core.domain.model.Activity
+import com.aurora.travlogue.core.domain.model.ActivityType
+import com.aurora.travlogue.core.domain.model.Booking
+import com.aurora.travlogue.core.domain.model.BookingType
+import com.aurora.travlogue.core.domain.model.DateType
+import com.aurora.travlogue.core.domain.model.Gap
+import com.aurora.travlogue.core.domain.model.GapType
+import com.aurora.travlogue.core.domain.model.Location
+import com.aurora.travlogue.core.domain.model.TimeSlot
+import com.aurora.travlogue.core.domain.model.Trip
 import com.aurora.travlogue.feature.tripdetail.domain.models.DaySchedule
 
 /**

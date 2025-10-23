@@ -11,7 +11,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.aurora.travlogue.core.data.local.entities.DateType
+import com.aurora.travlogue.core.domain.model.DateType
+import org.koin.compose.viewmodel.koinViewModel
 import com.aurora.travlogue.feature.createtrip.components.BottomActionBar
 import com.aurora.travlogue.feature.createtrip.components.ComingSoonCard
 import com.aurora.travlogue.feature.createtrip.components.TravelDatesCard
@@ -20,7 +21,7 @@ import com.aurora.travlogue.feature.createtrip.components.TripDetailsCard
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CreateTripScreen(
-    viewModel: CreateTripViewModel = hiltViewModel(),
+    viewModel: CreateTripViewModel = koinViewModel(),
     onNavigateBack: () -> Unit
 ) {
     val uiState by viewModel.uiState.collectAsState()
@@ -65,8 +66,8 @@ private fun CreateTripScreenContent(
     onTripNameChanged: (String) -> Unit,
     onOriginCityChanged: (String) -> Unit,
     onDateTypeSelected: (DateType) -> Unit,
-    onStartDateSelected: (java.time.LocalDate) -> Unit,
-    onEndDateSelected: (java.time.LocalDate) -> Unit,
+    onStartDateSelected: (kotlinx.datetime.LocalDate) -> Unit,
+    onEndDateSelected: (kotlinx.datetime.LocalDate) -> Unit,
     onFlexibleMonthChanged: (String) -> Unit,
     onFlexibleDurationChanged: (String) -> Unit,
     onCreateTripClicked: () -> Unit,

@@ -1,14 +1,12 @@
 package com.aurora.travlogue.navigation
 
 import androidx.compose.runtime.Composable
-import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import com.aurora.travlogue.feature.createtrip.presentation.CreateTripScreen
 import com.aurora.travlogue.feature.home.presentation.HomeScreen
-import com.aurora.travlogue.feature.home.presentation.HomeViewModel
 import com.aurora.travlogue.feature.mock.presentation.MockScreen
 import com.aurora.travlogue.feature.tripdetail.presentation.TripDetailScreen
 
@@ -29,7 +27,6 @@ fun AppNavHost(
         // Home screen - no arguments
         composable<Home> {
             HomeScreen(
-                viewModel = hiltViewModel<HomeViewModel>(),
                 onNavigateToCreateTrip = {
                     navController.navigate(CreateTrip)
                 },

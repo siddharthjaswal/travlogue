@@ -13,7 +13,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.aurora.travlogue.core.common.DateTimeUtils.toIsoString
-import com.aurora.travlogue.core.data.local.entities.DateType
+import com.aurora.travlogue.core.domain.model.DateType
 import java.time.LocalDate
 
 @OptIn(ExperimentalMaterial3Api::class)

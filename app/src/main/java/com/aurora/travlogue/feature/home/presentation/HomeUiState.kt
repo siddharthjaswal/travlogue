@@ -1,6 +1,6 @@
 package com.aurora.travlogue.feature.home.presentation
 
-import com.aurora.travlogue.core.data.local.entities.Trip
+import com.aurora.travlogue.core.domain.model.Trip
 
 /**
  * UI State for Home Screen

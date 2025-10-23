@@ -1,0 +1,49 @@
+package com.aurora.travlogue.core.data.repository
+
+import com.aurora.travlogue.core.data.local.dao.TransitOptionDao
+import com.aurora.travlogue.core.domain.model.TransitOption
+import kotlinx.coroutines.flow.Flow
+import javax.inject.Inject
+import javax.inject.Singleton
+
+@Singleton
+class TransitOptionRepository @Inject constructor(
+    private val transitOptionDao: TransitOptionDao
+) {
+
+    fun getTransitOptionsByGapId(gapId: String): Flow<List<TransitOption>> {
+        return transitOptionDao.getTransitOptionsByGapId(gapId)
+    }
+
+    suspend fun getTransitOptionsByGapIdSync(gapId: String): List<TransitOption> {
+        return transitOptionDao.getTransitOptionsByGapIdSync(gapId)
+    }
+
+    suspend fun getTransitOptionById(transitOptionId: String): TransitOption? {
+        return transitOptionDao.getTransitOptionById(transitOptionId)
+    }
+
+    suspend fun insertTransitOption(transitOption: TransitOption) {
+        transitOptionDao.insertTransitOption(transitOption)
+    }
+
+    suspend fun insertTransitOptions(transitOptions: List<TransitOption>) {
+        transitOptionDao.insertTransitOptions(transitOptions)
+    }
+
+    suspend fun updateTransitOption(transitOption: TransitOption) {
+        transitOptionDao.updateTransitOption(transitOption)
+    }
+
+    suspend fun deleteTransitOption(transitOption: TransitOption) {
+        transitOptionDao.deleteTransitOption(transitOption)
+    }
+
+    suspend fun deleteTransitOptionById(transitOptionId: String) {
+        transitOptionDao.deleteTransitOptionById(transitOptionId)
+    }
+
+    suspend fun deleteTransitOptionsByGapId(gapId: String) {
+        transitOptionDao.deleteTransitOptionsByGapId(gapId)
+    }
+}

@@ -1,0 +1,62 @@
+-- Booking table schema
+CREATE TABLE bookings (
+    id TEXT PRIMARY KEY NOT NULL,
+    tripId TEXT NOT NULL,
+    type TEXT NOT NULL, -- 'FLIGHT', 'HOTEL', 'TRAIN', 'BUS', 'TICKET', 'OTHER'
+    confirmationNumber TEXT,
+    provider TEXT NOT NULL,
+    startDateTime TEXT NOT NULL, -- ISO 8601 with timezone: "2025-11-15T14:30:00+01:00"
+    endDateTime TEXT, -- ISO 8601 with timezone
+    timezone TEXT NOT NULL, -- IANA timezone for start
+    endTimezone TEXT, -- IANA timezone for end (if different)
+    fromLocation TEXT,
+    toLocation TEXT,
+    price REAL,
+    currency TEXT,
+    notes TEXT,
+    imageUri TEXT,
+    FOREIGN KEY (tripId) REFERENCES trips(id) ON DELETE CASCADE
+);
+
+-- Index for faster lookups
+CREATE INDEX bookings_tripId ON bookings(tripId);
+
+-- Queries
+
+-- Get all bookings for a trip
+getBookingsByTripId:
+SELECT * FROM bookings
+WHERE tripId = ?
+ORDER BY startDateTime ASC;
+
+-- Get booking by ID
+getBookingById:
+SELECT * FROM bookings
+WHERE id = ?;
+
+-- Get transit bookings (FLIGHT, TRAIN, BUS) for a trip
+getTransitBookingsByTripId:
+SELECT * FROM bookings
+WHERE tripId = ? AND type IN ('FLIGHT', 'TRAIN', 'BUS')
+ORDER BY startDateTime ASC;
+
+-- Insert booking
+insertBooking:
+INSERT INTO bookings (id, tripId, type, confirmationNumber, provider, startDateTime, endDateTime, timezone, endTimezone, fromLocation, toLocation, price, currency, notes, imageUri)
+VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+
+-- Update booking
+updateBooking:
+UPDATE bookings
+SET type = ?, confirmationNumber = ?, provider = ?, startDateTime = ?, endDateTime = ?, timezone = ?, endTimezone = ?, fromLocation = ?, toLocation = ?, price = ?, currency = ?, notes = ?, imageUri = ?
+WHERE id = ?;
+
+-- Delete booking
+deleteBooking:
+DELETE FROM bookings
+WHERE id = ?;
+
+-- Delete all bookings for a trip
+deleteBookingsByTripId:
+DELETE FROM bookings
+WHERE tripId = ?;

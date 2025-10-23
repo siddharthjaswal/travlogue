@@ -1,0 +1,45 @@
+-- Trip table schema
+CREATE TABLE trips (
+    id TEXT PRIMARY KEY NOT NULL,
+    name TEXT NOT NULL,
+    originCity TEXT NOT NULL,
+    dateType TEXT NOT NULL, -- 'FIXED' or 'FLEXIBLE'
+    startDate TEXT, -- ISO format: yyyy-MM-dd
+    endDate TEXT, -- ISO format: yyyy-MM-dd
+    flexibleMonth TEXT, -- e.g., "November 2025"
+    flexibleDuration INTEGER, -- days
+    createdAt INTEGER NOT NULL,
+    updatedAt INTEGER NOT NULL
+);
+
+-- Queries
+
+-- Get all trips
+getAllTrips:
+SELECT * FROM trips
+ORDER BY createdAt DESC;
+
+-- Get trip by ID
+getTripById:
+SELECT * FROM trips
+WHERE id = ?;
+
+-- Insert trip
+insertTrip:
+INSERT INTO trips (id, name, originCity, dateType, startDate, endDate, flexibleMonth, flexibleDuration, createdAt, updatedAt)
+VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+
+-- Update trip
+updateTrip:
+UPDATE trips
+SET name = ?, originCity = ?, dateType = ?, startDate = ?, endDate = ?, flexibleMonth = ?, flexibleDuration = ?, updatedAt = ?
+WHERE id = ?;
+
+-- Delete trip
+deleteTrip:
+DELETE FROM trips
+WHERE id = ?;
+
+-- Count trips
+countTrips:
+SELECT COUNT(*) FROM trips;

@@ -1,9 +1,9 @@
 package com.aurora.travlogue.feature.tripdetail.domain.models
 
-import com.aurora.travlogue.core.data.local.entities.Activity
-import com.aurora.travlogue.core.data.local.entities.Booking
-import com.aurora.travlogue.core.data.local.entities.Location
-import com.aurora.travlogue.core.data.local.entities.Trip
+import com.aurora.travlogue.core.domain.model.Activity
+import com.aurora.travlogue.core.domain.model.Booking
+import com.aurora.travlogue.core.domain.model.Location
+import com.aurora.travlogue.core.domain.model.Trip
 
 /**
  * Aggregated data for a trip with all related entities

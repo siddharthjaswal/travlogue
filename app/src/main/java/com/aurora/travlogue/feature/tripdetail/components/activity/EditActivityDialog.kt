@@ -15,10 +15,10 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.aurora.travlogue.core.common.PreviewData
-import com.aurora.travlogue.core.data.local.entities.Activity
-import com.aurora.travlogue.core.data.local.entities.ActivityType
-import com.aurora.travlogue.core.data.local.entities.Location
-import com.aurora.travlogue.core.data.local.entities.TimeSlot
+import com.aurora.travlogue.core.domain.model.Activity
+import com.aurora.travlogue.core.domain.model.ActivityType
+import com.aurora.travlogue.core.domain.model.Location
+import com.aurora.travlogue.core.domain.model.TimeSlot
 import java.time.Instant
 import java.time.LocalDate
 import java.time.LocalTime
@@ -216,11 +216,13 @@ fun EditActivityDialog(
                                 ZonedDateTime.parse(selectedLocation.departureDateTime)
                             } catch (e: Exception) { null }
 
-                            if (arrivalTime != null && departureTime != null) {
+                            val arrivalDateTime = selectedLocation.arrivalDateTime
+                            val departureDateTime = selectedLocation.departureDateTime
+                            if (arrivalTime != null && departureTime != null && arrivalDateTime != null && departureDateTime != null) {
                                 Text(
-                                    text = "Valid: ${formatDateTime(selectedLocation.arrivalDateTime)} - ${
+                                    text = "Valid: ${formatDateTime(arrivalDateTime)} - ${
                                         formatDateTime(
-                                            selectedLocation.departureDateTime
+                                            departureDateTime
                                         )
                                     }",
                                     style = MaterialTheme.typography.bodySmall,

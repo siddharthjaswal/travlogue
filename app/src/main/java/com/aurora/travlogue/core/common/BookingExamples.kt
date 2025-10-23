@@ -1,7 +1,7 @@
 package com.aurora.travlogue.core.common
 
-import com.aurora.travlogue.core.data.local.entities.Booking
-import com.aurora.travlogue.core.data.local.entities.BookingType
+import com.aurora.travlogue.core.domain.model.Booking
+import com.aurora.travlogue.core.domain.model.BookingType
 import com.aurora.travlogue.core.common.DateTimeUtils.formatBookingTimeForDisplay
 import com.aurora.travlogue.core.common.DateTimeUtils.formatTimeForDisplay
 import com.aurora.travlogue.core.common.DateTimeUtils.toIsoString
@@ -139,13 +139,14 @@ object BookingExamples {
             // Display departure time in user's local timezone
             appendLine("Departure: ${booking.startDateTime.formatBookingTimeForDisplay()}")
 
-            if (booking.endDateTime != null) {
-                appendLine("Arrival: ${booking.endDateTime.formatBookingTimeForDisplay()}")
+            val endDateTime = booking.endDateTime
+            if (endDateTime != null) {
+                appendLine("Arrival: ${endDateTime.formatBookingTimeForDisplay()}")
 
                 // Calculate and display duration
                 val durationMinutes = durationInMinutes(
                     booking.startDateTime,
-                    booking.endDateTime
+                    endDateTime
                 )
                 appendLine("Duration: ${formatDuration(durationMinutes)}")
             }

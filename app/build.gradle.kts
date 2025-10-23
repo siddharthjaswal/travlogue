@@ -57,7 +57,8 @@ android {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
             excludes += setOf(
                 "META-INF/LICENSE.md",
-                "META-INF/LICENSE-notice.md"
+                "META-INF/LICENSE-notice.md",
+                "META-INF/versions/9/OSGI-INF/MANIFEST.MF"
             )
         }
     }
@@ -113,6 +114,9 @@ tasks.register<JacocoReport>("jacocoTestReport") {
 
 dependencies {
 
+    // Shared KMP Module
+    implementation(project(":shared"))
+
     // Core Android
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
@@ -131,15 +135,20 @@ dependencies {
     implementation(libs.androidx.navigation.compose)
     implementation(libs.kotlinx.serialization.json)
 
-    // Hilt (Dependency Injection)
+    // Hilt (Dependency Injection) - Will be gradually replaced by Koin
     implementation(libs.androidx.hilt.navigation.compose)
     implementation(libs.hilt.android)
     ksp(libs.hilt.compiler)
 
-    // Room (Local Database)
-    implementation(libs.androidx.room.runtime)
-    implementation(libs.androidx.room.ktx)
-    ksp(libs.androidx.room.compiler)
+    // Koin (for shared KMP module)
+    implementation(libs.koin.android)
+    implementation(libs.koin.compose)
+    implementation(libs.koin.compose.viewmodel)
+
+    // Room (Local Database) - Replaced by SQLDelight in KMP shared module
+    // implementation(libs.androidx.room.runtime)
+    // implementation(libs.androidx.room.ktx)
+    // ksp(libs.androidx.room.compiler)
 
     // Retrofit (Networking)
     implementation(libs.retrofit)
@@ -150,6 +159,7 @@ dependencies {
     // Utilities
     implementation(libs.timber)
     implementation(libs.gson)
+    implementation(libs.kotlinx.datetime)
 
     // Firebase
     implementation(platform(libs.android.firebase.bom))

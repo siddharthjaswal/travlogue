@@ -13,7 +13,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.aurora.travlogue.core.common.PreviewData
-import com.aurora.travlogue.core.data.local.entities.Booking
+import com.aurora.travlogue.core.domain.model.Booking
 import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
 

@@ -12,8 +12,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.aurora.travlogue.core.common.PreviewData
-import com.aurora.travlogue.core.data.local.entities.Booking
-import com.aurora.travlogue.core.data.local.entities.BookingType
+import com.aurora.travlogue.core.domain.model.Booking
+import com.aurora.travlogue.core.domain.model.BookingType
 import com.aurora.travlogue.core.design.AppTheme
 import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
@@ -118,9 +118,10 @@ private fun BookingCard(
                 }
 
                 // End time (if different day)
-                if (booking.endDateTime != null) {
+                val endDateTime = booking.endDateTime
+                if (endDateTime != null) {
                     Text(
-                        text = "Until: ${formatBookingDateTime(booking.endDateTime, booking.timezone)}",
+                        text = "Until: ${formatBookingDateTime(endDateTime, booking.timezone)}",
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -132,7 +133,8 @@ private fun BookingCard(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                if (booking.confirmationNumber != null) {
+                val confirmationNumber = booking.confirmationNumber
+                if (confirmationNumber != null) {
                     Column {
                         Text(
                             text = "Confirmation",
@@ -140,7 +142,7 @@ private fun BookingCard(
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                         Text(
-                            text = booking.confirmationNumber,
+                            text = confirmationNumber,
                             style = MaterialTheme.typography.bodyMedium,
                             color = MaterialTheme.colorScheme.onSurface
                         )
@@ -164,13 +166,14 @@ private fun BookingCard(
             }
 
             // Notes (if any)
-            if (!booking.notes.isNullOrBlank()) {
+            val notes = booking.notes
+            if (!notes.isNullOrBlank()) {
                 Surface(
                     shape = MaterialTheme.shapes.small,
                     color = MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.5f)
                 ) {
                     Text(
-                        text = booking.notes,
+                        text = notes,
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSecondaryContainer,
                         modifier = Modifier.padding(12.dp)

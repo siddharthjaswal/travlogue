@@ -1,0 +1,36 @@
+package com.aurora.travlogue.core.data.local.dao
+
+import androidx.room.*
+import com.aurora.travlogue.core.domain.model.TransitOption
+import kotlinx.coroutines.flow.Flow
+
+@Dao
+interface TransitOptionDao {
+
+    @Query("SELECT * FROM transit_options WHERE gapId = :gapId ORDER BY price ASC")
+    fun getTransitOptionsByGapId(gapId: String): Flow<List<TransitOption>>
+
+    @Query("SELECT * FROM transit_options WHERE gapId = :gapId ORDER BY price ASC")
+    suspend fun getTransitOptionsByGapIdSync(gapId: String): List<TransitOption>
+
+    @Query("SELECT * FROM transit_options WHERE id = :transitOptionId")
+    suspend fun getTransitOptionById(transitOptionId: String): TransitOption?
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertTransitOption(transitOption: TransitOption)
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertTransitOptions(transitOptions: List<TransitOption>)
+
+    @Update
+    suspend fun updateTransitOption(transitOption: TransitOption)
+
+    @Delete
+    suspend fun deleteTransitOption(transitOption: TransitOption)
+
+    @Query("DELETE FROM transit_options WHERE id = :transitOptionId")
+    suspend fun deleteTransitOptionById(transitOptionId: String)
+
+    @Query("DELETE FROM transit_options WHERE gapId = :gapId")
+    suspend fun deleteTransitOptionsByGapId(gapId: String)
+}

@@ -20,8 +20,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.aurora.travlogue.core.common.PreviewData
-import com.aurora.travlogue.core.data.local.entities.DateType
-import com.aurora.travlogue.core.data.local.entities.Trip
+import com.aurora.travlogue.core.domain.model.DateType
+import com.aurora.travlogue.core.domain.model.Trip
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.time.temporal.ChronoUnit

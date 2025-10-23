@@ -1,216 +1,472 @@
 # Travlogue Architecture
 
+**Last Updated**: October 23, 2025
+**Architecture**: Kotlin Multiplatform with Feature-First Clean Architecture
+
+---
+
 ## Overview
 
-Travlogue follows **Feature-First Clean Architecture** - a pragmatic approach that balances clean architecture principles with development velocity.
+Travlogue follows **Kotlin Multiplatform (KMP) with Feature-First Clean Architecture** - a modern approach that enables code sharing across Android, iOS, and Desktop platforms while maintaining clean architecture principles.
 
-## Architecture Principles
+### Architecture Principles
 
-1. **Feature-First Organization**: Code is organized by feature, not by technical layer
-2. **Separation of Concerns**: Clear boundaries between presentation, domain, and data layers
-3. **Dependency Rule**: Dependencies point inward (presentation → domain → data)
-4. **Pragmatic Complexity**: Add architectural layers only when needed
+1. **Multiplatform First**: Share business logic, data layer, and presentation logic across platforms
+2. **Feature-First Organization**: Code organized by feature, not by technical layer
+3. **Separation of Concerns**: Clear boundaries between presentation, domain, and data layers
+4. **Dependency Rule**: Dependencies point inward (presentation → domain → data)
+5. **Platform-Specific When Needed**: Platform code only where absolutely necessary
+
+---
 
 ## Project Structure
 
+### High-Level Architecture
+
 ```
+Travlogue/
+│
+├── shared/                        # KMP Module (Android, iOS, Desktop)
+│   ├── commonMain/               # Shared code for all platforms
+│   ├── androidMain/              # Android-specific implementations
+│   ├── iosMain/                  # iOS-specific implementations
+│   └── desktopMain/              # Desktop-specific implementations
+│
+└── app/                          # Android Application
+    └── Android-specific UI & features
+```
+
+### Detailed Structure
+
+```
+shared/src/
+│
+├── commonMain/kotlin/com/aurora/travlogue/
+│   │
+│   ├── core/
+│   │   ├── common/                    # Utilities (multiplatform)
+│   │   │   ├── UUID.kt
+│   │   │   └── DateTimeUtils.kt
+│   │   │
+│   │   ├── data/
+│   │   │   ├── local/
+│   │   │   │   └── DatabaseDriverFactory.kt (expect)
+│   │   │   └── repository/
+│   │   │       └── TripRepository.kt  # Multiplatform repository
+│   │   │
+│   │   └── domain/
+│   │       ├── model/                 # Domain models (data classes)
+│   │       │   ├── Trip.kt
+│   │       │   ├── Location.kt
+│   │       │   ├── Activity.kt
+│   │       │   ├── Booking.kt
+│   │       │   ├── Gap.kt
+│   │       │   └── ... (enums, types)
+│   │       │
+│   │       └── service/               # Business logic services
+│   │           ├── BookingSyncService.kt
+│   │           └── GapDetectionService.kt
+│   │
+│   ├── di/
+│   │   └── SharedModule.kt           # Koin DI configuration
+│   │
+│   └── presentation/                  # Shared ViewModels
+│       ├── home/
+│       │   ├── HomeViewModel.kt
+│       │   └── HomeUiState.kt
+│       │
+│       └── createtrip/
+│           ├── CreateTripViewModel.kt
+│           └── CreateTripUiState.kt
+│
+├── commonMain/sqldelight/com/aurora/travlogue/core/data/local/
+│   ├── Trip.sq                       # SQLDelight schema
+│   ├── Location.sq
+│   ├── Activity.sq
+│   ├── Booking.sq
+│   ├── Gap.sq
+│   └── TransitOption.sq
+│
+├── androidMain/kotlin/com/aurora/travlogue/
+│   ├── core/data/local/
+│   │   └── DatabaseDriverFactory.kt  # Android SQLite driver
+│   └── di/
+│       └── PlatformModule.kt         # Android-specific DI
+│
+├── iosMain/kotlin/com/aurora/travlogue/
+│   ├── core/data/local/
+│   │   └── DatabaseDriverFactory.kt  # iOS SQLite driver
+│   └── di/
+│       └── PlatformModule.kt         # iOS-specific DI
+│
+└── desktopMain/kotlin/com/aurora/travlogue/
+    ├── core/data/local/
+    │   └── DatabaseDriverFactory.kt  # Desktop SQLite driver
+    └── di/
+        └── PlatformModule.kt         # Desktop-specific DI
+
 app/src/main/java/com/aurora/travlogue/
 │
-├── core/                           # Shared across all features
-│   ├── data/                      # Data layer
-│   │   ├── local/                 # Room database
-│   │   │   ├── entities/         # Database entities
-│   │   │   ├── dao/              # Data access objects
-│   │   │   └── database/         # Database configuration
-│   │   └── repository/           # Repository implementations
-│   ├── domain/                    # Shared business logic (future)
-│   │   └── model/                # Domain models
-│   ├── common/                    # Utilities and helpers
-│   │   └── DateTimeUtils.kt
-│   └── design/                    # UI theme and design system
+├── feature/                           # Android-specific features
+│   ├── home/
+│   │   ├── presentation/
+│   │   │   └── HomeScreen.kt         # Jetpack Compose UI
+│   │   └── components/
+│   │       └── TripCard.kt
+│   │
+│   ├── createtrip/
+│   │   ├── presentation/
+│   │   │   └── CreateTripScreen.kt
+│   │   └── components/
+│   │       ├── DatePickerField.kt
+│   │       └── TravelDatesCard.kt
+│   │
+│   └── tripdetail/
+│       ├── presentation/
+│       │   ├── TripDetailScreen.kt
+│       │   ├── TripDetailViewModel.kt  # Still Hilt (uses bridge)
+│       │   └── TripDetailUiState.kt
+│       └── components/
+│           └── ... (UI components)
+│
+├── core/
+│   └── design/                        # Android Material theme
 │       ├── Color.kt
 │       ├── Theme.kt
 │       └── Type.kt
 │
-├── feature/                       # Feature modules
-│   └── home/                      # Home feature
-│       ├── presentation/          # UI layer
-│       │   ├── HomeScreen.kt     # Composable UI
-│       │   ├── HomeViewModel.kt  # State management
-│       │   └── HomeUiState.kt    # UI state models
-│       ├── domain/                # Feature-specific business logic
-│       │   ├── usecase/          # Use cases (when needed)
-│       │   └── model/            # Domain models (when needed)
-│       └── components/            # Reusable UI components
-│           ├── TripCard.kt
-│           └── CreateTripDialog.kt
+├── di/
+│   └── SharedModule.kt               # Hilt-Koin bridge
 │
-├── di/                            # Dependency injection
-│   ├── DatabaseModule.kt
-│   └── NetworkModule.kt
-│
-└── navigation/                    # App navigation
+└── navigation/
     ├── AppNavHost.kt
     └── Screen.kt
 ```
 
-## Layers Explained
+---
 
-### 1. Presentation Layer (`feature/{name}/presentation/`)
+## Architecture Layers
 
-**Responsibility**: UI and user interaction
+### 1. Shared Module (KMP)
+
+#### Data Layer (`shared/core/data/`)
+
+**Responsibility**: Data access and persistence (multiplatform)
 
 **Contains**:
-- Composable functions (screens)
-- ViewModels (state management)
+- SQLDelight database schema
+- Platform-specific database drivers (expect/actual)
+- Repository implementations
+- Data models
+
+**Example**:
+```kotlin
+// commonMain: TripRepository.kt
+class TripRepository(private val database: TravlogueDb) {
+    fun getAllTrips(): Flow<List<Trip>> =
+        database.tripQueries
+            .selectAll()
+            .asFlow()
+            .mapToList(Dispatchers.IO)
+}
+
+// androidMain: DatabaseDriverFactory.kt (actual)
+actual class DatabaseDriverFactory(private val context: Context) {
+    actual fun createDriver(): SqlDriver {
+        return AndroidSqliteDriver(TravlogueDb.Schema, context, "travlogue.db")
+    }
+}
+```
+
+#### Domain Layer (`shared/core/domain/`)
+
+**Responsibility**: Business logic (multiplatform)
+
+**Contains**:
+- Domain models (data classes with kotlinx.serialization)
+- Business services
+- Business rules
+
+**Example**:
+```kotlin
+// model/Trip.kt
+@Serializable
+data class Trip(
+    val id: String,
+    val name: String,
+    val dateType: DateType,
+    val startDate: String? = null,
+    val endDate: String? = null,
+    val originCity: String,
+    val coverImageUri: String? = null,
+    val createdAt: Long,
+    val updatedAt: Long
+)
+
+// service/BookingSyncService.kt
+class BookingSyncService {
+    fun syncBookingsWithLocations(
+        locations: List<Location>,
+        bookings: List<Booking>
+    ): List<Location> {
+        // Business logic to sync booking times with locations
+    }
+}
+```
+
+#### Presentation Layer (`shared/presentation/`)
+
+**Responsibility**: Shared ViewModels and UI state
+
+**Contains**:
+- ViewModels (using kotlinx.coroutines)
 - UI State models
 - UI Event models
 
 **Example**:
 ```kotlin
-// HomeScreen.kt - UI
-@Composable
-fun HomeScreen(viewModel: HomeViewModel = hiltViewModel()) {
-    val trips by viewModel.allTrips.collectAsState()
-    // UI rendering
-}
-
-// HomeViewModel.kt - State management
-@HiltViewModel
-class HomeViewModel @Inject constructor(
+// presentation/home/HomeViewModel.kt
+class HomeViewModel(
     private val tripRepository: TripRepository
 ) : ViewModel() {
-    val allTrips: StateFlow<List<Trip>> = tripRepository.allTrips
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
+
+    private val _uiState = MutableStateFlow(HomeUiState())
+    val uiState: StateFlow<HomeUiState> = _uiState.asStateFlow()
+
+    val allTrips: StateFlow<List<Trip>> = tripRepository
+        .getAllTrips()
+        .stateIn(viewModelScope, SharingStarted.Lazily, emptyList())
 }
 ```
 
-### 2. Domain Layer (`feature/{name}/domain/`)
+### 2. Android App (Platform-Specific)
 
-**Responsibility**: Business logic specific to the feature
+#### UI Layer (`app/feature/{name}/presentation/`)
 
-**Contains**:
-- Use cases (complex business operations)
-- Domain models (feature-specific)
-- Business rules
-
-**When to use**:
-- Complex logic that doesn't fit in ViewModel
-- Operations combining multiple repositories
-- Reusable business logic
-
-**Example** (future gap detection):
-```kotlin
-// domain/usecase/DetectGapsUseCase.kt
-class DetectGapsUseCase @Inject constructor(
-    private val gapRepository: GapRepository,
-    private val locationRepository: LocationRepository
-) {
-    suspend operator fun invoke(tripId: String): List<Gap> {
-        // Complex gap detection logic
-    }
-}
-```
-
-### 3. Components Layer (`feature/{name}/components/`)
-
-**Responsibility**: Reusable UI components for the feature
+**Responsibility**: Jetpack Compose UI (Android-specific)
 
 **Contains**:
-- Composable components used by multiple screens
-- Feature-specific UI widgets
+- Composable screens
+- Android-specific UI components
+- Material 3 theming
 
 **Example**:
 ```kotlin
-// components/TripCard.kt
+// feature/home/presentation/HomeScreen.kt
 @Composable
-fun TripCard(trip: Trip, onClick: () -> Unit, onDelete: () -> Unit) {
-    Card(onClick = onClick) {
-        // Trip display logic
+fun HomeScreen(
+    viewModel: HomeViewModel = koinViewModel(),  // From shared module
+    onNavigateToCreateTrip: () -> Unit
+) {
+    val trips by viewModel.allTrips.collectAsState()
+    val uiState by viewModel.uiState.collectAsState()
+
+    // Jetpack Compose UI
+    LazyColumn {
+        items(trips) { trip ->
+            TripCard(
+                trip = trip,
+                onClick = { /* navigate */ }
+            )
+        }
     }
 }
 ```
 
-### 4. Core Data Layer (`core/data/`)
+#### Dependency Injection Bridge (`app/di/SharedModule.kt`)
 
-**Responsibility**: Data access and persistence
-
-**Contains**:
-- Room entities
-- DAOs
-- Repositories
-- Network models (future)
+**Responsibility**: Bridge Koin (shared) and Hilt (Android)
 
 **Example**:
 ```kotlin
-// core/data/repository/TripRepository.kt
-@Singleton
-class TripRepository @Inject constructor(
-    private val tripDao: TripDao
-) {
-    val allTrips: Flow<List<Trip>> = tripDao.getAllTrips()
-    suspend fun insertTrip(trip: Trip) = tripDao.insertTrip(trip)
+@Module
+@InstallIn(SingletonComponent::class)
+object SharedModule : KoinComponent {
+
+    @Provides
+    @Singleton
+    fun provideTripRepository(): TripRepository {
+        val repository: TripRepository by inject()  // From Koin
+        return repository
+    }
+
+    @Provides
+    @Singleton
+    fun provideGapDetectionService(): GapDetectionService {
+        val service: GapDetectionService by inject()
+        return service
+    }
 }
 ```
+
+---
 
 ## Data Flow
 
+### Cross-Platform Data Flow
+
 ```
-┌──────────────┐
-│  HomeScreen  │  Observes StateFlow, renders UI
-└──────┬───────┘
-       │ User Action
-       ▼
-┌──────────────┐
-│ HomeViewModel│  Handles UI logic, manages state
-└──────┬───────┘
-       │ Calls repository
-       ▼
-┌──────────────┐
-│TripRepository│  Abstracts data source
-└──────┬───────┘
-       │ Queries database
-       ▼
-┌──────────────┐
-│   TripDao    │  Room database access
-└──────┬───────┘
-       │
-       ▼
-┌──────────────┐
-│ Room Database│  Persistent storage
-└──────────────┘
+┌─────────────────────────────────────────────────────┐
+│  Platform UI Layer (Android/iOS/Desktop)           │
+│  ┌───────────┐  ┌───────────┐  ┌───────────┐      │
+│  │  Android  │  │    iOS    │  │  Desktop  │      │
+│  │ Compose   │  │  SwiftUI  │  │ Compose   │      │
+│  └─────┬─────┘  └─────┬─────┘  └─────┬─────┘      │
+└────────┼──────────────┼──────────────┼────────────┘
+         │              │              │
+         ▼              ▼              ▼
+┌─────────────────────────────────────────────────────┐
+│  Shared Presentation Layer (KMP)                    │
+│  ┌───────────────────────────────────────────┐     │
+│  │        HomeViewModel (StateFlow)          │     │
+│  │        CreateTripViewModel                │     │
+│  └───────────────┬───────────────────────────┘     │
+└──────────────────┼─────────────────────────────────┘
+                   │ Calls repository
+                   ▼
+┌─────────────────────────────────────────────────────┐
+│  Shared Domain Layer (KMP)                          │
+│  ┌───────────────────────────────────────────┐     │
+│  │        TripRepository                     │     │
+│  │        BookingSyncService                 │     │
+│  │        GapDetectionService                │     │
+│  └───────────────┬───────────────────────────┘     │
+└──────────────────┼─────────────────────────────────┘
+                   │ Queries database
+                   ▼
+┌─────────────────────────────────────────────────────┐
+│  Shared Data Layer (KMP)                            │
+│  ┌───────────────────────────────────────────┐     │
+│  │     SQLDelight Database (TravlogueDb)     │     │
+│  └───────────────┬───────────────────────────┘     │
+└──────────────────┼─────────────────────────────────┘
+                   │ Uses platform driver
+                   ▼
+┌─────────────────────────────────────────────────────┐
+│  Platform-Specific Drivers (expect/actual)          │
+│  ┌───────────┐  ┌───────────┐  ┌───────────┐      │
+│  │  Android  │  │    iOS    │  │  Desktop  │      │
+│  │  SQLite   │  │  SQLite   │  │  SQLite   │      │
+│  └───────────┘  └───────────┘  └───────────┘      │
+└─────────────────────────────────────────────────────┘
 ```
+
+---
 
 ## Technology Stack
 
-### Core
-- **Language**: Kotlin
-- **Build System**: Gradle with Kotlin DSL
-- **Dependency Injection**: Hilt
+### Shared Module (KMP)
 
-### UI
+#### Core
+- **Language**: Kotlin 2.2.20
+- **Build System**: Gradle 9.0.0 with Kotlin DSL
+- **Dependency Injection**: Koin 4.0.1
+
+#### Database
+- **ORM**: SQLDelight 2.0.2
+- **Driver**: Platform-specific (Android, iOS, Desktop)
+- **Query Generation**: Compile-time type-safe SQL
+
+#### Reactive
+- **Coroutines**: kotlinx.coroutines 1.10.0
+- **Serialization**: kotlinx.serialization 1.9.0
+- **DateTime**: kotlinx.datetime 0.6.1
+
+### Android App
+
+#### Core
+- **Language**: Kotlin 2.2.20
+- **Dependency Injection**: Hilt (for Android-specific) + Koin (for shared)
+
+#### UI
 - **Framework**: Jetpack Compose
 - **Design System**: Material 3
 - **Navigation**: Compose Navigation
 
-### Data
-- **Local Database**: Room 2.8.2
+#### Data
+- **Local Database**: SQLDelight (via shared module)
 - **Networking**: Retrofit 2.11.0 (future use)
 - **Reactive**: Kotlin Coroutines + Flow
 
-### Architecture
-- **Pattern**: MVVM with Clean Architecture
-- **State Management**: StateFlow/SharedFlow
-- **Organization**: Feature-first modules
+---
+
+## Dependency Injection
+
+### Shared Module (Koin)
+
+```kotlin
+// shared/src/commonMain/kotlin/di/SharedModule.kt
+fun sharedModule() = module {
+    single<TravlogueDb> { createDatabase(get()) }
+    single<TripRepository> { TripRepository(get()) }
+    single<GapDetectionService> { GapDetectionService() }
+    single<BookingSyncService> { BookingSyncService() }
+}
+
+// Platform-specific
+expect fun platformModule(): Module
+```
+
+**Android Platform Module:**
+```kotlin
+// shared/src/androidMain/kotlin/di/PlatformModule.kt
+actual fun platformModule() = module {
+    single { DriverFactory(androidContext()) }
+}
+```
+
+### Android App (Hilt + Koin Bridge)
+
+**Application Initialization:**
+```kotlin
+@HiltAndroidApp
+class App : Application() {
+    override fun onCreate() {
+        super.onCreate()
+
+        // Initialize Koin for KMP shared module
+        startKoin {
+            androidContext(this@App)
+            modules(platformModule, sharedModule)
+        }
+    }
+}
+```
+
+**Hilt-Koin Bridge:**
+```kotlin
+@Module
+@InstallIn(SingletonComponent::class)
+object SharedModule : KoinComponent {
+    // Provides shared module dependencies to Hilt
+    @Provides @Singleton
+    fun provideTripRepository(): TripRepository {
+        val repository: TripRepository by inject()
+        return repository
+    }
+}
+```
+
+---
 
 ## Best Practices
 
 ### 1. State Management
 
-Use StateFlow for UI state:
+#### Shared ViewModel Pattern
 ```kotlin
-private val _uiState = MutableStateFlow<HomeUiState>(HomeUiState.Loading)
-val uiState: StateFlow<HomeUiState> = _uiState.asStateFlow()
+class HomeViewModel(
+    private val tripRepository: TripRepository
+) : ViewModel() {
+
+    private val _uiState = MutableStateFlow(HomeUiState())
+    val uiState: StateFlow<HomeUiState> = _uiState.asStateFlow()
+
+    // Use StateFlow for reactive state
+    val allTrips: StateFlow<List<Trip>> = tripRepository
+        .getAllTrips()
+        .stateIn(viewModelScope, SharingStarted.Lazily, emptyList())
+}
 ```
 
 ### 2. Error Handling
@@ -224,114 +480,208 @@ sealed interface HomeUiState {
 }
 ```
 
-### 3. Date/Time Handling
+### 3. Platform-Specific Code (expect/actual)
 
-Use appropriate formats:
-- **Calendar dates** (trip dates): ISO strings `"2025-11-15"`
-- **Date-times with timezone** (bookings): ISO 8601 `"2025-11-15T14:30:00+01:00"`
-- **System timestamps** (created/updated): Long (milliseconds)
-
-Use `DateTimeUtils` for conversions:
+Use expect/actual pattern for platform differences:
 ```kotlin
-import com.aurora.travlogue.core.common.DateTimeUtils.toLocalDate
-import com.aurora.travlogue.core.common.DateTimeUtils.formatDateForDisplay
+// commonMain
+expect class DriverFactory {
+    fun createDriver(): SqlDriver
+}
 
-val date = trip.startDate.toLocalDate()
-val displayDate = trip.startDate.formatDateForDisplay()
-```
-
-### 4. Repository Pattern
-
-Always access data through repositories, never directly from DAOs:
-```kotlin
-// ✅ Good
-class HomeViewModel @Inject constructor(
-    private val tripRepository: TripRepository
-)
-
-// ❌ Bad
-class HomeViewModel @Inject constructor(
-    private val tripDao: TripDao  // Don't inject DAOs directly
-)
-```
-
-### 5. Component Reusability
-
-Extract reusable components to `components/` package:
-```kotlin
-// components/TripCard.kt - Reusable across home feature
-@Composable
-fun TripCard(trip: Trip, onClick: () -> Unit) { ... }
-```
-
-## When to Add Use Cases
-
-Start with ViewModel → Repository pattern. Add use cases when:
-
-1. **Complex business logic** that doesn't fit in ViewModel
-2. **Multiple repositories** need to be coordinated
-3. **Reusable operations** across multiple ViewModels
-4. **Testable business logic** separate from Android framework
-
-Example for gap detection:
-```kotlin
-// domain/usecase/DetectGapsUseCase.kt
-class DetectGapsUseCase @Inject constructor(
-    private val gapRepository: GapRepository,
-    private val locationRepository: LocationRepository,
-    private val bookingRepository: BookingRepository
-) {
-    suspend operator fun invoke(tripId: String): GapAnalysis {
-        val locations = locationRepository.getLocationsForTrip(tripId)
-        val bookings = bookingRepository.getBookingsForTrip(tripId)
-
-        // Complex gap detection algorithm
-        return analyzeGaps(locations, bookings)
+// androidMain
+actual class DriverFactory(private val context: Context) {
+    actual fun createDriver(): SqlDriver {
+        return AndroidSqliteDriver(TravlogueDb.Schema, context, "travlogue.db")
     }
 }
 ```
 
-## Migration Path
+### 4. Date/Time Handling
 
-The current architecture is **module-ready**:
+Use kotlinx.datetime for multiplatform compatibility:
+```kotlin
+import kotlinx.datetime.LocalDate
+import kotlinx.datetime.Clock
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.toLocalDateTime
 
-### Current: Single Module
-```
-app/
-└── src/main/java/com/aurora/travlogue/
-    ├── core/
-    ├── feature/
-    └── di/
-```
-
-### Future: Multi-Module (when needed)
-```
-core-data/
-core-domain/
-core-design/
-feature-home/
-feature-plan/      # Future feature
-feature-discover/  # Future feature
-app/
+val now = Clock.System.now()
+val localDateTime = now.toLocalDateTime(TimeZone.currentSystemDefault())
 ```
 
-To modularize later:
-1. Each `feature/{name}` becomes a Gradle module
-2. `core/*` becomes shared library modules
-3. Package structure remains the same
-4. Only build.gradle files change
+### 5. Serialization
 
-## Folder Naming Conventions
+Use kotlinx.serialization for data classes:
+```kotlin
+@Serializable
+data class Trip(
+    val id: String,
+    val name: String,
+    val dateType: DateType
+)
 
-- **Packages**: lowercase, no underscores (`feature.home.presentation`)
-- **Files**: PascalCase (`HomeScreen.kt`, `TripRepository.kt`)
-- **Composables**: PascalCase matching file name
-- **Functions**: camelCase (`createTrip()`, `deleteTrip()`)
+@Serializable
+enum class DateType {
+    FIXED, FLEXIBLE
+}
+```
+
+### 6. Smart Cast Handling
+
+Store nullable properties in local variables:
+```kotlin
+// ❌ Bad - Won't compile with KMP public API
+if (trip.startDate != null) {
+    Text(trip.startDate.format())  // Smart cast fails
+}
+
+// ✅ Good - Works with KMP
+val startDate = trip.startDate
+if (startDate != null) {
+    Text(startDate.format())  // Smart cast succeeds
+}
+```
+
+---
+
+## Platform-Specific Implementation
+
+### Android
+
+**ViewModel Consumption:**
+```kotlin
+@Composable
+fun HomeScreen(
+    viewModel: HomeViewModel = koinViewModel()  // From shared module
+) {
+    val trips by viewModel.allTrips.collectAsState()
+    // Jetpack Compose UI
+}
+```
+
+### iOS (Ready for Implementation)
+
+**ViewModel Consumption:**
+```swift
+struct HomeView: View {
+    @StateObject private var viewModel = HomeViewModel(
+        tripRepository: KoinKt.koin.get()
+    )
+
+    var body: some View {
+        // SwiftUI
+    }
+}
+```
+
+### Desktop (Ready for Implementation)
+
+**ViewModel Consumption:**
+```kotlin
+@Composable
+fun HomeScreen(
+    viewModel: HomeViewModel = koinViewModel()  // Same as Android
+) {
+    val trips by viewModel.allTrips.collectAsState()
+    // Compose Desktop UI
+}
+```
+
+---
+
+## Testing Strategy
+
+### Shared Module Tests
+
+```kotlin
+// commonTest
+class TripRepositoryTest {
+    @Test
+    fun insertAndRetrieveTrip() = runTest {
+        val repository = TripRepository(createTestDatabase())
+        val trip = createTestTrip()
+
+        repository.insertTrip(trip)
+        val retrieved = repository.getTripById(trip.id).first()
+
+        assertEquals(trip, retrieved)
+    }
+}
+```
+
+### Android Tests
+
+```kotlin
+// Android UI tests
+@Test
+fun homeScreen_displaysTrips() {
+    composeTestRule.setContent {
+        HomeScreen()
+    }
+
+    composeTestRule
+        .onNodeWithText("My Trip")
+        .assertIsDisplayed()
+}
+```
+
+---
+
+## Migration Status
+
+| Component | Status | Platform |
+|-----------|--------|----------|
+| Database (SQLDelight) | ✅ Complete | Android, iOS, Desktop |
+| TripRepository | ✅ Complete | Android, iOS, Desktop |
+| Domain Models | ✅ Complete | Android, iOS, Desktop |
+| Business Services | ✅ Complete | Android, iOS, Desktop |
+| HomeViewModel | ✅ Complete | Android, iOS, Desktop |
+| CreateTripViewModel | ✅ Complete | Android, iOS, Desktop |
+| TripDetailViewModel | ⚠️ Hybrid | Android (uses Hilt bridge) |
+| Android UI | ✅ Complete | Android |
+| iOS UI | 📋 Planned | iOS |
+| Desktop UI | 📋 Planned | Desktop |
+
+---
+
+## Future Architecture Plans
+
+### Short Term
+- Migrate remaining Android ViewModels to shared module
+- Add comprehensive unit tests for shared code
+- Begin iOS app development
+
+### Medium Term
+- Implement iOS app with SwiftUI
+- Create Compose Desktop application
+- Share more presentation logic
+
+### Long Term
+- Kotlin/JS for web platform
+- Compose Multiplatform UI sharing
+- Full feature parity across all platforms
+
+---
 
 ## References
 
-- **Clean Architecture**: Robert C. Martin (Uncle Bob)
-- **MVVM Pattern**: Microsoft documentation
-- **Jetpack Compose**: Android official guide
-- **Room Database**: Android official guide
-- **Hilt**: Dagger Hilt documentation
+### Official Documentation
+- [Kotlin Multiplatform](https://kotlinlang.org/docs/multiplatform.html)
+- [SQLDelight](https://cashapp.github.io/sqldelight/)
+- [Koin](https://insert-koin.io/)
+- [kotlinx.datetime](https://github.com/Kotlin/kotlinx-datetime)
+- [kotlinx.serialization](https://github.com/Kotlin/kotlinx.serialization)
+- [Jetpack Compose](https://developer.android.com/compose)
+
+### Project Documentation
+- `docs/KMP_MIGRATION_COMPLETE.md` - Detailed migration documentation
+- `docs/TESTING_STRATEGY.md` - Testing approach
+- `docs/PRD.md` - Product requirements
+- `shared/README.md` - Shared module documentation
+
+---
+
+**Architecture Version**: 2.0 (KMP)
+**Last Updated**: October 23, 2025
+**Status**: ✅ Fully Migrated to Kotlin Multiplatform

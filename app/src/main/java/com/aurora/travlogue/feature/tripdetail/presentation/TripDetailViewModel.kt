@@ -3,17 +3,10 @@ package com.aurora.travlogue.feature.tripdetail.presentation
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.aurora.travlogue.core.data.local.entities.Activity
-import com.aurora.travlogue.core.data.local.entities.ActivityType
-import com.aurora.travlogue.core.data.local.entities.Booking
-import com.aurora.travlogue.core.data.local.entities.BookingType
-import com.aurora.travlogue.core.data.local.entities.DateType
-import com.aurora.travlogue.core.data.local.entities.Gap
-import com.aurora.travlogue.core.data.local.entities.Location
-import com.aurora.travlogue.core.data.local.entities.TimeSlot
 import com.aurora.travlogue.core.data.repository.TripRepository
-import com.aurora.travlogue.core.domain.BookingSyncService
-import com.aurora.travlogue.core.domain.GapDetectionService
+import com.aurora.travlogue.core.domain.model.*
+import com.aurora.travlogue.core.domain.service.BookingSyncService
+import com.aurora.travlogue.core.domain.service.GapDetectionService
 import com.aurora.travlogue.feature.tripdetail.domain.models.DaySchedule
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -24,9 +17,9 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import java.time.LocalDate
-import java.time.format.DateTimeFormatter
-import java.time.temporal.ChronoUnit
+import kotlinx.datetime.LocalDate
+import kotlinx.datetime.DateTimeUnit
+import kotlinx.datetime.plus
 import javax.inject.Inject
 
 @HiltViewModel
@@ -339,7 +332,11 @@ class TripDetailViewModel @Inject constructor(
                 tripRepository.insertBooking(booking)
 
                 // Sync booking times with location arrival/departure times
-                bookingSyncService.syncBookingsWithLocations(tripId)
+                val updatedLocations = bookingSyncService.syncBookingsWithLocations(
+                    _uiState.value.locations,
+                    _uiState.value.bookings + booking
+                )
+                updatedLocations.forEach { tripRepository.updateLocation(it) }
 
                 _uiEvents.emit(TripDetailUiEvent.ShowSnackbar("Booking added successfully"))
             } catch (e: Exception) {
@@ -354,7 +351,11 @@ class TripDetailViewModel @Inject constructor(
                 tripRepository.updateBooking(booking)
 
                 // Sync booking times with location arrival/departure times
-                bookingSyncService.syncBookingsWithLocations(tripId)
+                val updatedLocations = bookingSyncService.syncBookingsWithLocations(
+                    _uiState.value.locations,
+                    _uiState.value.bookings
+                )
+                updatedLocations.forEach { tripRepository.updateLocation(it) }
 
                 _uiEvents.emit(TripDetailUiEvent.ShowSnackbar("Booking updated successfully"))
             } catch (e: Exception) {
@@ -370,7 +371,11 @@ class TripDetailViewModel @Inject constructor(
 
                 // Sync booking times with location arrival/departure times
                 // This will clear arrival/departure times if no other bookings reference the location
-                bookingSyncService.syncBookingsWithLocations(tripId)
+                val updatedLocations = bookingSyncService.syncBookingsWithLocations(
+                    _uiState.value.locations,
+                    _uiState.value.bookings.filter { it.id != booking.id }
+                )
+                updatedLocations.forEach { tripRepository.updateLocation(it) }
 
                 _uiEvents.emit(TripDetailUiEvent.ShowSnackbar("Booking deleted successfully"))
             } catch (e: Exception) {
@@ -494,27 +499,29 @@ class TripDetailViewModel @Inject constructor(
      * Data class to hold combined trip detail data
      */
     private data class TripDetailData(
-        val trip: com.aurora.travlogue.core.data.local.entities.Trip?,
-        val locations: List<com.aurora.travlogue.core.data.local.entities.Location>,
-        val activities: List<com.aurora.travlogue.core.data.local.entities.Activity>,
+        val trip: Trip?,
+        val locations: List<Location>,
+        val activities: List<Activity>,
         val bookings: List<Booking>,
         val gaps: List<Gap>
     )
 
     private fun generateDaySchedules(
-        trip: com.aurora.travlogue.core.data.local.entities.Trip,
-        locations: List<com.aurora.travlogue.core.data.local.entities.Location>,
-        activities: List<com.aurora.travlogue.core.data.local.entities.Activity>
+        trip: Trip,
+        locations: List<Location>,
+        activities: List<Activity>
     ): List<DaySchedule> {
         // For fixed dates, generate day-by-day schedule
-        if (trip.dateType == DateType.FIXED && trip.startDate != null && trip.endDate != null) {
-            val startDate = LocalDate.parse(trip.startDate)
-            val endDate = LocalDate.parse(trip.endDate)
-            val dayCount = ChronoUnit.DAYS.between(startDate, endDate).toInt() + 1
+        val tripStartDate = trip.startDate
+        val tripEndDate = trip.endDate
+        if (trip.dateType == DateType.FIXED && tripStartDate != null && tripEndDate != null) {
+            val startDate = LocalDate.parse(tripStartDate)
+            val endDate = LocalDate.parse(tripEndDate)
+            val dayCount = (endDate.toEpochDays() - startDate.toEpochDays()).toInt() + 1
 
             return (0 until dayCount).map { dayIndex ->
-                val currentDate = startDate.plusDays(dayIndex.toLong())
-                val dateString = currentDate.format(DateTimeFormatter.ISO_LOCAL_DATE)
+                val currentDate = startDate.plus(dayIndex.toLong(), DateTimeUnit.DAY)
+                val dateString = currentDate.toString()
 
                 // Find location for this date
                 val location = locations.find { it.date == dateString }

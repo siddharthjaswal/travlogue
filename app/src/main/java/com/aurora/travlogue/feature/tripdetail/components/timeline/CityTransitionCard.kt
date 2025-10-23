@@ -28,9 +28,9 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.aurora.travlogue.core.common.PreviewData.bookingFlight
 import com.aurora.travlogue.core.common.PreviewData.bookingTrain
-import com.aurora.travlogue.core.data.local.entities.Booking
-import com.aurora.travlogue.core.data.local.entities.BookingType
-import com.aurora.travlogue.core.data.local.entities.Location
+import com.aurora.travlogue.core.domain.model.Booking
+import com.aurora.travlogue.core.domain.model.BookingType
+import com.aurora.travlogue.core.domain.model.Location
 import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
 

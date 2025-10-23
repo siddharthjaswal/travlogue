@@ -1,8 +1,8 @@
 package com.aurora.travlogue.feature.tripdetail.domain.models
 
-import com.aurora.travlogue.core.data.local.entities.Activity
-import com.aurora.travlogue.core.data.local.entities.Location
-import com.aurora.travlogue.core.data.local.entities.TimeSlot
+import com.aurora.travlogue.core.domain.model.Activity
+import com.aurora.travlogue.core.domain.model.Location
+import com.aurora.travlogue.core.domain.model.TimeSlot
 
 /**
  * Represents a single day's schedule in the trip

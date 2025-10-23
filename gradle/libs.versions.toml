@@ -6,11 +6,21 @@ compile_sdk_version = "36"
 target_sdk_version = "36"
 min_sdk_version = "28"
 
-agp = "9.0.0-alpha11"
+agp = "8.9.1"
 googleServices = "4.4.4"
 kotlin = "2.2.20"
 kspVersion = "2.2.20-2.0.3"
 kotlinxSerialization = "1.9.0"
+kotlinxCoroutines = "1.10.2"
+
+# KMP Dependencies
+composeMultiplatform = "1.7.3"
+sqldelight = "2.0.2"
+ktor = "3.0.3"
+koin = "4.0.1"
+kotlinxDatetime = "0.6.1"
+kermit = "2.0.4"
+kamel = "1.0.1"
 coreKtx = "1.17.0"
 junit = "4.13.2"
 junitVersion = "1.3.0"
@@ -136,6 +146,39 @@ robolectric = { group = "org.robolectric", name = "robolectric", version.ref = "
 mockito-core = { group = "org.mockito", name = "mockito-core", version.ref = "mockito" }
 mockito-inline = { group = "org.mockito", name = "mockito-inline", version.ref = "mockito" }
 
+#KMP Libraries
+kotlinx-datetime = { group = "org.jetbrains.kotlinx", name = "kotlinx-datetime", version.ref = "kotlinxDatetime" }
+kotlinx-coroutines-core = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-core", version.ref = "kotlinxCoroutines" }
+kotlin-test = { group = "org.jetbrains.kotlin", name = "kotlin-test", version.ref = "kotlin" }
+kermit = { group = "co.touchlab", name = "kermit", version.ref = "kermit" }
+
+#SQLDelight
+sqldelight-runtime = { group = "app.cash.sqldelight", name = "runtime", version.ref = "sqldelight" }
+sqldelight-coroutines = { group = "app.cash.sqldelight", name = "coroutines-extensions", version.ref = "sqldelight" }
+sqldelight-android = { group = "app.cash.sqldelight", name = "android-driver", version.ref = "sqldelight" }
+sqldelight-native = { group = "app.cash.sqldelight", name = "native-driver", version.ref = "sqldelight" }
+sqldelight-js = { group = "app.cash.sqldelight", name = "sqljs-driver", version.ref = "sqldelight" }
+sqldelight-jvm = { group = "app.cash.sqldelight", name = "sqlite-driver", version.ref = "sqldelight" }
+
+#Ktor
+ktor-client-core = { group = "io.ktor", name = "ktor-client-core", version.ref = "ktor" }
+ktor-client-okhttp = { group = "io.ktor", name = "ktor-client-okhttp", version.ref = "ktor" }
+ktor-client-darwin = { group = "io.ktor", name = "ktor-client-darwin", version.ref = "ktor" }
+ktor-client-js = { group = "io.ktor", name = "ktor-client-js", version.ref = "ktor" }
+ktor-client-cio = { group = "io.ktor", name = "ktor-client-cio", version.ref = "ktor" }
+ktor-client-content-negotiation = { group = "io.ktor", name = "ktor-client-content-negotiation", version.ref = "ktor" }
+ktor-client-serialization = { group = "io.ktor", name = "ktor-serialization-kotlinx-json", version.ref = "ktor" }
+ktor-client-logging = { group = "io.ktor", name = "ktor-client-logging", version.ref = "ktor" }
+
+#Koin
+koin-core = { group = "io.insert-koin", name = "koin-core", version.ref = "koin" }
+koin-android = { group = "io.insert-koin", name = "koin-android", version.ref = "koin" }
+koin-compose = { group = "io.insert-koin", name = "koin-compose", version.ref = "koin" }
+koin-compose-viewmodel = { group = "io.insert-koin", name = "koin-compose-viewmodel", version.ref = "koin" }
+
+#Kamel (Image loading for KMP)
+kamel-image = { group = "media.kamel", name = "kamel-image", version.ref = "kamel" }
+
 [plugins]
 androidApplication = { id = "com.android.application", version.ref = "agp" }
 googleServices = { id = "com.google.gms.google-services", version.ref = "googleServices" }
@@ -145,3 +188,8 @@ kotlinSerialization = { id = "org.jetbrains.kotlin.plugin.serialization", versio
 hilt = { id = "com.google.dagger.hilt.android", version.ref = "hilt" }
 androidLibrary = { id = "com.android.library", version.ref = "agp" }
 compose-compiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
+
+# KMP Plugins
+kotlinMultiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref = "kotlin" }
+composeMultiplatform = { id = "org.jetbrains.compose", version.ref = "composeMultiplatform" }
+sqldelight = { id = "app.cash.sqldelight", version.ref = "sqldelight" }

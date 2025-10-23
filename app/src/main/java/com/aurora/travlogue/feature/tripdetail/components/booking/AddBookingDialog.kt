@@ -14,7 +14,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.aurora.travlogue.core.data.local.entities.BookingType
+import com.aurora.travlogue.core.domain.model.BookingType
 import com.aurora.travlogue.feature.tripdetail.components.dialogs.DateTimePickerField
 import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter

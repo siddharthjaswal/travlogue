@@ -1,6 +1,6 @@
 package com.aurora.travlogue.feature.tripdetail.components.activity
 
-import com.aurora.travlogue.core.data.local.entities.Location
+import com.aurora.travlogue.core.domain.model.Location
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.LocalTime
@@ -98,17 +98,20 @@ fun validateActivityTimeWindow(
     val arrivalLocalDateTime = arrivalTime.toLocalDateTime()
     val departureLocalDateTime = departureTime.toLocalDateTime()
 
+    val arrivalDateTimeStr = location.arrivalDateTime
+    val departureDateTimeStr = location.departureDateTime
+
     return when {
         activityStartDateTime.isBefore(arrivalLocalDateTime) -> {
             TimeValidationResult(
                 isValid = false,
-                errorMessage = "Activity starts before arrival at ${location.name} (${formatDateTime(location.arrivalDateTime)})"
+                errorMessage = "Activity starts before arrival at ${location.name} (${arrivalDateTimeStr?.let { formatDateTime(it) }})"
             )
         }
         activityEndDateTime.isAfter(departureLocalDateTime) -> {
             TimeValidationResult(
                 isValid = false,
-                errorMessage = "Activity ends after departure from ${location.name} (${formatDateTime(location.departureDateTime)})"
+                errorMessage = "Activity ends after departure from ${location.name} (${departureDateTimeStr?.let { formatDateTime(it) }})"
             )
         }
         else -> TimeValidationResult(isValid = true)

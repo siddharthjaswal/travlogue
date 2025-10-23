@@ -14,7 +14,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.aurora.travlogue.core.common.PreviewData
-import com.aurora.travlogue.core.data.local.entities.Location
+import com.aurora.travlogue.core.domain.model.Location
 import com.aurora.travlogue.feature.tripdetail.components.dialogs.TimezoneSelectorDialog
 import java.time.Instant
 import java.time.LocalDate

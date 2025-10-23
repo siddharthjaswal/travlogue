@@ -11,6 +11,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import org.koin.compose.viewmodel.koinViewModel
 import com.aurora.travlogue.feature.tripdetail.components.activity.AddActivityDialog
 import com.aurora.travlogue.feature.tripdetail.components.booking.AddBookingDialog
 import com.aurora.travlogue.feature.tripdetail.components.location.AddLocationDialog
@@ -237,10 +238,10 @@ private fun TripDetailScreenContent(
     onAddActivity: (String?, String?) -> Unit,
     onAddLocation: () -> Unit,
     onAddBooking: () -> Unit,
-    onActivityClick: (com.aurora.travlogue.core.data.local.entities.Activity) -> Unit,
-    onLocationClick: (com.aurora.travlogue.core.data.local.entities.Location) -> Unit,
-    onBookingClick: (com.aurora.travlogue.core.data.local.entities.Booking) -> Unit,
-    onGapClick: (com.aurora.travlogue.core.data.local.entities.Gap) -> Unit
+    onActivityClick: (com.aurora.travlogue.core.domain.model.Activity) -> Unit,
+    onLocationClick: (com.aurora.travlogue.core.domain.model.Location) -> Unit,
+    onBookingClick: (com.aurora.travlogue.core.domain.model.Booking) -> Unit,
+    onGapClick: (com.aurora.travlogue.core.domain.model.Gap) -> Unit
 ) {
     Scaffold(
         topBar = {

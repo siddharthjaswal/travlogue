@@ -1,0 +1,57 @@
+-- Location table schema
+CREATE TABLE locations (
+    id TEXT PRIMARY KEY NOT NULL,
+    tripId TEXT NOT NULL,
+    name TEXT NOT NULL,
+    country TEXT NOT NULL,
+    date TEXT, -- ISO format: yyyy-MM-dd (deprecated, use arrivalDateTime)
+    latitude REAL,
+    longitude REAL,
+    `order` INTEGER NOT NULL,
+    timezone TEXT, -- IANA timezone: "Asia/Tokyo", "Europe/Paris"
+    arrivalDateTime TEXT, -- ISO 8601 with timezone: "2025-07-01T14:30:00+09:00"
+    departureDateTime TEXT, -- ISO 8601 with timezone: "2025-07-05T09:00:00+09:00"
+    FOREIGN KEY (tripId) REFERENCES trips(id) ON DELETE CASCADE
+);
+
+-- Index for faster lookups
+CREATE INDEX locations_tripId ON locations(tripId);
+
+-- Queries
+
+-- Get all locations for a trip, ordered by sequence
+getLocationsByTripId:
+SELECT * FROM locations
+WHERE tripId = ?
+ORDER BY `order` ASC;
+
+-- Get location by ID
+getLocationById:
+SELECT * FROM locations
+WHERE id = ?;
+
+-- Insert location
+insertLocation:
+INSERT INTO locations (id, tripId, name, country, date, latitude, longitude, `order`, timezone, arrivalDateTime, departureDateTime)
+VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+
+-- Update location
+updateLocation:
+UPDATE locations
+SET name = ?, country = ?, date = ?, latitude = ?, longitude = ?, `order` = ?, timezone = ?, arrivalDateTime = ?, departureDateTime = ?
+WHERE id = ?;
+
+-- Delete location
+deleteLocation:
+DELETE FROM locations
+WHERE id = ?;
+
+-- Delete all locations for a trip
+deleteLocationsByTripId:
+DELETE FROM locations
+WHERE tripId = ?;
+
+-- Count locations for a trip
+countLocationsByTripId:
+SELECT COUNT(*) FROM locations
+WHERE tripId = ?;

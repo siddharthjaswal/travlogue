@@ -2,11 +2,11 @@ package com.aurora.travlogue.feature.mock.presentation
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.aurora.travlogue.core.data.local.entities.*
+import com.aurora.travlogue.core.common.generateUUID
 import com.aurora.travlogue.core.data.repository.TripRepository
+import com.aurora.travlogue.core.domain.model.*
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
-import java.util.UUID
 import javax.inject.Inject
 
 @HiltViewModel
@@ -28,7 +28,7 @@ class MockViewModel @Inject constructor(
         viewModelScope.launch {
             try {
                 // Create trip (dates in origin timezone - San Francisco)
-                val tripId = UUID.randomUUID().toString()
+                val tripId = generateUUID()
                 val trip = Trip(
                     id = tripId,
                     name = "Complete Japan Adventure",
@@ -42,9 +42,9 @@ class MockViewModel @Inject constructor(
                 tripRepository.insertTrip(trip)
 
                 // Create locations
-                val tokyoId = UUID.randomUUID().toString()
-                val kyotoId = UUID.randomUUID().toString()
-                val osakaId = UUID.randomUUID().toString()
+                val tokyoId = generateUUID()
+                val kyotoId = generateUUID()
+                val osakaId = generateUUID()
 
                 val tokyo = Location(
                     id = tokyoId,
@@ -310,7 +310,7 @@ class MockViewModel @Inject constructor(
         viewModelScope.launch {
             try {
                 // Create trip (dates in origin timezone - New York)
-                val tripId = UUID.randomUUID().toString()
+                val tripId = generateUUID()
                 val trip = Trip(
                     id = tripId,
                     name = "Italy Trip (Incomplete)",
@@ -324,9 +324,9 @@ class MockViewModel @Inject constructor(
                 tripRepository.insertTrip(trip)
 
                 // Create locations (with gaps in dates!)
-                val romeId = UUID.randomUUID().toString()
-                val florenceId = UUID.randomUUID().toString()
-                val veniceId = UUID.randomUUID().toString()
+                val romeId = generateUUID()
+                val florenceId = generateUUID()
+                val veniceId = generateUUID()
 
                 val rome = Location(
                     id = romeId,

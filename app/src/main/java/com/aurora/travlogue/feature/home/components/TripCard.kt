@@ -14,9 +14,9 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.aurora.travlogue.core.common.DateTimeUtils.daysBetween
 import com.aurora.travlogue.core.common.DateTimeUtils.formatDateForDisplay
-import com.aurora.travlogue.core.data.local.entities.DateType
-import com.aurora.travlogue.core.data.local.entities.Trip
-import com.aurora.travlogue.core.data.local.entities.TripMockData
+import com.aurora.travlogue.core.domain.model.DateType
+import com.aurora.travlogue.core.domain.model.Trip
+import com.aurora.travlogue.core.domain.model.TripMockData
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -94,10 +94,12 @@ fun TripCard(
 
                 when (trip.dateType) {
                     DateType.FIXED -> {
-                        if (trip.startDate != null && trip.endDate != null) {
-                            val days = daysBetween(trip.startDate, trip.endDate) + 1
+                        val startDate = trip.startDate
+                        val endDate = trip.endDate
+                        if (startDate != null && endDate != null) {
+                            val days = daysBetween(startDate, endDate) + 1
                             Text(
-                                text = "${trip.startDate.formatDateForDisplay()} - ${trip.endDate.formatDateForDisplay()} ($days days)",
+                                text = "${startDate.formatDateForDisplay()} - ${endDate.formatDateForDisplay()} ($days days)",
                                 style = MaterialTheme.typography.bodyMedium,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                             )

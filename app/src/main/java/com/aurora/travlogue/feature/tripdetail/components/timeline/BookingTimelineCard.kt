@@ -13,8 +13,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.aurora.travlogue.core.common.PreviewData
-import com.aurora.travlogue.core.data.local.entities.Booking
-import com.aurora.travlogue.core.data.local.entities.BookingType
+import com.aurora.travlogue.core.domain.model.Booking
+import com.aurora.travlogue.core.domain.model.BookingType
 import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
 import java.time.temporal.ChronoUnit
@@ -95,22 +95,28 @@ fun BookingTimelineCard(
                         horizontalArrangement = Arrangement.spacedBy(6.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Text(
-                            text = booking.fromLocation,
-                            style = MaterialTheme.typography.labelSmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
+                        val fromLocation = booking.fromLocation
+                        val toLocation = booking.toLocation
+                        if (fromLocation != null) {
+                            Text(
+                                text = fromLocation,
+                                style = MaterialTheme.typography.labelSmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowForward,
                             contentDescription = null,
                             modifier = Modifier.size(10.dp),
                             tint = MaterialTheme.colorScheme.onSurfaceVariant
                         )
-                        Text(
-                            text = booking.toLocation,
-                            style = MaterialTheme.typography.labelSmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
+                        if (toLocation != null) {
+                            Text(
+                                text = toLocation,
+                                style = MaterialTheme.typography.labelSmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
                     }
                 }
 
@@ -126,21 +132,22 @@ fun BookingTimelineCard(
                         fontWeight = FontWeight.Medium
                     )
 
-                    if (booking.endDateTime != null) {
+                    val endDateTime = booking.endDateTime
+                    if (endDateTime != null) {
                         Text(
                             text = "→",
                             style = MaterialTheme.typography.labelSmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                         Text(
-                            text = formatTime(booking.endDateTime),
+                            text = formatTime(endDateTime),
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurface,
                             fontWeight = FontWeight.Medium
                         )
 
                         // Duration
-                        val duration = calculateDuration(booking.startDateTime, booking.endDateTime)
+                        val duration = calculateDuration(booking.startDateTime, endDateTime)
                         if (duration != null) {
                             Text(
                                 text = "•",

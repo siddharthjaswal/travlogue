@@ -1,0 +1,51 @@
+-- TransitOption table schema
+CREATE TABLE transit_options (
+    id TEXT PRIMARY KEY NOT NULL,
+    gapId TEXT NOT NULL,
+    mode TEXT NOT NULL, -- 'FLIGHT', 'TRAIN', 'BUS', 'CAR', 'FERRY'
+    provider TEXT,
+    duration INTEGER NOT NULL, -- minutes
+    price REAL,
+    currency TEXT,
+    departureTime TEXT,
+    arrivalTime TEXT,
+    fetchedAt INTEGER NOT NULL,
+    FOREIGN KEY (gapId) REFERENCES gaps(id) ON DELETE CASCADE
+);
+
+-- Index for faster lookups
+CREATE INDEX transit_options_gapId ON transit_options(gapId);
+
+-- Queries
+
+-- Get all transit options for a gap
+getTransitOptionsByGapId:
+SELECT * FROM transit_options
+WHERE gapId = ?
+ORDER BY duration ASC, price ASC;
+
+-- Get transit option by ID
+getTransitOptionById:
+SELECT * FROM transit_options
+WHERE id = ?;
+
+-- Insert transit option
+insertTransitOption:
+INSERT INTO transit_options (id, gapId, mode, provider, duration, price, currency, departureTime, arrivalTime, fetchedAt)
+VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+
+-- Update transit option
+updateTransitOption:
+UPDATE transit_options
+SET mode = ?, provider = ?, duration = ?, price = ?, currency = ?, departureTime = ?, arrivalTime = ?, fetchedAt = ?
+WHERE id = ?;
+
+-- Delete transit option
+deleteTransitOption:
+DELETE FROM transit_options
+WHERE id = ?;
+
+-- Delete all transit options for a gap
+deleteTransitOptionsByGapId:
+DELETE FROM transit_options
+WHERE gapId = ?;

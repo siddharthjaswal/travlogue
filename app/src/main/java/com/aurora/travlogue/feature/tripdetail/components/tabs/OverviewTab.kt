@@ -13,10 +13,10 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.aurora.travlogue.core.common.PreviewData
-import com.aurora.travlogue.core.data.local.entities.DateType
-import com.aurora.travlogue.core.data.local.entities.Gap
-import com.aurora.travlogue.core.data.local.entities.Location
-import com.aurora.travlogue.core.data.local.entities.Trip
+import com.aurora.travlogue.core.domain.model.DateType
+import com.aurora.travlogue.core.domain.model.Gap
+import com.aurora.travlogue.core.domain.model.Location
+import com.aurora.travlogue.core.domain.model.Trip
 import com.aurora.travlogue.feature.tripdetail.presentation.components.GapCard
 import com.aurora.travlogue.core.design.AppTheme
 import java.time.LocalDate
