@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		74C3C77C7F89031CF4C3C57E /* TripDetailViewEnhanced.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0EC5A1A9013F755F92B12236 /* TripDetailViewEnhanced.swift */; };
+		9B2186D11E9A29751D63AFFA /* MockView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1A720CECE1457F1EF20B5548 /* MockView.swift */; };
 		A1A1A1A11A1A1A1A1A1A1A1A /* TravlogueApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1A1A1A01A1A1A1A1A1A1A1A /* TravlogueApp.swift */; };
 		A1A1A1A31A1A1A1A1A1A1A1A /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1A1A1A21A1A1A1A1A1A1A1A /* ContentView.swift */; };
 		A1A1A1A51A1A1A1A1A1A1A1A /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = A1A1A1A41A1A1A1A1A1A1A1A /* Assets.xcassets */; };
@@ -16,6 +18,8 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		0EC5A1A9013F755F92B12236 /* TripDetailViewEnhanced.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = TripDetailViewEnhanced.swift; sourceTree = "<group>"; };
+		1A720CECE1457F1EF20B5548 /* MockView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = MockView.swift; sourceTree = "<group>"; };
 		A1A1A19D1A1A1A1A1A1A1A1A /* iosApp.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = iosApp.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		A1A1A1A01A1A1A1A1A1A1A1A /* TravlogueApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TravlogueApp.swift; sourceTree = "<group>"; };
 		A1A1A1A21A1A1A1A1A1A1A1A /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
@@ -69,8 +73,19 @@
 				A1A1A1AF1A1A1A1A1A1A1A1A /* HomeView.swift */,
 				A1A1A1B11A1A1A1A1A1A1A1A /* CreateTripView.swift */,
 				A1A1A1B31A1A1A1A1A1A1A1A /* TripDetailView.swift */,
+				1A720CECE1457F1EF20B5548 /* MockView.swift */,
+				A3507FC79A3F2F26A5089A6F /* TripDetail */,
 			);
 			path = Views;
+			sourceTree = "<group>";
+		};
+		A3507FC79A3F2F26A5089A6F /* TripDetail */ = {
+			isa = PBXGroup;
+			children = (
+				0EC5A1A9013F755F92B12236 /* TripDetailViewEnhanced.swift */,
+			);
+			name = TripDetail;
+			path = TripDetail;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -169,6 +184,8 @@
 				A1A1A1B01A1A1A1A1A1A1A1A /* HomeView.swift in Sources */,
 				A1A1A1B21A1A1A1A1A1A1A1A /* CreateTripView.swift in Sources */,
 				A1A1A1B41A1A1A1A1A1A1A1A /* TripDetailView.swift in Sources */,
+				9B2186D11E9A29751D63AFFA /* MockView.swift in Sources */,
+				74C3C77C7F89031CF4C3C57E /* TripDetailViewEnhanced.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

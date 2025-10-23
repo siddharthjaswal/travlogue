@@ -247,7 +247,7 @@ struct GapCardView: View {
                 Text(gapTypeText)
                     .font(.headline)
 
-                Text(gap.description_)
+                Text("\(gap.fromDate) to \(gap.toDate)")
                     .font(.caption)
                     .foregroundColor(.secondary)
             }
@@ -261,28 +261,28 @@ struct GapCardView: View {
     }
 
     var gapIcon: String {
-        switch gap.type {
-        case .missingTransit: return "car.fill"
-        case .missingAccommodation: return "bed.double.fill"
-        case .unplannedTime: return "clock.fill"
+        switch gap.gapType {
+        case GapType.missingTransit: return "car.fill"
+        case GapType.unplannedDay: return "calendar"
+        case GapType.timeConflict: return "exclamationmark.triangle.fill"
         default: return "exclamationmark.triangle.fill"
         }
     }
 
     var gapColor: Color {
-        switch gap.type {
-        case .missingTransit: return .orange
-        case .missingAccommodation: return .red
-        case .unplannedTime: return .yellow
+        switch gap.gapType {
+        case GapType.missingTransit: return .orange
+        case GapType.unplannedDay: return .yellow
+        case GapType.timeConflict: return .red
         default: return .gray
         }
     }
 
     var gapTypeText: String {
-        switch gap.type {
-        case .missingTransit: return "Missing Transit"
-        case .missingAccommodation: return "Missing Accommodation"
-        case .unplannedTime: return "Unplanned Time"
+        switch gap.gapType {
+        case GapType.missingTransit: return "Missing Transit"
+        case GapType.unplannedDay: return "Unplanned Day"
+        case GapType.timeConflict: return "Time Conflict"
         default: return "Gap"
         }
     }
@@ -309,7 +309,7 @@ struct DayScheduleCard: View {
             }
 
             // Activities by time slot
-            ForEach(Array(schedule.activitiesByTimeSlot.keys.sorted()), id: \.self) { timeSlot in
+            ForEach(Array(schedule.activitiesByTimeSlot.keys).sorted(by: { timeSlotOrder($0) < timeSlotOrder($1) }), id: \.self) { timeSlot in
                 if let activities = schedule.activitiesByTimeSlot[timeSlot] {
                     VStack(alignment: .leading, spacing: 8) {
                         Text(timeSlotName(timeSlot))
@@ -336,6 +336,16 @@ struct DayScheduleCard: View {
         case .evening: return "Evening"
         case .fullDay: return "Full Day"
         default: return "All Day"
+        }
+    }
+
+    func timeSlotOrder(_ timeSlot: TimeSlot) -> Int {
+        switch timeSlot {
+        case .morning: return 0
+        case .afternoon: return 1
+        case .evening: return 2
+        case .fullDay: return 3
+        default: return 4
         }
     }
 }
@@ -367,11 +377,11 @@ struct ActivityRowView: View {
 
     var activityIcon: String {
         switch activity.type {
-        case .attraction: return "star.fill"
-        case .food: return "fork.knife"
-        case .shopping: return "bag.fill"
-        case .entertainment: return "theatermasks.fill"
-        case .other: return "circle.fill"
+        case ActivityType.attraction: return "star.fill"
+        case ActivityType.food: return "fork.knife"
+        case ActivityType.booking: return "calendar.badge.checkmark"
+        case ActivityType.transit: return "car.fill"
+        case ActivityType.other: return "circle.fill"
         default: return "circle.fill"
         }
     }
@@ -388,7 +398,7 @@ struct BookingCardView: View {
                     .foregroundColor(bookingColor)
 
                 VStack(alignment: .leading, spacing: 4) {
-                    Text(booking.confirmationNumber)
+                    Text(booking.confirmationNumber ?? "No confirmation")
                         .font(.headline)
 
                     Text(booking.provider)
@@ -426,21 +436,23 @@ struct BookingCardView: View {
 
     var bookingIcon: String {
         switch booking.type {
-        case .flight: return "airplane"
-        case .hotel: return "bed.double.fill"
-        case .train: return "tram.fill"
-        case .car: return "car.fill"
-        case .other: return "ticket.fill"
+        case BookingType.flight: return "airplane"
+        case BookingType.hotel: return "bed.double.fill"
+        case BookingType.train: return "tram.fill"
+        case BookingType.bus: return "bus.fill"
+        case BookingType.ticket: return "ticket.fill"
+        case BookingType.other: return "circle.fill"
         default: return "ticket.fill"
         }
     }
 
     var bookingColor: Color {
         switch booking.type {
-        case .flight: return .blue
-        case .hotel: return .purple
-        case .train: return .green
-        case .car: return .orange
+        case BookingType.flight: return .blue
+        case BookingType.hotel: return .purple
+        case BookingType.train: return .green
+        case BookingType.bus: return .orange
+        case BookingType.ticket: return .cyan
         default: return .gray
         }
     }
@@ -482,10 +494,11 @@ struct ActivityCardView: View {
 
     var activityIcon: String {
         switch activity.type {
-        case .attraction: return "star.fill"
-        case .food: return "fork.knife"
-        case .shopping: return "bag.fill"
-        case .entertainment: return "theatermasks.fill"
+        case ActivityType.attraction: return "star.fill"
+        case ActivityType.food: return "fork.knife"
+        case ActivityType.booking: return "calendar.badge.checkmark"
+        case ActivityType.transit: return "car.fill"
+        case ActivityType.other: return "circle.fill"
         default: return "circle.fill"
         }
     }
@@ -591,12 +604,13 @@ class TripDetailViewModelWrapper: ObservableObject {
         Task { @MainActor in
             while !Task.isCancelled {
                 if let state = sharedViewModel.uiState.value as? TripDetailUiState {
-                    if let tripData = state.tripData {
-                        self.locations = tripData.locations
-                        self.bookings = tripData.bookings
-                        self.activities = tripData.activities
-                        self.gaps = tripData.gaps
-                        self.daySchedules = tripData.daySchedules
+                    self.locations = state.locations
+                    self.bookings = state.bookings
+                    self.gaps = state.gaps
+                    self.daySchedules = state.daySchedules
+                    // Extract all activities from day schedules
+                    self.activities = state.daySchedules.flatMap { schedule in
+                        schedule.activitiesByTimeSlot.values.flatMap { $0 }
                     }
                     self.isLoading = state.isLoading
                 }
