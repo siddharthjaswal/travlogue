@@ -5,6 +5,7 @@ import Shared
 struct HomeView: View {
     @StateObject private var viewModel = HomeViewModel()
     @State private var showCreateTrip = false
+    @State private var showMock = false
     @State private var selectedTrip: Trip?
 
     var body: some View {
@@ -28,10 +29,15 @@ struct HomeView: View {
             }
         }
         .navigationDestination(item: $selectedTrip) { trip in
-            TripDetailView(trip: trip)
+            TripDetailViewEnhanced(trip: trip)
         }
         .navigationTitle("My Trips")
         .toolbar {
+            ToolbarItem(placement: .navigationBarLeading) {
+                Button(action: { showMock = true }) {
+                    Image(systemName: "flask")
+                }
+            }
             ToolbarItem(placement: .navigationBarTrailing) {
                 Button(action: { showCreateTrip = true }) {
                     Image(systemName: "plus")
@@ -43,6 +49,11 @@ struct HomeView: View {
                 CreateTripView(onTripCreated: {
                     showCreateTrip = false
                 })
+            }
+        }
+        .sheet(isPresented: $showMock) {
+            NavigationStack {
+                MockView()
             }
         }
         .onAppear {

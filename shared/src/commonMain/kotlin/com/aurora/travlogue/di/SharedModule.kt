@@ -10,6 +10,8 @@ import com.aurora.travlogue.core.domain.service.GapDetectionService
 import com.aurora.travlogue.core.domain.usecase.*
 import com.aurora.travlogue.feature.createtrip.presentation.CreateTripViewModel
 import com.aurora.travlogue.feature.home.presentation.HomeViewModel
+import com.aurora.travlogue.feature.mock.presentation.MockViewModel
+import com.aurora.travlogue.feature.tripdetail.presentation.TripDetailViewModel
 import org.koin.compose.viewmodel.dsl.viewModelOf
 import org.koin.core.module.Module
 import org.koin.core.module.dsl.singleOf
@@ -43,6 +45,7 @@ val sharedModule = module {
     // ViewModels
     viewModelOf(::HomeViewModel)
     viewModelOf(::CreateTripViewModel)
+    viewModelOf(::MockViewModel)
 }
 
 /**
