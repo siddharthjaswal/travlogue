@@ -16,6 +16,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.aurora.travlogue.core.domain.model.*
 import com.aurora.travlogue.feature.tripdetail.domain.models.DaySchedule
 import com.aurora.travlogue.feature.tripdetail.presentation.TripDetailTab
@@ -109,24 +110,24 @@ private fun TripDetailContent(
     onDayClicked: (String) -> Unit
 ) {
     Column(modifier = Modifier.fillMaxSize()) {
-        // Tab Row
+        // Tab Row (matching Android order: Timeline - Locations - Bookings - Overview)
         TabRow(
             selectedTabIndex = when (uiState.selectedTab) {
-                TripDetailTab.OVERVIEW -> 0
-                TripDetailTab.TIMELINE -> 1
+                TripDetailTab.TIMELINE -> 0
+                TripDetailTab.LOCATIONS -> 1
                 TripDetailTab.BOOKINGS -> 2
-                TripDetailTab.LOCATIONS -> 3
+                TripDetailTab.OVERVIEW -> 3
             }
         ) {
-            Tab(
-                selected = uiState.selectedTab == TripDetailTab.OVERVIEW,
-                onClick = { onTabSelected(TripDetailTab.OVERVIEW) },
-                text = { Text("Overview") }
-            )
             Tab(
                 selected = uiState.selectedTab == TripDetailTab.TIMELINE,
                 onClick = { onTabSelected(TripDetailTab.TIMELINE) },
                 text = { Text("Timeline") }
+            )
+            Tab(
+                selected = uiState.selectedTab == TripDetailTab.LOCATIONS,
+                onClick = { onTabSelected(TripDetailTab.LOCATIONS) },
+                text = { Text("Locations (${uiState.locationCount})") }
             )
             Tab(
                 selected = uiState.selectedTab == TripDetailTab.BOOKINGS,
@@ -134,18 +135,18 @@ private fun TripDetailContent(
                 text = { Text("Bookings (${uiState.bookingCount})") }
             )
             Tab(
-                selected = uiState.selectedTab == TripDetailTab.LOCATIONS,
-                onClick = { onTabSelected(TripDetailTab.LOCATIONS) },
-                text = { Text("Locations (${uiState.locationCount})") }
+                selected = uiState.selectedTab == TripDetailTab.OVERVIEW,
+                onClick = { onTabSelected(TripDetailTab.OVERVIEW) },
+                text = { Text("Overview") }
             )
         }
 
         // Tab Content
         when (uiState.selectedTab) {
-            TripDetailTab.OVERVIEW -> OverviewTab(uiState)
             TripDetailTab.TIMELINE -> TimelineTab(uiState, onDayClicked)
-            TripDetailTab.BOOKINGS -> BookingsTab(uiState)
             TripDetailTab.LOCATIONS -> LocationsTab(uiState)
+            TripDetailTab.BOOKINGS -> BookingsTab(uiState)
+            TripDetailTab.OVERVIEW -> OverviewTab(uiState)
         }
     }
 }
@@ -287,7 +288,7 @@ private fun TimelineTab(
     uiState: com.aurora.travlogue.feature.tripdetail.presentation.TripDetailUiState,
     onDayClicked: (String) -> Unit
 ) {
-    if (uiState.daySchedules.isEmpty()) {
+    if (uiState.timelineItems.isEmpty()) {
         Box(
             modifier = Modifier.fillMaxSize(),
             contentAlignment = Alignment.Center
@@ -308,92 +309,161 @@ private fun TimelineTab(
             }
         }
     } else {
+        // Pre-calculate which items should show dates
+        val itemsWithDateFlags = uiState.timelineItems.mapIndexed { index, item ->
+            val currentDate = extractDate(item.getDateTime())
+            val showDate = if (currentDate != null) {
+                val previousItems = uiState.timelineItems.subList(0, index)
+                previousItems.none { extractDate(it.getDateTime()) == currentDate }
+            } else {
+                false
+            }
+            Pair(item, showDate)
+        }
+
         LazyColumn(
             modifier = Modifier.fillMaxSize(),
-            contentPadding = PaddingValues(16.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp)
+            contentPadding = PaddingValues(horizontal = 16.dp, vertical = 24.dp)
         ) {
-            items(
-                items = uiState.daySchedules,
-                key = { it.date }
-            ) { daySchedule ->
-                DayScheduleCard(
-                    daySchedule = daySchedule,
-                    isExpanded = daySchedule.date in uiState.expandedDays,
-                    onDayClicked = onDayClicked
-                )
-            }
-        }
-    }
-}
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-private fun DayScheduleCard(
-    daySchedule: DaySchedule,
-    isExpanded: Boolean,
-    onDayClicked: (String) -> Unit
-) {
-    Card(
-        onClick = { onDayClicked(daySchedule.date) },
-        modifier = Modifier.fillMaxWidth()
-    ) {
-        Column(modifier = Modifier.padding(16.dp)) {
-            // Day Header
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Column {
-                    Text(
-                        text = "Day ${daySchedule.dayNumber}",
-                        style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.Bold
-                    )
-                    Text(
-                        text = daySchedule.date,
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                }
-
-                daySchedule.location?.let { location ->
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Icon(
-                            Icons.Default.Place,
-                            contentDescription = null,
-                            modifier = Modifier.size(16.dp),
-                            tint = MaterialTheme.colorScheme.primary
-                        )
-                        Spacer(modifier = Modifier.width(4.dp))
-                        Text(
-                            text = location.name,
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = MaterialTheme.colorScheme.primary
-                        )
+            itemsIndexed(
+                items = itemsWithDateFlags,
+                key = { _, (item, _) -> item.getKey() }
+            ) { index, (item, showDate) ->
+                when (item) {
+                    is com.aurora.travlogue.feature.tripdetail.domain.models.TimelineItem.TransitArrival -> {
+                        TimelineItemWrapper(
+                            dateTime = item.getDateTime(),
+                            showDate = showDate,
+                            dotColor = MaterialTheme.colorScheme.primary
+                        ) {
+                            CityArrivalCard(
+                                location = item.location,
+                                arrivalDateTime = item.arrivalDateTime,
+                                arrivalBooking = item.arrivalBooking
+                            )
+                        }
                     }
-                }
-            }
 
-            // Activities (when expanded)
-            if (isExpanded && daySchedule.activitiesByTimeSlot.isNotEmpty()) {
-                Spacer(modifier = Modifier.height(12.dp))
-                Divider()
-                Spacer(modifier = Modifier.height(12.dp))
+                    is com.aurora.travlogue.feature.tripdetail.domain.models.TimelineItem.CityWelcome -> {
+                        TimelineItemWrapper(
+                            dateTime = item.getDateTime(),
+                            showDate = showDate,
+                            dotColor = MaterialTheme.colorScheme.primary
+                        ) {
+                            WelcomeCityCard(
+                                location = item.location,
+                                arrivalDateTime = item.arrivalDateTime
+                            )
+                        }
+                    }
 
-                daySchedule.activitiesByTimeSlot.forEach { (timeSlot, activities) ->
-                    Text(
-                        text = timeSlot.name.replace("_", " "),
-                        style = MaterialTheme.typography.labelMedium,
-                        fontWeight = FontWeight.SemiBold,
-                        color = MaterialTheme.colorScheme.primary
-                    )
-                    Spacer(modifier = Modifier.height(8.dp))
+                    is com.aurora.travlogue.feature.tripdetail.domain.models.TimelineItem.HotelCheckIn -> {
+                        TimelineItemWrapper(
+                            dateTime = item.getDateTime(),
+                            showDate = showDate,
+                            dotColor = MaterialTheme.colorScheme.tertiary
+                        ) {
+                            HotelCheckInCard(
+                                booking = item.booking
+                            )
+                        }
+                    }
 
-                    activities.forEach { activity ->
-                        ActivityItem(activity)
-                        Spacer(modifier = Modifier.height(8.dp))
+                    is com.aurora.travlogue.feature.tripdetail.domain.models.TimelineItem.ActivityItem -> {
+                        TimelineItemWrapper(
+                            dateTime = item.getDateTime(),
+                            showDate = showDate,
+                            dotColor = MaterialTheme.colorScheme.primary
+                        ) {
+                            ActivityTimelineCard(
+                                activity = item.activity
+                            )
+                        }
+                    }
+
+                    is com.aurora.travlogue.feature.tripdetail.domain.models.TimelineItem.NothingPlanned -> {
+                        TimelineItemWrapper(
+                            dateTime = item.getDateTime(),
+                            showDate = showDate,
+                            dotColor = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f)
+                        ) {
+                            NothingPlannedCard()
+                        }
+                    }
+
+                    is com.aurora.travlogue.feature.tripdetail.domain.models.TimelineItem.HotelCheckOut -> {
+                        TimelineItemWrapper(
+                            dateTime = item.getDateTime(),
+                            showDate = showDate,
+                            dotColor = MaterialTheme.colorScheme.secondary
+                        ) {
+                            HotelCheckOutCard(
+                                booking = item.booking
+                            )
+                        }
+                    }
+
+                    is com.aurora.travlogue.feature.tripdetail.domain.models.TimelineItem.CityGoodbye -> {
+                        TimelineItemWrapper(
+                            dateTime = item.getDateTime(),
+                            showDate = showDate,
+                            dotColor = MaterialTheme.colorScheme.secondary
+                        ) {
+                            GoodbyeCityCard(
+                                location = item.location,
+                                departureDateTime = item.departureDateTime
+                            )
+                        }
+                    }
+
+                    is com.aurora.travlogue.feature.tripdetail.domain.models.TimelineItem.TransitDeparture -> {
+                        TimelineItemWrapper(
+                            dateTime = item.getDateTime(),
+                            showDate = showDate,
+                            dotColor = MaterialTheme.colorScheme.secondary
+                        ) {
+                            CityDepartureCard(
+                                location = item.location,
+                                departureDateTime = item.departureDateTime,
+                                departureBooking = item.departureBooking
+                            )
+                        }
+                    }
+
+                    is com.aurora.travlogue.feature.tripdetail.domain.models.TimelineItem.InTransit -> {
+                        TimelineItemWrapper(
+                            dateTime = item.getDateTime(),
+                            showDate = showDate,
+                            dotColor = MaterialTheme.colorScheme.tertiary
+                        ) {
+                            TransitCard(booking = item.booking)
+                        }
+                    }
+
+                    is com.aurora.travlogue.feature.tripdetail.domain.models.TimelineItem.OriginDeparture -> {
+                        TimelineItemWrapper(
+                            dateTime = item.getDateTime(),
+                            showDate = showDate,
+                            dotColor = MaterialTheme.colorScheme.secondary
+                        ) {
+                            OriginDepartureCard(
+                                originCity = item.originCity,
+                                departureDateTime = item.booking.startDateTime,
+                                departureBooking = item.booking
+                            )
+                        }
+                    }
+
+                    is com.aurora.travlogue.feature.tripdetail.domain.models.TimelineItem.BookingItem -> {
+                        TimelineItemWrapper(
+                            dateTime = item.getDateTime(),
+                            showDate = showDate,
+                            dotColor = MaterialTheme.colorScheme.tertiary
+                        ) {
+                            BookingTimelineCard(
+                                booking = item.booking
+                            )
+                        }
                     }
                 }
             }
@@ -845,4 +915,707 @@ private fun getActivityTypeColor(type: ActivityType): Color {
         ActivityType.TRANSIT -> Color(0xFF9C27B0)
         ActivityType.OTHER -> Color(0xFF607D8B)
     }
+}
+
+// ==================== TIMELINE COMPONENTS ====================
+
+/**
+ * Timeline item wrapper with circular date badge
+ */
+@Composable
+private fun TimelineItemWrapper(
+    dateTime: String?,
+    showDate: Boolean = true,
+    dotColor: Color = MaterialTheme.colorScheme.primary,
+    content: @Composable () -> Unit
+) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.spacedBy(12.dp)
+    ) {
+        // Date badge (left side) - 10% of width
+        if (showDate && dateTime != null) {
+            Box(
+                modifier = Modifier.fillMaxWidth(0.1f),
+                contentAlignment = Alignment.Center
+            ) {
+                CircularDateBadge(
+                    dateTime = dateTime,
+                    color = dotColor
+                )
+            }
+        } else {
+            // Spacer to maintain alignment when date is hidden
+            Spacer(modifier = Modifier.fillMaxWidth(0.1f))
+        }
+
+        // Content (right side) - 90% of width
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(bottom = 12.dp)
+        ) {
+            content()
+        }
+    }
+}
+
+/**
+ * Circular date badge showing weekday and day number
+ */
+@Composable
+private fun CircularDateBadge(
+    dateTime: String,
+    color: Color,
+    modifier: Modifier = Modifier
+) {
+    val (day, weekday) = parseDateToDisplay(dateTime)
+
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(2.dp),
+        modifier = modifier
+    ) {
+        // Weekday on top
+        Text(
+            text = weekday,
+            style = MaterialTheme.typography.labelSmall.copy(
+                fontWeight = FontWeight.SemiBold,
+                fontSize = 9.sp,
+                letterSpacing = 0.3.sp
+            ),
+            color = color.copy(alpha = 0.8f)
+        )
+
+        // Circle with day number
+        Surface(
+            shape = androidx.compose.foundation.shape.CircleShape,
+            color = color.copy(alpha = 0.15f),
+            shadowElevation = 1.dp
+        ) {
+            Box(
+                contentAlignment = Alignment.Center,
+                modifier = Modifier.padding(horizontal = 10.dp)
+            ) {
+                Text(
+                    text = day,
+                    style = MaterialTheme.typography.titleLarge.copy(
+                        fontWeight = FontWeight.Normal,
+                        fontSize = 12.sp
+                    ),
+                    color = color
+                )
+            }
+        }
+    }
+}
+
+private fun parseDateToDisplay(isoDateTime: String): Pair<String, String> {
+    return try {
+        val instant = kotlinx.datetime.Instant.parse(isoDateTime)
+        val localDateTime = instant.toLocalDateTime(kotlinx.datetime.TimeZone.currentSystemDefault())
+        val day = localDateTime.dayOfMonth.toString()
+        val weekday = localDateTime.dayOfWeek.name.take(3).uppercase()
+        Pair(day, weekday)
+    } catch (e: Exception) {
+        try {
+            val datePart = isoDateTime.substringBefore('T')
+            val localDate = kotlinx.datetime.LocalDate.parse(datePart)
+            val day = localDate.dayOfMonth.toString()
+            val weekday = localDate.dayOfWeek.name.take(3).uppercase()
+            Pair(day, weekday)
+        } catch (e2: Exception) {
+            Pair("--", "---")
+        }
+    }
+}
+
+/**
+ * Extract date from ISO datetime for comparison
+ */
+private fun extractDate(isoDateTime: String?): String? {
+    if (isoDateTime == null) return null
+    return try {
+        val instant = kotlinx.datetime.Instant.parse(isoDateTime)
+        instant.toLocalDateTime(kotlinx.datetime.TimeZone.UTC).date.toString()
+    } catch (e: Exception) {
+        try {
+            kotlinx.datetime.LocalDate.parse(isoDateTime.substringBefore('T')).toString()
+        } catch (e2: Exception) {
+            null
+        }
+    }
+}
+
+@Composable
+private fun WelcomeCityCard(
+    location: Location,
+    arrivalDateTime: String,
+    modifier: Modifier = Modifier
+) {
+    Card(
+        modifier = modifier.fillMaxWidth(),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.5f)
+        )
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            horizontalArrangement = Arrangement.spacedBy(12.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Icon(
+                imageVector = Icons.Default.WavingHand,
+                contentDescription = "Welcome",
+                tint = MaterialTheme.colorScheme.primary,
+                modifier = Modifier.size(32.dp)
+            )
+
+            Column(
+                modifier = Modifier.weight(1f),
+                verticalArrangement = Arrangement.spacedBy(2.dp)
+            ) {
+                Text(
+                    text = "Welcome to ${location.name}!",
+                    style = MaterialTheme.typography.titleSmall,
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.primary
+                )
+
+                Text(
+                    text = formatWelcomeTime(arrivalDateTime, location),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun GoodbyeCityCard(
+    location: Location,
+    departureDateTime: String,
+    modifier: Modifier = Modifier
+) {
+    Card(
+        modifier = modifier.fillMaxWidth(),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.5f)
+        )
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            horizontalArrangement = Arrangement.spacedBy(12.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                text = "👋",
+                style = MaterialTheme.typography.headlineMedium
+            )
+
+            Column(
+                modifier = Modifier.weight(1f),
+                verticalArrangement = Arrangement.spacedBy(2.dp)
+            ) {
+                Text(
+                    text = "Goodbye ${location.name}!",
+                    style = MaterialTheme.typography.titleSmall,
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.secondary
+                )
+
+                Text(
+                    text = formatGoodbyeTime(departureDateTime),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+            }
+        }
+    }
+}
+
+private fun formatWelcomeTime(isoDateTime: String, location: Location): String {
+    return try {
+        val instant = kotlinx.datetime.Instant.parse(isoDateTime)
+        val localDateTime = instant.toLocalDateTime(kotlinx.datetime.TimeZone.currentSystemDefault())
+        val hour = localDateTime.hour
+
+        val greeting = when (hour) {
+            in 5..11 -> "Good morning"
+            in 12..16 -> "Good afternoon"
+            in 17..21 -> "Good evening"
+            else -> "Welcome"
+        }
+
+        "$greeting! You've arrived"
+    } catch (e: Exception) {
+        "Arrived at ${location.name}"
+    }
+}
+
+private fun formatGoodbyeTime(isoDateTime: String): String {
+    return try {
+        val instant = kotlinx.datetime.Instant.parse(isoDateTime)
+        "Time to head out"
+    } catch (e: Exception) {
+        "Departing soon"
+    }
+}
+
+@Composable
+private fun CityArrivalCard(
+    location: Location,
+    arrivalDateTime: String,
+    arrivalBooking: Booking,
+    modifier: Modifier = Modifier
+) {
+    Card(
+        modifier = modifier.fillMaxWidth(),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.3f)
+        )
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            horizontalArrangement = Arrangement.spacedBy(12.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Icon(
+                imageVector = Icons.Default.FlightLand,
+                contentDescription = "Arrival",
+                tint = MaterialTheme.colorScheme.primary,
+                modifier = Modifier.size(32.dp)
+            )
+
+            Column(
+                modifier = Modifier.weight(1f),
+                verticalArrangement = Arrangement.spacedBy(4.dp)
+            ) {
+                Text(
+                    text = "Arrive in ${location.name}",
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold
+                )
+
+                Text(
+                    text = formatDateTime(arrivalDateTime),
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = MaterialTheme.colorScheme.primary,
+                    fontWeight = FontWeight.SemiBold
+                )
+
+                if (arrivalBooking.fromLocation != null) {
+                    Text(
+                        text = "From ${arrivalBooking.fromLocation}",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun CityDepartureCard(
+    location: Location,
+    departureDateTime: String,
+    departureBooking: Booking,
+    modifier: Modifier = Modifier
+) {
+    Card(
+        modifier = modifier.fillMaxWidth(),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.3f)
+        )
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            horizontalArrangement = Arrangement.spacedBy(12.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Icon(
+                imageVector = Icons.Default.FlightTakeoff,
+                contentDescription = "Departure",
+                tint = MaterialTheme.colorScheme.secondary,
+                modifier = Modifier.size(32.dp)
+            )
+
+            Column(
+                modifier = Modifier.weight(1f),
+                verticalArrangement = Arrangement.spacedBy(4.dp)
+            ) {
+                Text(
+                    text = "Depart from ${location.name}",
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold
+                )
+
+                Text(
+                    text = formatDateTime(departureDateTime),
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = MaterialTheme.colorScheme.secondary,
+                    fontWeight = FontWeight.SemiBold
+                )
+
+                if (departureBooking.toLocation != null) {
+                    Text(
+                        text = "To ${departureBooking.toLocation}",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun OriginDepartureCard(
+    originCity: String,
+    departureDateTime: String,
+    departureBooking: Booking,
+    modifier: Modifier = Modifier
+) {
+    Card(
+        modifier = modifier.fillMaxWidth(),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.3f)
+        )
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            horizontalArrangement = Arrangement.spacedBy(12.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Icon(
+                imageVector = Icons.Default.FlightTakeoff,
+                contentDescription = "Departure",
+                tint = MaterialTheme.colorScheme.secondary,
+                modifier = Modifier.size(32.dp)
+            )
+
+            Column(
+                modifier = Modifier.weight(1f),
+                verticalArrangement = Arrangement.spacedBy(4.dp)
+            ) {
+                Text(
+                    text = "Depart from $originCity",
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold
+                )
+
+                Text(
+                    text = formatDateTime(departureDateTime),
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = MaterialTheme.colorScheme.secondary,
+                    fontWeight = FontWeight.SemiBold
+                )
+
+                if (departureBooking.toLocation != null) {
+                    Text(
+                        text = "To ${departureBooking.toLocation}",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun TransitCard(
+    booking: Booking,
+    modifier: Modifier = Modifier
+) {
+    Card(
+        modifier = modifier.fillMaxWidth(),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.tertiaryContainer.copy(alpha = 0.3f)
+        )
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            horizontalArrangement = Arrangement.spacedBy(12.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Icon(
+                imageVector = getTransitIcon(booking.type),
+                contentDescription = "In Transit",
+                tint = MaterialTheme.colorScheme.tertiary,
+                modifier = Modifier.size(32.dp)
+            )
+
+            Column(
+                modifier = Modifier.weight(1f),
+                verticalArrangement = Arrangement.spacedBy(4.dp)
+            ) {
+                Text(
+                    text = "In Transit",
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold
+                )
+
+                Text(
+                    text = booking.provider,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun HotelCheckInCard(
+    booking: Booking,
+    modifier: Modifier = Modifier
+) {
+    Card(
+        modifier = modifier.fillMaxWidth(),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.tertiaryContainer.copy(alpha = 0.3f)
+        )
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            horizontalArrangement = Arrangement.spacedBy(12.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Icon(
+                imageVector = Icons.Default.Hotel,
+                contentDescription = "Check In",
+                tint = MaterialTheme.colorScheme.tertiary,
+                modifier = Modifier.size(32.dp)
+            )
+
+            Column(
+                modifier = Modifier.weight(1f),
+                verticalArrangement = Arrangement.spacedBy(4.dp)
+            ) {
+                Text(
+                    text = "Check In: ${booking.provider}",
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold
+                )
+
+                Text(
+                    text = formatDateTime(booking.startDateTime),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun HotelCheckOutCard(
+    booking: Booking,
+    modifier: Modifier = Modifier
+) {
+    Card(
+        modifier = modifier.fillMaxWidth(),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.3f)
+        )
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            horizontalArrangement = Arrangement.spacedBy(12.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Icon(
+                imageVector = Icons.Default.Hotel,
+                contentDescription = "Check Out",
+                tint = MaterialTheme.colorScheme.secondary,
+                modifier = Modifier.size(32.dp)
+            )
+
+            Column(
+                modifier = Modifier.weight(1f),
+                verticalArrangement = Arrangement.spacedBy(4.dp)
+            ) {
+                Text(
+                    text = "Check Out: ${booking.provider}",
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold
+                )
+
+                booking.endDateTime?.let {
+                    Text(
+                        text = formatDateTime(it),
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun ActivityTimelineCard(
+    activity: Activity,
+    modifier: Modifier = Modifier
+) {
+    Card(
+        modifier = modifier.fillMaxWidth()
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            horizontalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = activity.title,
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold
+                )
+
+                activity.description?.let {
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Text(
+                        text = it,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+
+                if (activity.startTime != null && activity.endTime != null) {
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Text(
+                        text = "${activity.startTime} - ${activity.endTime}",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+            }
+
+            Surface(
+                shape = RoundedCornerShape(4.dp),
+                color = getActivityTypeColor(activity.type)
+            ) {
+                Text(
+                    text = activity.type.name,
+                    modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp),
+                    style = MaterialTheme.typography.labelSmall,
+                    color = Color.White
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun BookingTimelineCard(
+    booking: Booking,
+    modifier: Modifier = Modifier
+) {
+    Card(
+        modifier = modifier.fillMaxWidth()
+    ) {
+        Column(modifier = Modifier.padding(16.dp)) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Surface(
+                    shape = RoundedCornerShape(4.dp),
+                    color = getBookingTypeColor(booking.type)
+                ) {
+                    Text(
+                        text = booking.type.name,
+                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+                        style = MaterialTheme.typography.labelSmall,
+                        color = Color.White
+                    )
+                }
+
+                Text(
+                    text = booking.provider,
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold
+                )
+            }
+
+            if (booking.confirmationNumber != null) {
+                Spacer(modifier = Modifier.height(8.dp))
+                Text(
+                    text = "Confirmation: ${booking.confirmationNumber}",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun NothingPlannedCard(
+    modifier: Modifier = Modifier
+) {
+    Card(
+        modifier = modifier.fillMaxWidth(),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f)
+        )
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            horizontalArrangement = Arrangement.Center
+        ) {
+            Text(
+                text = "Nothing Planned",
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                fontStyle = androidx.compose.ui.text.font.FontStyle.Italic
+            )
+        }
+    }
+}
+
+private fun formatDateTime(isoDateTime: String): String {
+    return try {
+        val instant = kotlinx.datetime.Instant.parse(isoDateTime)
+        val localDateTime = instant.toLocalDateTime(kotlinx.datetime.TimeZone.currentSystemDefault())
+        val month = localDateTime.month.name.take(3).lowercase().replaceFirstChar { it.uppercase() }
+        val day = localDateTime.dayOfMonth
+        val hour = if (localDateTime.hour == 0 || localDateTime.hour == 12) 12 else localDateTime.hour % 12
+        val minute = localDateTime.minute.toString().padStart(2, '0')
+        val amPm = if (localDateTime.hour < 12) "AM" else "PM"
+        "$month $day, $hour:$minute $amPm"
+    } catch (e: Exception) {
+        isoDateTime
+    }
+}
+
+private fun getTransitIcon(type: BookingType) = when (type) {
+    BookingType.FLIGHT -> Icons.Default.Flight
+    BookingType.TRAIN -> Icons.Default.Train
+    BookingType.BUS -> Icons.Default.DirectionsBus
+    else -> Icons.Default.Flight
 }

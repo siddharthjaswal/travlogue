@@ -366,6 +366,7 @@ private fun TripDetailScreenContent(
                                 onGapClick = onGapClick,
                                 onAddActivity = { onAddActivity(null, null) }
                             )
+                            // TODO: Update to use uiState.timelineItems once we migrate TimelineTab to use shared TimelineItem
                         }
 
                         TripDetailTab.LOCATIONS -> {

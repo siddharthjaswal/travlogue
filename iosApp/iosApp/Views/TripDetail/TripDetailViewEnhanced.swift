@@ -94,20 +94,40 @@ struct TimelineTabView: View {
 
     var body: some View {
         ScrollView {
-            LazyVStack(alignment: .leading, spacing: 16) {
-                if viewModel.daySchedules.isEmpty {
-                    EmptyStateView(
-                        icon: "calendar",
-                        message: "No timeline items yet"
-                    )
-                } else {
-                    ForEach(Array(viewModel.daySchedules.enumerated()), id: \.element.date) { index, schedule in
-                        DayScheduleCard(schedule: schedule)
+            if viewModel.timelineItems.isEmpty {
+                EmptyStateView(
+                    icon: "calendar",
+                    message: "No timeline items yet"
+                )
+            } else {
+                LazyVStack(alignment: .leading, spacing: 0) {
+                    ForEach(Array(viewModel.timelineItems.enumerated()), id: \.offset) { index, item in
+                        let showDate = shouldShowDate(for: item, at: index, in: viewModel.timelineItems)
+                        TimelineItemView(item: item, showDate: showDate)
                     }
                 }
+                .padding(.horizontal)
+                .padding(.vertical, 24)
             }
-            .padding()
         }
+    }
+
+    private func shouldShowDate(for item: TimelineItem, at index: Int, in items: [TimelineItem]) -> Bool {
+        guard let currentDate = extractDate(from: item.getDateTime()) else {
+            return false
+        }
+
+        if index == 0 {
+            return true
+        }
+
+        let previousItems = Array(items.prefix(index))
+        return !previousItems.contains { extractDate(from: $0.getDateTime()) == currentDate }
+    }
+
+    private func extractDate(from isoDateTime: String?) -> String? {
+        guard let isoDateTime = isoDateTime else { return nil }
+        return String(isoDateTime.prefix(10)) // YYYY-MM-DD
     }
 }
 
@@ -767,6 +787,7 @@ class TripDetailViewModelWrapper: ObservableObject {
     @Published var activities: [Activity] = []
     @Published var gaps: [Gap] = []
     @Published var daySchedules: [DaySchedule] = []
+    @Published var timelineItems: [TimelineItem] = []
     @Published var isLoading: Bool = true
 
     private let sharedViewModel: TripDetailViewModel
@@ -784,6 +805,7 @@ class TripDetailViewModelWrapper: ObservableObject {
                     self.bookings = state.bookings
                     self.gaps = state.gaps
                     self.daySchedules = state.daySchedules
+                    self.timelineItems = state.timelineItems
                     // Extract all activities from day schedules
                     self.activities = state.daySchedules.flatMap { schedule in
                         schedule.activitiesByTimeSlot.values.flatMap { $0 }
@@ -793,6 +815,337 @@ class TripDetailViewModelWrapper: ObservableObject {
                 try? await Task.sleep(nanoseconds: 500_000_000) // 0.5 seconds
             }
         }
+    }
+}
+
+// MARK: - Timeline Item View
+struct TimelineItemView: View {
+    let item: TimelineItem
+    let showDate: Bool
+
+    var body: some View {
+        HStack(alignment: .top, spacing: 12) {
+            // Date badge (left side)
+            if showDate, let dateTime = item.getDateTime() {
+                CircularDateBadge(dateTime: dateTime, color: dotColor)
+                    .frame(width: 50)
+            } else {
+                Spacer()
+                    .frame(width: 50)
+            }
+
+            // Content (right side)
+            VStack(spacing: 0) {
+                TimelineItemContent(item: item)
+                Spacer().frame(height: 12)
+            }
+        }
+    }
+
+    private var dotColor: Color {
+        switch item {
+        case is TimelineItem.TransitArrival, is TimelineItem.CityWelcome, is TimelineItem.ActivityItem:
+            return .blue
+        case is TimelineItem.HotelCheckIn, is TimelineItem.InTransit, is TimelineItem.BookingItem:
+            return .purple
+        case is TimelineItem.HotelCheckOut, is TimelineItem.CityGoodbye, is TimelineItem.TransitDeparture:
+            return .orange
+        case is TimelineItem.NothingPlanned:
+            return .gray.opacity(0.5)
+        default:
+            return .blue
+        }
+    }
+}
+
+// MARK: - Circular Date Badge
+struct CircularDateBadge: View {
+    let dateTime: String
+    let color: Color
+
+    var body: some View {
+        VStack(spacing: 2) {
+            // Weekday
+            Text(weekday)
+                .font(.system(size: 9, weight: .semibold))
+                .foregroundColor(color.opacity(0.8))
+                .textCase(.uppercase)
+
+            // Circle with day number
+            ZStack {
+                Circle()
+                    .fill(color.opacity(0.15))
+                    .shadow(color: .black.opacity(0.05), radius: 1, x: 0, y: 1)
+
+                Text(day)
+                    .font(.system(size: 12, weight: .regular))
+                    .foregroundColor(color)
+            }
+            .frame(width: 32, height: 32)
+        }
+    }
+
+    private var day: String {
+        parseDateComponents().day
+    }
+
+    private var weekday: String {
+        parseDateComponents().weekday
+    }
+
+    private func parseDateComponents() -> (day: String, weekday: String) {
+        let formatter = ISO8601DateFormatter()
+        formatter.formatOptions = [.withFullDate, .withTime, .withTimeZone]
+
+        if let date = formatter.date(from: dateTime) {
+            let dayFormatter = DateFormatter()
+            dayFormatter.dateFormat = "d"
+            let weekdayFormatter = DateFormatter()
+            weekdayFormatter.dateFormat = "EEE"
+
+            return (dayFormatter.string(from: date), weekdayFormatter.string(from: date).uppercased())
+        }
+
+        // Fallback: try parsing just the date part
+        let datePart = String(dateTime.prefix(10))
+        let dateFormatter = DateFormatter()
+        dateFormatter.dateFormat = "yyyy-MM-dd"
+
+        if let date = dateFormatter.date(from: datePart) {
+            let dayFormatter = DateFormatter()
+            dayFormatter.dateFormat = "d"
+            let weekdayFormatter = DateFormatter()
+            weekdayFormatter.dateFormat = "EEE"
+
+            return (dayFormatter.string(from: date), weekdayFormatter.string(from: date).uppercased())
+        }
+
+        return ("--", "---")
+    }
+}
+
+// MARK: - Timeline Item Content
+struct TimelineItemContent: View {
+    let item: TimelineItem
+
+    var body: some View {
+        Group {
+            switch item {
+            case let welcomeItem as TimelineItem.CityWelcome:
+                WelcomeCityCard(
+                    location: welcomeItem.location,
+                    arrivalDateTime: welcomeItem.arrivalDateTime
+                )
+
+            case let hotelCheckIn as TimelineItem.HotelCheckIn:
+                HotelCheckInCardView(booking: hotelCheckIn.booking)
+
+            case let activityItem as TimelineItem.ActivityItem:
+                ActivityCardView(activity: activityItem.activity)
+
+            case let nothingPlanned as TimelineItem.NothingPlanned:
+                NothingPlannedCard()
+
+            case let hotelCheckOut as TimelineItem.HotelCheckOut:
+                HotelCheckOutCardView(booking: hotelCheckOut.booking)
+
+            case let cityGoodbye as TimelineItem.CityGoodbye:
+                GoodbyeCityCard(
+                    location: cityGoodbye.location,
+                    departureDateTime: cityGoodbye.departureDateTime
+                )
+
+            case let transitDeparture as TimelineItem.TransitDeparture:
+                CityDepartureCard(
+                    location: transitDeparture.location,
+                    departureDateTime: transitDeparture.departureDateTime,
+                    departureBooking: transitDeparture.departureBooking
+                )
+
+            case let inTransit as TimelineItem.InTransit:
+                InTransitCard(booking: inTransit.booking)
+
+            case let originDeparture as TimelineItem.OriginDeparture:
+                OriginDepartureCard(
+                    originCity: originDeparture.originCity,
+                    departureBooking: originDeparture.booking
+                )
+
+            case let bookingItem as TimelineItem.BookingItem:
+                BookingCardView(booking: bookingItem.booking)
+
+            case let transitArrival as TimelineItem.TransitArrival:
+                CityArrivalCard(
+                    location: transitArrival.location,
+                    arrivalDateTime: transitArrival.arrivalDateTime,
+                    arrivalBooking: transitArrival.arrivalBooking
+                )
+
+            default:
+                Text("Unknown timeline item")
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+            }
+        }
+    }
+}
+
+// MARK: - Simple Card Components
+struct NothingPlannedCard: View {
+    var body: some View {
+        Text("Nothing planned")
+            .font(.subheadline)
+            .foregroundColor(.secondary)
+            .padding()
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .background(Color(.systemGray6))
+            .cornerRadius(12)
+    }
+}
+
+struct HotelCheckInCardView: View {
+    let booking: Booking
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            HStack {
+                Image(systemName: "bed.double.fill")
+                    .foregroundColor(.purple)
+                Text("Check-in: \(booking.provider)")
+                    .font(.subheadline)
+                    .fontWeight(.medium)
+            }
+        }
+        .padding()
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(Color(.systemBackground))
+        .cornerRadius(12)
+        .shadow(color: .black.opacity(0.05), radius: 2, x: 0, y: 1)
+    }
+}
+
+struct HotelCheckOutCardView: View {
+    let booking: Booking
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            HStack {
+                Image(systemName: "bed.double.fill")
+                    .foregroundColor(.orange)
+                Text("Check-out: \(booking.provider)")
+                    .font(.subheadline)
+                    .fontWeight(.medium)
+            }
+        }
+        .padding()
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(Color(.systemBackground))
+        .cornerRadius(12)
+        .shadow(color: .black.opacity(0.05), radius: 2, x: 0, y: 1)
+    }
+}
+
+struct GoodbyeCityCard: View {
+    let location: Location
+    let departureDateTime: String
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            HStack {
+                Image(systemName: "hand.wave.fill")
+                    .foregroundColor(.orange)
+                Text("Leaving \(location.name)")
+                    .font(.subheadline)
+                    .fontWeight(.medium)
+            }
+        }
+        .padding()
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(Color(.systemBackground))
+        .cornerRadius(12)
+        .shadow(color: .black.opacity(0.05), radius: 2, x: 0, y: 1)
+    }
+}
+
+struct CityDepartureCard: View {
+    let location: Location
+    let departureDateTime: String
+    let departureBooking: Booking
+
+    var body: some View {
+        BookingCardView(booking: departureBooking)
+    }
+}
+
+struct InTransitCard: View {
+    let booking: Booking
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            HStack {
+                Image(systemName: "airplane")
+                    .foregroundColor(.purple)
+                Text("In transit")
+                    .font(.subheadline)
+                    .fontWeight(.medium)
+            }
+        }
+        .padding()
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(Color(.systemBackground))
+        .cornerRadius(12)
+        .shadow(color: .black.opacity(0.05), radius: 2, x: 0, y: 1)
+    }
+}
+
+struct OriginDepartureCard: View {
+    let originCity: String
+    let departureBooking: Booking
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            HStack {
+                Image(systemName: "airplane.departure")
+                    .foregroundColor(.blue)
+                Text("Departing \(originCity)")
+                    .font(.subheadline)
+                    .fontWeight(.medium)
+            }
+            BookingCardView(booking: departureBooking)
+        }
+    }
+}
+
+struct CityArrivalCard: View {
+    let location: Location
+    let arrivalDateTime: String
+    let arrivalBooking: Booking
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            BookingCardView(booking: arrivalBooking)
+        }
+    }
+}
+
+struct WelcomeCityCard: View {
+    let location: Location
+    let arrivalDateTime: String
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            HStack {
+                Image(systemName: "mappin.circle.fill")
+                    .font(.system(size: 24))
+                    .foregroundColor(.blue)
+                Text("Welcome to \(location.name)!")
+                    .font(.headline)
+            }
+        }
+        .padding()
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(Color.blue.opacity(0.1))
+        .cornerRadius(12)
     }
 }
 

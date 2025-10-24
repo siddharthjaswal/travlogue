@@ -148,7 +148,26 @@ class TimelineBuilder {
                     items.add(TimelineItem.NothingPlanned(dateString))
                 }
 
-                currentDate = currentDate.plus(kotlinx.datetime.DatePeriod(days = 1))
+                // Move to next day
+                currentDate = LocalDate(
+                    year = currentDate.year,
+                    monthNumber = currentDate.monthNumber,
+                    dayOfMonth = currentDate.dayOfMonth
+                ).run {
+                    val dayOfMonth = currentDate.dayOfMonth + 1
+                    val daysInMonth = currentDate.month.length(currentDate.year % 4 == 0 && (currentDate.year % 100 != 0 || currentDate.year % 400 == 0))
+
+                    if (dayOfMonth > daysInMonth) {
+                        // Move to next month
+                        if (currentDate.monthNumber == 12) {
+                            LocalDate(currentDate.year + 1, 1, 1)
+                        } else {
+                            LocalDate(currentDate.year, currentDate.monthNumber + 1, 1)
+                        }
+                    } else {
+                        LocalDate(currentDate.year, currentDate.monthNumber, dayOfMonth)
+                    }
+                }
             }
         }
 
@@ -162,10 +181,13 @@ class TimelineBuilder {
                     try {
                         Instant.parse(dateTimePart).toEpochMilliseconds()
                     } catch (e: Exception) {
-                        // If that fails, parse as date-time string and assign a default time
+                        // If that fails, just use date as string for comparison
                         try {
-                            val localDateTime = kotlinx.datetime.LocalDateTime.parse(dateTimePart)
-                            localDateTime.toInstant(TimeZone.UTC).toEpochMilliseconds()
+                            // Parse date part and use as epoch days for ordering
+                            val datePart = dateTimePart.substringBefore('T')
+                            val localDate = LocalDate.parse(datePart)
+                            // Convert to epoch day count for ordering
+                            localDate.toEpochDays().toLong() * 24 * 60 * 60 * 1000
                         } catch (e2: Exception) {
                             Long.MAX_VALUE
                         }
