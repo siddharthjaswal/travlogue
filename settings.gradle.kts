@@ -22,3 +22,4 @@ dependencyResolutionManagement {
 rootProject.name = "Travlogue"
 include(":app")
 include(":shared")
+include(":desktopApp")
