@@ -3,11 +3,14 @@
 ## Table of Contents
 1. [Project Structure](#project-structure)
 2. [Shared Module Architecture](#shared-module-architecture)
-3. [iOS Integration](#ios-integration)
+3. [Platform Integration](#platform-integration)
+   - [iOS Integration](#ios-integration)
+   - [macOS Desktop Integration](#macos-desktop-integration)
 4. [State Management](#state-management)
 5. [Dependency Injection](#dependency-injection)
 6. [Working with Xcode](#working-with-xcode)
-7. [Development Workflow](#development-workflow)
+7. [Working with Desktop](#working-with-desktop)
+8. [Development Workflow](#development-workflow)
 
 ---
 
@@ -28,6 +31,17 @@ Travlogue/
 │   │       └── TripDetail/
 │   │           └── TripDetailViewEnhanced.swift
 │   └── iosApp.xcodeproj/          # Xcode project file
+│
+├── desktopApp/                    # macOS Desktop UI (Compose Multiplatform)
+│   ├── build.gradle.kts           # Desktop build configuration
+│   └── src/desktopMain/kotlin/com/aurora/travlogue/desktop/
+│       ├── Main.kt                # Desktop app entry point
+│       ├── TravlogueApp.kt        # Navigation
+│       └── ui/screens/            # Compose Desktop screens
+│           ├── HomeScreen.kt
+│           ├── CreateTripScreen.kt
+│           ├── MockScreen.kt
+│           └── TripDetailScreen.kt
 │
 └── shared/                        # Shared KMP code (70-80% of app)
     ├── src/
@@ -154,9 +168,11 @@ The shared module follows **Clean Architecture** principles:
 
 ---
 
-## iOS Integration
+## Platform Integration
 
-### **Where Should iOS Files Be?**
+### **iOS Integration**
+
+#### **Where Should iOS Files Be?**
 
 All iOS-specific UI code goes in: `iosApp/iosApp/Views/`
 
@@ -199,13 +215,110 @@ class KoinHelper : KoinComponent {
 }
 ```
 
+### **macOS Desktop Integration**
+
+#### **Where Should Desktop Files Be?**
+
+All macOS desktop UI code goes in: `desktopApp/src/desktopMain/kotlin/com/aurora/travlogue/desktop/`
+
+```
+desktopApp/src/desktopMain/kotlin/com/aurora/travlogue/desktop/
+├── Main.kt                        # Application entry point
+├── TravlogueApp.kt               # Navigation and app root
+└── ui/screens/                   # Screen composables
+    ├── HomeScreen.kt
+    ├── CreateTripScreen.kt
+    ├── MockScreen.kt
+    └── TripDetailScreen.kt
+```
+
+#### **Desktop App Entry Point**
+
+The desktop app uses **Compose Multiplatform** for native desktop UI:
+
+```kotlin
+// desktopApp/src/desktopMain/kotlin/Main.kt
+fun main() = application {
+    // Initialize Koin
+    startKoin {
+        modules(sharedModule)
+    }
+
+    val windowState = rememberWindowState(
+        size = DpSize(1200.dp, 800.dp)
+    )
+
+    Window(
+        onCloseRequest = ::exitApplication,
+        title = "Travlogue - Travel Planning Made Easy",
+        state = windowState
+    ) {
+        TravlogueApp()
+    }
+}
+```
+
+#### **Desktop ViewModels Access**
+
+Desktop uses **Compose Multiplatform's Koin integration** directly - no wrapper needed!
+
+```kotlin
+@Composable
+fun HomeScreen(
+    viewModel: HomeViewModel = koinViewModel() // Direct access!
+) {
+    val uiState by viewModel.uiState.collectAsState()
+
+    // Use uiState directly in Compose
+    LazyColumn {
+        items(uiState.trips) { trip ->
+            TripCard(trip)
+        }
+    }
+}
+```
+
+For ViewModels with parameters:
+
+```kotlin
+@Composable
+fun TripDetailScreen(
+    trip: Trip,
+    viewModel: TripDetailViewModel = koinViewModel { parametersOf(trip.id) }
+) {
+    val uiState by viewModel.uiState.collectAsState()
+    // ...
+}
+```
+
+#### **Building Desktop App**
+
+```bash
+# Build the desktop application
+./gradlew :desktopApp:build
+
+# Run the desktop app
+./gradlew :desktopApp:run
+
+# Create distributable packages (DMG for macOS)
+./gradlew :desktopApp:createDistributable
+
+# Create native installers
+./gradlew :desktopApp:packageDmg  # macOS DMG
+./gradlew :desktopApp:packagePkg  # macOS PKG
+```
+
 ---
 
 ## State Management
 
-### **How to Pass States from Kotlin to iOS**
+### **How to Pass States from Kotlin to Platforms**
 
-Kotlin ViewModels use **StateFlow** for reactive state management. iOS observes these states using a **polling pattern**.
+Kotlin ViewModels use **StateFlow** for reactive state management.
+
+### **iOS: Polling Pattern**
+
+iOS observes these states using a **polling pattern** (due to Swift/Kotlin interop limitations):
 
 #### **Step 1: ViewModel in Kotlin (Shared Module)**
 
@@ -278,11 +391,41 @@ struct HomeView: View {
 }
 ```
 
-### **Why Polling Instead of Direct Flow Collection?**
-
+**Why Polling for iOS?**
 - Kotlin Flows don't directly map to Swift's Combine framework
 - Polling is simple, reliable, and 0.5s interval is imperceptible to users
-- Alternative: Use `@Parcelize` or custom Combine wrappers (more complex)
+- Alternative: Use custom Combine wrappers (more complex)
+
+### **Desktop: Direct StateFlow Collection**
+
+Desktop uses Compose Multiplatform which has **native Kotlin Flow support**:
+
+```kotlin
+@Composable
+fun HomeScreen(viewModel: HomeViewModel = koinViewModel()) {
+    // Direct StateFlow collection - no polling needed!
+    val uiState by viewModel.uiState.collectAsState()
+
+    // Reactive updates automatically
+    LazyColumn {
+        items(uiState.trips) { trip ->
+            TripCard(trip)
+        }
+    }
+}
+```
+
+### **Android: Direct StateFlow Collection**
+
+Android also uses direct collection (same as Desktop):
+
+```kotlin
+@Composable
+fun HomeScreen(viewModel: HomeViewModel = hiltViewModel()) {
+    val uiState by viewModel.uiState.collectAsState()
+    // Automatically reactive
+}
+```
 
 ---
 
@@ -602,21 +745,23 @@ If you only need to change iOS UI (no shared logic changes):
 ### **2. Communication Between Platforms**
 
 ```
-┌─────────────────────────────────────────────┐
-│          Shared Module (Kotlin)             │
-│  ┌────────────┐  ┌────────────┐            │
-│  │ ViewModel  │  │ Repository │            │
-│  │ (StateFlow)│  │            │            │
-│  └────────────┘  └────────────┘            │
-└─────────────┬───────────────────────────────┘
-              │
-    ┌─────────┴─────────┐
-    │                   │
-    ▼                   ▼
-┌─────────┐       ┌─────────┐
-│ Android │       │   iOS   │
-│ (Compose)│       │(SwiftUI)│
-└─────────┘       └─────────┘
+┌──────────────────────────────────────────────────────┐
+│           Shared Module (Kotlin)                     │
+│   ┌────────────┐  ┌────────────┐  ┌──────────────┐ │
+│   │ ViewModel  │  │ Repository │  │   Services   │ │
+│   │ (StateFlow)│  │            │  │              │ │
+│   └────────────┘  └────────────┘  └──────────────┘ │
+└────────────┬─────────────────────────────────────────┘
+             │
+   ┌─────────┼──────────┬────────────┐
+   │         │          │            │
+   ▼         ▼          ▼            ▼
+┌──────┐ ┌──────┐  ┌────────┐  ┌─────────┐
+│Android│ │Desktop│  │  iOS   │  │   Web   │
+│Compose│ │Compose│  │SwiftUI │  │(Future) │
+└──────┘ └──────┘  └────────┘  └─────────┘
+  Direct   Direct    Polling      Direct
+  Flow     Flow      Pattern      Flow
 ```
 
 ### **3. File Naming Conventions**
@@ -634,20 +779,26 @@ If you only need to change iOS UI (no shared logic changes):
 ### **Common Commands**
 
 ```bash
-# Build shared framework for iOS
+# Build shared framework
 ./gradlew :shared:build
 
 # Clean build
 ./gradlew clean
 
-# Run Android app
-./gradlew :androidApp:installDebug
+# Android
+./gradlew :androidApp:installDebug            # Install on device/emulator
+./gradlew :androidApp:assembleDebug           # Build APK
 
-# Build iOS app (from iosApp directory)
+# iOS (from iosApp directory)
 xcodebuild -project iosApp.xcodeproj -scheme iosApp -sdk iphonesimulator
+open iosApp/iosApp.xcodeproj                  # Open in Xcode
 
-# Open Xcode
-open iosApp/iosApp.xcodeproj
+# macOS Desktop
+./gradlew :desktopApp:run                     # Run desktop app
+./gradlew :desktopApp:build                   # Build desktop app
+./gradlew :desktopApp:packageDmg              # Create DMG installer
+./gradlew :desktopApp:packagePkg              # Create PKG installer
+./gradlew :desktopApp:createDistributable     # Create distributable
 ```
 
 ### **Directory Quick Links**
@@ -661,17 +812,44 @@ open iosApp/iosApp.xcodeproj
 | iOS Bridge            | `shared/src/iosMain/kotlin/KoinHelper.kt`             |
 | iOS Views             | `iosApp/iosApp/Views/`                                |
 | Android UI            | `androidApp/src/main/java/ui/`                        |
+| Desktop UI            | `desktopApp/src/desktopMain/kotlin/ui/screens/`       |
+
+### **Platform Comparison**
+
+| Feature               | Android | iOS | Desktop | Web (Future) |
+|-----------------------|---------|-----|---------|--------------|
+| UI Framework          | Compose | SwiftUI | Compose MP | Compose Web |
+| ViewModel Access      | hiltViewModel() | KoinHelper + Wrapper | koinViewModel() | koinViewModel() |
+| StateFlow Collection  | Direct  | Polling | Direct  | Direct |
+| Navigation            | Navigation Component | SwiftUI Navigation | Sealed Class | TBD |
+| DI Framework          | Hilt    | Koin (via bridge) | Koin | Koin |
+| Build Tool            | Gradle  | Xcode | Gradle | Gradle |
+| Distribution          | APK/AAB | IPA | DMG/PKG | Web Deploy |
 
 ---
 
 ## Summary
 
-1. **Business logic lives in `shared/`** - accessible to both platforms
-2. **iOS UI lives in `iosApp/iosApp/Views/`** - SwiftUI code
-3. **Use KoinHelper** to access shared ViewModels from iOS
-4. **Poll StateFlow** in iOS wrappers to get reactive updates
-5. **Use Xcode for iOS UI work** after shared framework is built
-6. **Use Android Studio for Kotlin work** (ViewModels, repositories, models)
-7. **Build shared framework** with `./gradlew :shared:build` after Kotlin changes
+1. **Business logic lives in `shared/`** - accessible to all platforms
+2. **Platform-specific UI**:
+   - Android: `androidApp/src/main/java/ui/` (Jetpack Compose)
+   - iOS: `iosApp/iosApp/Views/` (SwiftUI)
+   - Desktop: `desktopApp/src/desktopMain/kotlin/ui/screens/` (Compose Multiplatform)
+3. **ViewModel Access**:
+   - Android: `hiltViewModel()` (Hilt DI)
+   - iOS: `KoinHelper` bridge with polling wrappers
+   - Desktop: `koinViewModel()` (direct Koin access)
+4. **StateFlow Observation**:
+   - Android & Desktop: Direct collection with `collectAsState()`
+   - iOS: Polling pattern (0.5s interval)
+5. **Development Tools**:
+   - Kotlin code: Android Studio / IntelliJ IDEA
+   - iOS UI: Xcode
+   - Desktop UI: Android Studio / IntelliJ IDEA
+6. **Build Commands**:
+   - Shared: `./gradlew :shared:build`
+   - Android: `./gradlew :androidApp:installDebug`
+   - iOS: `open iosApp/iosApp.xcodeproj` then Cmd+R
+   - Desktop: `./gradlew :desktopApp:run`
 
-This architecture allows you to **write business logic once** and share it across platforms, while keeping platform-specific UI native and performant.
+This architecture allows you to **write business logic once** and share it across **Android, iOS, and macOS Desktop**, while keeping platform-specific UI native and performant. Future expansion to Web is straightforward with Compose for Web!
