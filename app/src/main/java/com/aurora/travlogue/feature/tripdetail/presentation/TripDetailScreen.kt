@@ -316,16 +316,18 @@ private fun TripDetailScreenContent(
                 }
 
                 uiState.error != null -> {
+                    val errorMessage = uiState.error ?: "Unknown error"
                     ErrorState(
-                        message = uiState.error,
+                        message = errorMessage,
                         onRetry = onRetry
                     )
                 }
 
                 uiState.trip != null -> {
+                    val trip = uiState.trip!!
                     // Trip Header Section
                     TripHeaderSection(
-                        trip = uiState.trip
+                        trip = trip
                     )
 
                     // Tab Navigation
@@ -355,18 +357,13 @@ private fun TripDetailScreenContent(
                     when (uiState.selectedTab) {
                         TripDetailTab.TIMELINE -> {
                             TimelineTab(
-                                daySchedules = uiState.daySchedules,
-                                bookings = uiState.bookings,
-                                gaps = uiState.gaps,
+                                timelineItems = uiState.timelineItems,
                                 locations = uiState.locations,
-                                expandedDays = uiState.expandedDays,
-                                onDayClicked = onDayClicked,
                                 onActivityClick = onActivityClick,
                                 onBookingClick = onBookingClick,
                                 onGapClick = onGapClick,
                                 onAddActivity = { onAddActivity(null, null) }
                             )
-                            // TODO: Update to use uiState.timelineItems once we migrate TimelineTab to use shared TimelineItem
                         }
 
                         TripDetailTab.LOCATIONS -> {
@@ -387,7 +384,7 @@ private fun TripDetailScreenContent(
 
                         TripDetailTab.OVERVIEW -> {
                             OverviewTab(
-                                trip = uiState.trip,
+                                trip = trip,
                                 locationCount = uiState.locationCount,
                                 activityCount = uiState.activityCount,
                                 bookingCount = uiState.bookingCount,

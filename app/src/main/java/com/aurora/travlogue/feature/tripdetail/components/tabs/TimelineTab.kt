@@ -26,7 +26,7 @@ import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
 
 /**
- * Improved timeline with:
+ * Timeline tab using shared TimelineItem from shared module
  * - All dates shown with badges
  * - Individual activity cards (no DayCard wrapper)
  * - "Nothing Planned" for empty days
@@ -34,30 +34,20 @@ import java.time.format.DateTimeFormatter
  */
 @Composable
 fun TimelineTab(
-    daySchedules: List<DaySchedule>,
-    bookings: List<Booking>,
-    gaps: List<Gap>,
+    timelineItems: List<com.aurora.travlogue.feature.tripdetail.domain.models.TimelineItem>,
     locations: List<Location>,
-    expandedDays: Set<String>,
-    onDayClicked: (String) -> Unit,
     onActivityClick: (Activity) -> Unit,
     onBookingClick: (Booking) -> Unit,
     onGapClick: (Gap) -> Unit,
     onAddActivity: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    if (daySchedules.isEmpty() && bookings.isEmpty()) {
+    if (timelineItems.isEmpty()) {
         EmptyTimelineState(
             onAddActivity = onAddActivity,
             modifier = modifier
         )
     } else {
-        // Build complete timeline with all dates
-        val timelineItems = buildCompleteTimeline(
-            daySchedules,
-            bookings,
-            locations
-        )
 
         // Pre-calculate which items should show dates
         val itemsWithDateFlags = timelineItems.mapIndexed { index, item ->
@@ -80,7 +70,7 @@ fun TimelineTab(
                 key = { _, (item, _) -> item.getKey() }
             ) { index, (item, showDate) ->
                 when (item) {
-                    is TimelineItem.TransitArrival -> {
+                    is com.aurora.travlogue.feature.tripdetail.domain.models.TimelineItem.TransitArrival -> {
                         TimelineItem(
                             dateTime = item.getDateTime(),
                             showDate = showDate,
@@ -94,7 +84,7 @@ fun TimelineTab(
                         }
                     }
 
-                    is TimelineItem.CityWelcome -> {
+                    is com.aurora.travlogue.feature.tripdetail.domain.models.TimelineItem.CityWelcome -> {
                         TimelineItem(
                             dateTime = item.getDateTime(),
                             showDate = showDate,
@@ -107,7 +97,7 @@ fun TimelineTab(
                         }
                     }
 
-                    is TimelineItem.HotelCheckIn -> {
+                    is com.aurora.travlogue.feature.tripdetail.domain.models.TimelineItem.HotelCheckIn -> {
                         TimelineItem(
                             dateTime = item.getDateTime(),
                             showDate = showDate,
@@ -120,7 +110,7 @@ fun TimelineTab(
                         }
                     }
 
-                    is TimelineItem.ActivityItem -> {
+                    is com.aurora.travlogue.feature.tripdetail.domain.models.TimelineItem.ActivityItem -> {
                         TimelineItem(
                             dateTime = item.getDateTime(),
                             showDate = showDate,
@@ -133,7 +123,7 @@ fun TimelineTab(
                         }
                     }
 
-                    is TimelineItem.NothingPlanned -> {
+                    is com.aurora.travlogue.feature.tripdetail.domain.models.TimelineItem.NothingPlanned -> {
                         TimelineItem(
                             dateTime = item.getDateTime(),
                             showDate = showDate,
@@ -143,7 +133,7 @@ fun TimelineTab(
                         }
                     }
 
-                    is TimelineItem.HotelCheckOut -> {
+                    is com.aurora.travlogue.feature.tripdetail.domain.models.TimelineItem.HotelCheckOut -> {
                         TimelineItem(
                             dateTime = item.getDateTime(),
                             showDate = showDate,
@@ -156,7 +146,7 @@ fun TimelineTab(
                         }
                     }
 
-                    is TimelineItem.CityGoodbye -> {
+                    is com.aurora.travlogue.feature.tripdetail.domain.models.TimelineItem.CityGoodbye -> {
                         TimelineItem(
                             dateTime = item.getDateTime(),
                             showDate = showDate,
@@ -169,7 +159,7 @@ fun TimelineTab(
                         }
                     }
 
-                    is TimelineItem.TransitDeparture -> {
+                    is com.aurora.travlogue.feature.tripdetail.domain.models.TimelineItem.TransitDeparture -> {
                         TimelineItem(
                             dateTime = item.getDateTime(),
                             showDate = showDate,
@@ -183,7 +173,7 @@ fun TimelineTab(
                         }
                     }
 
-                    is TimelineItem.InTransit -> {
+                    is com.aurora.travlogue.feature.tripdetail.domain.models.TimelineItem.InTransit -> {
                         TimelineItem(
                             dateTime = item.getDateTime(),
                             showDate = showDate,
@@ -193,7 +183,7 @@ fun TimelineTab(
                         }
                     }
 
-                    is TimelineItem.OriginDeparture -> {
+                    is com.aurora.travlogue.feature.tripdetail.domain.models.TimelineItem.OriginDeparture -> {
                         TimelineItem(
                             dateTime = item.getDateTime(),
                             showDate = showDate,
@@ -207,7 +197,7 @@ fun TimelineTab(
                         }
                     }
 
-                    is TimelineItem.BookingItem -> {
+                    is com.aurora.travlogue.feature.tripdetail.domain.models.TimelineItem.BookingItem -> {
                         TimelineItem(
                             dateTime = item.getDateTime(),
                             showDate = showDate,
@@ -225,287 +215,10 @@ fun TimelineTab(
     }
 }
 
-/**
- * Sealed class for timeline items
- */
-private sealed class TimelineItem {
-    data class TransitArrival(
-        val location: Location,
-        val arrivalDateTime: String,
-        val arrivalBooking: Booking
-    ) : TimelineItem()
-
-    data class CityWelcome(
-        val location: Location,
-        val arrivalDateTime: String
-    ) : TimelineItem()
-
-    data class HotelCheckIn(
-        val booking: Booking
-    ) : TimelineItem()
-
-    data class ActivityItem(
-        val activity: Activity
-    ) : TimelineItem()
-
-    data class NothingPlanned(
-        val date: String // YYYY-MM-DD format
-    ) : TimelineItem()
-
-    data class HotelCheckOut(
-        val booking: Booking
-    ) : TimelineItem()
-
-    data class CityGoodbye(
-        val location: Location,
-        val departureDateTime: String
-    ) : TimelineItem()
-
-    data class TransitDeparture(
-        val location: Location,
-        val departureDateTime: String,
-        val departureBooking: Booking
-    ) : TimelineItem()
-
-    data class InTransit(
-        val booking: Booking
-    ) : TimelineItem()
-
-    data class OriginDeparture(
-        val booking: Booking,
-        val originCity: String
-    ) : TimelineItem()
-
-    data class BookingItem(
-        val booking: Booking
-    ) : TimelineItem()
-
-    fun getSortableTimestamp(): String {
-        return when (this) {
-            is TransitArrival -> "${arrivalDateTime}|1"
-            is CityWelcome -> "${arrivalDateTime}|2"
-            is HotelCheckIn -> "${booking.startDateTime}|3"
-            is ActivityItem -> {
-                val date = activity.date ?: "9999-12-31"
-                val time = activity.startTime ?: when (activity.timeSlot) {
-                    TimeSlot.MORNING -> "09:00:00"
-                    TimeSlot.AFTERNOON -> "13:00:00"
-                    TimeSlot.EVENING -> "17:00:00"
-                    TimeSlot.FULL_DAY -> "09:00:00"
-                    null -> "12:00:00"
-                }
-                "${date}T${time}|4"
-            }
-
-            is NothingPlanned -> "${date}T06:00:00|5"
-            is HotelCheckOut -> "${booking.endDateTime}|6"
-            is CityGoodbye -> "${departureDateTime}|7"
-            is TransitDeparture -> "${departureDateTime}|8"
-            is InTransit -> "${booking.startDateTime}|8.5" // Between departure and arrival
-            is OriginDeparture -> "${booking.startDateTime}|0" // Very first item
-            is BookingItem -> "${booking.startDateTime}|9"
-        }
-    }
-
-    fun getDateTime(): String? {
-        return when (this) {
-            is TransitArrival -> arrivalDateTime
-            is CityWelcome -> arrivalDateTime
-            is HotelCheckIn -> booking.startDateTime
-            is ActivityItem -> {
-                activity.date?.let { date ->
-                    val time = activity.startTime ?: when (activity.timeSlot) {
-                        TimeSlot.MORNING -> "09:00:00"
-                        TimeSlot.AFTERNOON -> "13:00:00"
-                        TimeSlot.EVENING -> "17:00:00"
-                        TimeSlot.FULL_DAY -> "09:00:00"
-                        null -> "12:00:00"
-                    }
-                    "${date}T${time}"
-                }
-            }
-            is NothingPlanned -> "${date}T06:00:00"
-            is HotelCheckOut -> booking.endDateTime
-            is CityGoodbye -> departureDateTime
-            is TransitDeparture -> departureDateTime
-            is InTransit -> booking.startDateTime
-            is OriginDeparture -> booking.startDateTime
-            is BookingItem -> booking.startDateTime
-        }
-    }
-
-    fun getKey(): String {
-        return when (this) {
-            is TransitArrival -> "transit-arrival-${location.id}-${arrivalBooking.id}"
-            is CityWelcome -> "welcome-${location.id}"
-            is HotelCheckIn -> "checkin-${booking.id}"
-            is ActivityItem -> "activity-${activity.id}"
-            is NothingPlanned -> "nothing-planned-${date}"
-            is HotelCheckOut -> "checkout-${booking.id}"
-            is CityGoodbye -> "goodbye-${location.id}"
-            is TransitDeparture -> "transit-departure-${location.id}-${departureBooking.id}"
-            is InTransit -> "in-transit-${booking.id}"
-            is OriginDeparture -> "origin-departure-${booking.id}"
-            is BookingItem -> "booking-${booking.id}"
-        }
-    }
-}
-
-/**
- * Build complete timeline with all dates in range
- * Shows "Nothing Planned" for days with no activities or bookings
- */
-private fun buildCompleteTimeline(
-    daySchedules: List<DaySchedule>,
-    bookings: List<Booking>,
-    locations: List<Location>
-): List<TimelineItem> {
-    val items = mutableListOf<TimelineItem>()
-
-    // Extract all activities from day schedules
-    val allActivities = daySchedules.flatMap { daySchedule ->
-        daySchedule.activitiesByTimeSlot.values.flatten()
-    }
-
-    // Group bookings
-    val transitBookings = bookings.filter {
-        it.type in listOf(BookingType.FLIGHT, BookingType.TRAIN, BookingType.BUS)
-    }
-    val hotelBookings = bookings.filter { it.type == BookingType.HOTEL }
-    val otherBookings = bookings.filter {
-        it.type in listOf(BookingType.TICKET, BookingType.OTHER)
-    }
-
-    // Track which transit bookings we've added to avoid duplicates
-    val processedTransitBookings = mutableSetOf<String>()
-
-    // Add any transit bookings that don't match locations (e.g., departing from origin city)
-    // These are typically the first and last legs of the journey
-    transitBookings.forEach { booking ->
-        val departureMatchesLocation = locations.any { location ->
-            booking.fromLocation?.contains(location.name, ignoreCase = true) == true
-        }
-        val arrivalMatchesLocation = locations.any { location ->
-            booking.toLocation?.contains(location.name, ignoreCase = true) == true
-        }
-
-        // If departing from a non-location (origin city), add departure card
-        val fromLocation = booking.fromLocation
-        if (!departureMatchesLocation && fromLocation != null) {
-            // Extract origin city from fromLocation (e.g., "San Francisco (SFO)" -> "San Francisco")
-            val originCity = fromLocation.substringBefore("(").trim()
-            items.add(TimelineItem.OriginDeparture(booking, originCity))
-            items.add(TimelineItem.InTransit(booking))
-            processedTransitBookings.add(booking.id)
-        }
-        // If arriving at a non-location (return to origin), just add transit card
-        else if (!arrivalMatchesLocation && booking.toLocation != null) {
-            if (booking.id !in processedTransitBookings) {
-                items.add(TimelineItem.InTransit(booking))
-                processedTransitBookings.add(booking.id)
-            }
-        }
-    }
-
-    // Add city transitions and hotels for each location
-    locations.sortedBy { it.order }.forEach { location ->
-        val arrivalBooking = transitBookings.find { booking ->
-            booking.toLocation?.contains(location.name, ignoreCase = true) == true
-        }
-
-        val hotelBooking = hotelBookings.find { booking ->
-            val hotelLocation = booking.toLocation ?: booking.fromLocation
-            hotelLocation?.contains(location.name, ignoreCase = true) == true
-        }
-
-        val departureBooking = transitBookings.find { booking ->
-            booking.fromLocation?.contains(location.name, ignoreCase = true) == true
-        }
-
-        arrivalBooking?.let { arrival ->
-            val arrivalTime = arrival.endDateTime ?: arrival.startDateTime
-            items.add(TimelineItem.TransitArrival(location, arrivalTime, arrival))
-            items.add(TimelineItem.CityWelcome(location, arrivalTime))
-        }
-
-        hotelBooking?.let { hotel ->
-            items.add(TimelineItem.HotelCheckIn(hotel))
-        }
-
-        hotelBooking?.let { hotel ->
-            items.add(TimelineItem.HotelCheckOut(hotel))
-        }
-
-        departureBooking?.let { departure ->
-            items.add(TimelineItem.CityGoodbye(location, departure.startDateTime))
-            items.add(TimelineItem.TransitDeparture(location, departure.startDateTime, departure))
-
-            // Add InTransit card after departure (only once per booking)
-            if (departure.id !in processedTransitBookings) {
-                items.add(TimelineItem.InTransit(departure))
-                processedTransitBookings.add(departure.id)
-            }
-        }
-    }
-
-    // Add other bookings
-    otherBookings.forEach { booking ->
-        items.add(TimelineItem.BookingItem(booking))
-    }
-
-    // Add all activities
-    allActivities.forEach { activity ->
-        items.add(TimelineItem.ActivityItem(activity))
-    }
-
-    // Get trip date range
-    val tripStartDate = daySchedules.minByOrNull { it.date }?.date
-    val tripEndDate = daySchedules.maxByOrNull { it.date }?.date
-
-    // Fill in "Nothing Planned" for empty days
-    if (tripStartDate != null && tripEndDate != null) {
-        val start = LocalDate.parse(tripStartDate)
-        val end = LocalDate.parse(tripEndDate)
-
-        // Get all dates that have items
-        val datesWithItems = items.mapNotNull { item ->
-            item.getDateTime()?.let { extractDate(it) }
-        }.toSet()
-
-        // Generate all dates in range
-        var currentDate = start
-        while (!currentDate.isAfter(end)) {
-            val dateString = currentDate.toString()
-
-            // If no items exist for this date, add "Nothing Planned"
-            if (dateString !in datesWithItems) {
-                items.add(TimelineItem.NothingPlanned(dateString))
-            }
-
-            currentDate = currentDate.plusDays(1)
-        }
-    }
-
-    // Sort chronologically
-    return items.sortedWith(compareBy(
-        { item ->
-            try {
-                val timestamp = item.getSortableTimestamp()
-                val dateTimePart = timestamp.substringBefore("|")
-                // Try parsing as ZonedDateTime first (bookings with timezone)
-                try {
-                    ZonedDateTime.parse(dateTimePart).toInstant().toEpochMilli()
-                } catch (e: Exception) {
-                    // If that fails, parse as LocalDateTime (activities without timezone)
-                    java.time.LocalDateTime.parse(dateTimePart).atZone(java.time.ZoneId.systemDefault()).toInstant().toEpochMilli()
-                }
-            } catch (e: Exception) {
-                Long.MAX_VALUE
-            }
-        },
-        { item -> item.getSortableTimestamp().substringAfter("|").toDoubleOrNull() ?: 99.0 }
-    ))
-}
+// Removed local TimelineItem sealed class and buildCompleteTimeline function
+// Now using shared versions from:
+// - com.aurora.travlogue.feature.tripdetail.domain.models.TimelineItem
+// - com.aurora.travlogue.feature.tripdetail.domain.service.TimelineBuilder
 
 @Composable
 private fun EmptyTimelineState(
@@ -550,3 +263,4 @@ private fun EmptyTimelineState(
         }
     }
 }
+

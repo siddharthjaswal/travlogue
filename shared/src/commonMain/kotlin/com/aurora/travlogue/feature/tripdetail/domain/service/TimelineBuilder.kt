@@ -139,34 +139,32 @@ class TimelineBuilder {
             }.toSet()
 
             // Generate all dates in range
-            var currentDate = start
-            while (currentDate <= end) {
+            val daysDiff = start.daysUntil(end)
+            for (i in 0..daysDiff) {
+                val currentDate = LocalDate(start.year, start.monthNumber, start.dayOfMonth).run {
+                    // Add i days to start date
+                    var result = this
+                    repeat(i) {
+                        val nextDay = result.dayOfMonth + 1
+                        result = try {
+                            LocalDate(result.year, result.monthNumber, nextDay)
+                        } catch (e: IllegalArgumentException) {
+                            // Day is out of range for month, move to next month
+                            if (result.monthNumber == 12) {
+                                LocalDate(result.year + 1, 1, 1)
+                            } else {
+                                LocalDate(result.year, result.monthNumber + 1, 1)
+                            }
+                        }
+                    }
+                    result
+                }
+
                 val dateString = currentDate.toString()
 
                 // If no items exist for this date, add "Nothing Planned"
                 if (dateString !in datesWithItems) {
                     items.add(TimelineItem.NothingPlanned(dateString))
-                }
-
-                // Move to next day
-                currentDate = LocalDate(
-                    year = currentDate.year,
-                    monthNumber = currentDate.monthNumber,
-                    dayOfMonth = currentDate.dayOfMonth
-                ).run {
-                    val dayOfMonth = currentDate.dayOfMonth + 1
-                    val daysInMonth = currentDate.month.length(currentDate.year % 4 == 0 && (currentDate.year % 100 != 0 || currentDate.year % 400 == 0))
-
-                    if (dayOfMonth > daysInMonth) {
-                        // Move to next month
-                        if (currentDate.monthNumber == 12) {
-                            LocalDate(currentDate.year + 1, 1, 1)
-                        } else {
-                            LocalDate(currentDate.year, currentDate.monthNumber + 1, 1)
-                        }
-                    } else {
-                        LocalDate(currentDate.year, currentDate.monthNumber, dayOfMonth)
-                    }
                 }
             }
         }

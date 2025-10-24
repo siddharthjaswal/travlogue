@@ -68,7 +68,6 @@ kotlin {
             implementation(compose.foundation)
             implementation(compose.material3)
             implementation(compose.ui)
-            implementation(compose.components.resources)
             implementation(compose.components.uiToolingPreview)
         }
 
@@ -126,4 +125,9 @@ sqldelight {
             packageName.set("com.aurora.travlogue.database")
         }
     }
+}
+
+// Disable Compose resources sync for iOS since we don't use it
+tasks.named("syncComposeResourcesForIos") {
+    enabled = false
 }
