@@ -10,8 +10,8 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.hilt.navigation.compose.hiltViewModel
 import org.koin.compose.viewmodel.koinViewModel
+import org.koin.core.parameter.parametersOf
 import com.aurora.travlogue.feature.tripdetail.components.activity.AddActivityDialog
 import com.aurora.travlogue.feature.tripdetail.components.booking.AddBookingDialog
 import com.aurora.travlogue.feature.tripdetail.components.location.AddLocationDialog
@@ -28,9 +28,13 @@ import com.aurora.travlogue.feature.tripdetail.presentation.components.GapDetail
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TripDetailScreen(
-    viewModel: TripDetailViewModel = hiltViewModel(),
+    tripId: String,
     onNavigateBack: () -> Unit
 ) {
+    // Get ViewModel from Koin with tripId parameter (factory pattern from shared module)
+    val viewModel: com.aurora.travlogue.feature.tripdetail.presentation.TripDetailViewModel = koinViewModel(
+        parameters = { parametersOf(tripId) }
+    )
     val uiState by viewModel.uiState.collectAsState()
     val snackbarHostState = remember { SnackbarHostState() }
 

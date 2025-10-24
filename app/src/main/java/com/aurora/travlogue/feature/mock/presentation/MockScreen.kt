@@ -11,12 +11,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.hilt.navigation.compose.hiltViewModel
+import org.koin.compose.viewmodel.koinViewModel
+import com.aurora.travlogue.feature.mock.presentation.MockViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MockScreen(
-    viewModel: MockViewModel = hiltViewModel(),
+    viewModel: MockViewModel = koinViewModel(),
     onNavigateBack: () -> Unit,
     onNavigateToTrip: (String) -> Unit
 ) {
