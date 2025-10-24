@@ -488,6 +488,118 @@ struct iOSApp: App {
 
 ---
 
+## Working with Desktop
+
+### **Starting the macOS Desktop Application**
+
+There are multiple ways to run the desktop application:
+
+#### **Option 1: Using Gradle (Recommended for Development)**
+
+```bash
+# From project root
+./gradlew :desktopApp:run
+```
+
+This starts the app in development mode with full debug support. The window will open at 1200x800 pixels.
+
+#### **Option 2: Using IntelliJ IDEA / Android Studio**
+
+1. Open the project in IntelliJ IDEA or Android Studio
+2. Navigate to `desktopApp/src/desktopMain/kotlin/com/aurora/travlogue/desktop/Main.kt`
+3. Click the green ▶️ play button next to the `main()` function
+4. Or use the run configuration: Select "Main.kt" from the dropdown and click Run
+
+#### **Option 3: Building a Distributable Package**
+
+For sharing or deploying the app:
+
+```bash
+# Create a distributable application bundle
+./gradlew :desktopApp:createDistributable
+
+# The app will be created at:
+# desktopApp/build/compose/binaries/main/app/
+
+# Run the packaged app:
+open desktopApp/build/compose/binaries/main/app/Travlogue.app
+```
+
+#### **Option 4: Creating Native Installers**
+
+For distribution to end users:
+
+```bash
+# Create a DMG installer (macOS disk image)
+./gradlew :desktopApp:packageDmg
+# Output: desktopApp/build/compose/binaries/main/dmg/
+
+# Create a PKG installer (macOS installer package)
+./gradlew :desktopApp:packagePkg
+# Output: desktopApp/build/compose/binaries/main/pkg/
+```
+
+### **Desktop App Features**
+
+The desktop application has full feature parity with Android and iOS:
+
+- ✅ **Home Screen**: View all trips, create new trips, access mock data generator
+- ✅ **Create Trip**: Full form with date type selection (Fixed/Flexible), validation
+- ✅ **Trip Details**: 4-tab interface (Overview, Timeline, Bookings, Locations)
+- ✅ **Mock Data**: Generate sample trips (Complete Japan Trip, Incomplete Italy Trip)
+- ✅ **Native Desktop Experience**: Window management, keyboard shortcuts, native UI controls
+
+### **Desktop Development Workflow**
+
+1. **Make changes** to desktop UI:
+   ```bash
+   # Edit files in desktopApp/src/desktopMain/kotlin/
+   ```
+
+2. **Build and run**:
+   ```bash
+   ./gradlew :desktopApp:run
+   ```
+
+3. **Hot reload** (when available):
+   - Some changes can be picked up without restart
+   - For major changes, stop and restart the app
+
+4. **Debug** in IntelliJ IDEA:
+   - Set breakpoints in desktop UI code
+   - Run in debug mode for step-through debugging
+
+### **Desktop Build Configuration**
+
+The desktop app is configured in `desktopApp/build.gradle.kts`:
+
+```kotlin
+compose.desktop {
+    application {
+        mainClass = "com.aurora.travlogue.desktop.MainKt"
+
+        nativeDistributions {
+            targetFormats(TargetFormat.Dmg, TargetFormat.Pkg)
+            packageName = "Travlogue"
+            packageVersion = "1.0.0"
+
+            macOS {
+                bundleID = "com.aurora.travlogue.desktop"
+            }
+        }
+    }
+}
+```
+
+### **System Requirements**
+
+- **macOS**: 10.14 (Mojave) or later
+- **Java**: JDK 11 or later
+- **Memory**: Minimum 4GB RAM
+- **Disk Space**: ~200MB for app + dependencies
+
+---
+
 ## Working with Xcode
 
 ### **Can I Open Xcode to Work on iOS Files?**
