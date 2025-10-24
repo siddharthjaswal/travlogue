@@ -3,9 +3,23 @@
 /local.properties
 .DS_Store
 /build
+**/build/
 /captures
 .externalNativeBuild
 .cxx
 local.properties
 /.kotlin/errors/errors-1740298742049.log
 /.idea/
+
+# Kotlin Native build artifacts
+*.klib
+*.knm
+*.knf
+*.knd
+*.knt
+*.knb
+
+# iOS Framework build artifacts
+shared/build/
+iosApp/build/
+androidApp/build/
