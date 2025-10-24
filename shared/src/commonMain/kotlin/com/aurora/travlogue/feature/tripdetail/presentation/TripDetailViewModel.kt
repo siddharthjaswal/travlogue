@@ -7,6 +7,7 @@ import com.aurora.travlogue.core.domain.model.*
 import com.aurora.travlogue.core.domain.service.BookingSyncService
 import com.aurora.travlogue.core.domain.service.GapDetectionService
 import com.aurora.travlogue.feature.tripdetail.domain.models.DaySchedule
+import com.aurora.travlogue.feature.tripdetail.domain.service.TimelineBuilder
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -37,6 +38,9 @@ class TripDetailViewModel(
     // UI Events
     private val _uiEvents = MutableSharedFlow<TripDetailUiEvent>()
     val uiEvents = _uiEvents.asSharedFlow()
+
+    // Timeline builder
+    private val timelineBuilder = TimelineBuilder()
 
     init {
         loadTripDetails()
@@ -454,6 +458,13 @@ class TripDetailViewModel(
                         // Generate day schedules
                         val daySchedules = generateDaySchedules(trip, data.locations, data.activities)
 
+                        // Build timeline items
+                        val timelineItems = timelineBuilder.buildCompleteTimeline(
+                            daySchedules,
+                            data.bookings,
+                            data.locations
+                        )
+
                         _uiState.update {
                             it.copy(
                                 trip = trip,
@@ -461,6 +472,7 @@ class TripDetailViewModel(
                                 daySchedules = daySchedules,
                                 bookings = data.bookings.sortedBy { it.startDateTime },
                                 gaps = data.gaps.filter { !it.isResolved },
+                                timelineItems = timelineItems,
                                 isLoading = false,
                                 error = null
                             )

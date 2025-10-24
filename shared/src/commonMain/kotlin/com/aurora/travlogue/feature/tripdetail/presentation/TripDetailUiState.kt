@@ -6,6 +6,7 @@ import com.aurora.travlogue.core.domain.model.Gap
 import com.aurora.travlogue.core.domain.model.Location
 import com.aurora.travlogue.core.domain.model.Trip
 import com.aurora.travlogue.feature.tripdetail.domain.models.DaySchedule
+import com.aurora.travlogue.feature.tripdetail.domain.models.TimelineItem
 
 /**
  * UI State for Trip Detail Screen
@@ -16,6 +17,7 @@ data class TripDetailUiState(
     val daySchedules: List<DaySchedule> = emptyList(),
     val bookings: List<Booking> = emptyList(),
     val gaps: List<Gap> = emptyList(),
+    val timelineItems: List<TimelineItem> = emptyList(),
     val selectedTab: TripDetailTab = TripDetailTab.TIMELINE,
     val expandedDays: Set<String> = emptySet(),
     val isLoading: Boolean = false,
