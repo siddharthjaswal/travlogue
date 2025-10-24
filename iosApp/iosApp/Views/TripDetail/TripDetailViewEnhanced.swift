@@ -4,7 +4,7 @@ import Shared
 struct TripDetailViewEnhanced: View {
     let trip: Trip
     @StateObject private var viewModel: TripDetailViewModelWrapper
-    @State private var selectedTab: TripDetailTab = .overview
+    @State private var selectedTab: TripDetailTab = .timeline
 
     init(trip: Trip) {
         self.trip = trip
@@ -13,33 +13,29 @@ struct TripDetailViewEnhanced: View {
 
     var body: some View {
         VStack(spacing: 0) {
-            // Tab Picker
+            // Tab Picker (matching Android tab order)
             Picker("Tab", selection: $selectedTab) {
-                Text("Overview").tag(TripDetailTab.overview)
                 Text("Timeline").tag(TripDetailTab.timeline)
-                Text("Bookings").tag(TripDetailTab.bookings)
-                Text("Activities").tag(TripDetailTab.activities)
                 Text("Locations").tag(TripDetailTab.locations)
+                Text("Bookings").tag(TripDetailTab.bookings)
+                Text("Overview").tag(TripDetailTab.overview)
             }
             .pickerStyle(.segmented)
             .padding()
 
             // Tab Content
             TabView(selection: $selectedTab) {
-                OverviewTabView(trip: trip, viewModel: viewModel)
-                    .tag(TripDetailTab.overview)
-
                 TimelineTabView(viewModel: viewModel)
                     .tag(TripDetailTab.timeline)
+
+                LocationsTabView(viewModel: viewModel)
+                    .tag(TripDetailTab.locations)
 
                 BookingsTabView(viewModel: viewModel)
                     .tag(TripDetailTab.bookings)
 
-                ActivitiesTabView(viewModel: viewModel)
-                    .tag(TripDetailTab.activities)
-
-                LocationsTabView(viewModel: viewModel)
-                    .tag(TripDetailTab.locations)
+                OverviewTabView(trip: trip, viewModel: viewModel)
+                    .tag(TripDetailTab.overview)
             }
             .tabViewStyle(.page(indexDisplayMode: .never))
         }
@@ -153,29 +149,6 @@ struct BookingsTabView: View {
                 } else {
                     ForEach(viewModel.bookings, id: \.id) { booking in
                         BookingCardView(booking: booking)
-                    }
-                }
-            }
-            .padding()
-        }
-    }
-}
-
-// MARK: - Activities Tab
-struct ActivitiesTabView: View {
-    @ObservedObject var viewModel: TripDetailViewModelWrapper
-
-    var body: some View {
-        ScrollView {
-            LazyVStack(spacing: 16) {
-                if viewModel.activities.isEmpty {
-                    EmptyStateView(
-                        icon: "star",
-                        message: "No activities planned yet"
-                    )
-                } else {
-                    ForEach(viewModel.activities, id: \.id) { activity in
-                        ActivityCardView(activity: activity)
                     }
                 }
             }
@@ -848,9 +821,8 @@ class TripDetailViewModelWrapper: ObservableObject {
 
 // MARK: - Tab Enum
 enum TripDetailTab {
-    case overview
     case timeline
-    case bookings
-    case activities
     case locations
+    case bookings
+    case overview
 }
