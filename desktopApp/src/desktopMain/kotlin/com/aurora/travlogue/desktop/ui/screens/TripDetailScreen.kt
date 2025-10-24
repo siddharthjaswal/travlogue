@@ -180,7 +180,7 @@ private fun OverviewTab(uiState: com.aurora.travlogue.feature.tripdetail.present
                 StatCard(
                     title = "Bookings",
                     value = uiState.bookingCount.toString(),
-                    icon = Icons.Default.ConfirmationNumber,
+                    icon = Icons.Default.Info,
                     modifier = Modifier.weight(1f)
                 )
             }
@@ -294,7 +294,7 @@ private fun TimelineTab(
         ) {
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
                 Icon(
-                    Icons.Default.Event,
+                    Icons.Default.DateRange,
                     contentDescription = null,
                     modifier = Modifier.size(64.dp),
                     tint = MaterialTheme.colorScheme.onSurfaceVariant
@@ -358,7 +358,7 @@ private fun DayScheduleCard(
                     )
                 }
 
-                if (daySchedule.location != null) {
+                daySchedule.location?.let { location ->
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Icon(
                             Icons.Default.Place,
@@ -368,7 +368,7 @@ private fun DayScheduleCard(
                         )
                         Spacer(modifier = Modifier.width(4.dp))
                         Text(
-                            text = daySchedule.location.name,
+                            text = location.name,
                             style = MaterialTheme.typography.bodyMedium,
                             color = MaterialTheme.colorScheme.primary
                         )
@@ -407,7 +407,7 @@ private fun DayScheduleCard(
 private fun BookingsTab(uiState: com.aurora.travlogue.feature.tripdetail.presentation.TripDetailUiState) {
     if (uiState.bookings.isEmpty()) {
         EmptyState(
-            icon = Icons.Default.ConfirmationNumber,
+            icon = Icons.Default.Info,
             message = "No bookings yet"
         )
     } else {

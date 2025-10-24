@@ -5,7 +5,6 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.CalendarMonth
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
@@ -14,6 +13,7 @@ import com.aurora.travlogue.core.domain.model.DateType
 import com.aurora.travlogue.feature.createtrip.presentation.CreateTripUiEvent
 import com.aurora.travlogue.feature.createtrip.presentation.CreateTripViewModel
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.datetime.LocalDate
 import org.koin.compose.viewmodel.koinViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -26,7 +26,7 @@ fun CreateTripScreen(
     val snackbarHostState = remember { SnackbarHostState() }
 
     LaunchedEffect(Unit) {
-        viewModel.events.collectLatest { event ->
+        viewModel.uiEvents.collectLatest { event ->
             when (event) {
                 is CreateTripUiEvent.TripCreatedSuccess -> {
                     snackbarHostState.showSnackbar("Trip created successfully!")
@@ -98,8 +98,8 @@ fun CreateTripScreen(
                         horizontalArrangement = Arrangement.Start
                     ) {
                         RadioButton(
-                            selected = uiState.dateType == dateType,
-                            onClick = { viewModel.onDateTypeChanged(dateType) }
+                            selected = uiState.selectedDateType == dateType,
+                            onClick = { viewModel.onDateTypeSelected(dateType) }
                         )
                         Spacer(modifier = Modifier.width(8.dp))
                         Column {
@@ -111,7 +111,6 @@ fun CreateTripScreen(
                                 text = when (dateType) {
                                     DateType.FIXED -> "I have specific dates"
                                     DateType.FLEXIBLE -> "I have flexible dates"
-                                    DateType.PLANNING -> "I'm just planning"
                                 },
                                 style = MaterialTheme.typography.bodySmall,
                                 color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
@@ -121,35 +120,104 @@ fun CreateTripScreen(
                 }
             }
 
-            // Date Fields (only for FIXED and FLEXIBLE)
-            if (uiState.dateType != DateType.PLANNING) {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(16.dp)
-                ) {
+            // Date Fields based on type
+            when (uiState.selectedDateType) {
+                DateType.FIXED -> {
+                    Text(
+                        text = "Trip Dates",
+                        style = MaterialTheme.typography.titleMedium,
+                        modifier = Modifier.padding(top = 8.dp)
+                    )
+
+                    // Start Date Input
+                    var startDateText by remember { mutableStateOf("") }
                     OutlinedTextField(
-                        value = uiState.startDate,
-                        onValueChange = { viewModel.onStartDateChanged(it) },
+                        value = startDateText,
+                        onValueChange = { text ->
+                            startDateText = text
+                            // Try to parse as LocalDate (YYYY-MM-DD format)
+                            try {
+                                val date = LocalDate.parse(text)
+                                viewModel.onStartDateSelected(date)
+                            } catch (e: Exception) {
+                                // Invalid format, ignore
+                            }
+                        },
                         label = { Text("Start Date") },
                         placeholder = { Text("YYYY-MM-DD") },
-                        leadingIcon = { Icon(Icons.Default.Event, contentDescription = null) },
-                        modifier = Modifier.weight(1f),
+                        modifier = Modifier.fillMaxWidth(),
                         singleLine = true,
-                        isError = uiState.startDateError != null,
-                        supportingText = uiState.startDateError?.let { { Text(it) } }
+                        isError = uiState.dateError != null
+                    )
+
+                    Spacer(modifier = Modifier.height(8.dp))
+
+                    // End Date Input
+                    var endDateText by remember { mutableStateOf("") }
+                    OutlinedTextField(
+                        value = endDateText,
+                        onValueChange = { text ->
+                            endDateText = text
+                            // Try to parse as LocalDate (YYYY-MM-DD format)
+                            try {
+                                val date = LocalDate.parse(text)
+                                viewModel.onEndDateSelected(date)
+                            } catch (e: Exception) {
+                                // Invalid format, ignore
+                            }
+                        },
+                        label = { Text("End Date") },
+                        placeholder = { Text("YYYY-MM-DD") },
+                        modifier = Modifier.fillMaxWidth(),
+                        singleLine = true,
+                        isError = uiState.dateError != null
+                    )
+
+                    uiState.dateError?.let {
+                        Text(
+                            text = it,
+                            color = MaterialTheme.colorScheme.error,
+                            style = MaterialTheme.typography.bodySmall,
+                            modifier = Modifier.padding(start = 16.dp)
+                        )
+                    }
+                }
+                DateType.FLEXIBLE -> {
+                    Text(
+                        text = "Flexible Dates",
+                        style = MaterialTheme.typography.titleMedium,
+                        modifier = Modifier.padding(top = 8.dp)
                     )
 
                     OutlinedTextField(
-                        value = uiState.endDate,
-                        onValueChange = { viewModel.onEndDateChanged(it) },
-                        label = { Text("End Date") },
-                        placeholder = { Text("YYYY-MM-DD") },
-                        leadingIcon = { Icon(Icons.Default.Event, contentDescription = null) },
-                        modifier = Modifier.weight(1f),
+                        value = uiState.flexibleMonth,
+                        onValueChange = { viewModel.onFlexibleMonthChanged(it) },
+                        label = { Text("Month") },
+                        placeholder = { Text("e.g., July 2025") },
+                        modifier = Modifier.fillMaxWidth(),
                         singleLine = true,
-                        isError = uiState.endDateError != null,
-                        supportingText = uiState.endDateError?.let { { Text(it) } }
+                        isError = uiState.dateError != null
                     )
+
+                    Spacer(modifier = Modifier.height(8.dp))
+
+                    OutlinedTextField(
+                        value = uiState.flexibleDuration,
+                        onValueChange = { viewModel.onFlexibleDurationChanged(it) },
+                        label = { Text("Duration (days)") },
+                        placeholder = { Text("e.g., 7") },
+                        modifier = Modifier.fillMaxWidth(),
+                        singleLine = true
+                    )
+
+                    uiState.dateError?.let {
+                        Text(
+                            text = it,
+                            color = MaterialTheme.colorScheme.error,
+                            style = MaterialTheme.typography.bodySmall,
+                            modifier = Modifier.padding(start = 16.dp)
+                        )
+                    }
                 }
             }
 

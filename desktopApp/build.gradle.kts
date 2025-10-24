@@ -29,6 +29,9 @@ kotlin {
                 implementation(libs.koin.core)
                 implementation(libs.koin.compose)
                 implementation(libs.koin.compose.viewmodel)
+
+                // DateTime for date handling
+                implementation(libs.kotlinx.datetime)
             }
         }
     }
