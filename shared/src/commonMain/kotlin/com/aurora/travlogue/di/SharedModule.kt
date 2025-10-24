@@ -46,6 +46,16 @@ val sharedModule = module {
     viewModelOf(::HomeViewModel)
     viewModelOf(::CreateTripViewModel)
     viewModelOf(::MockViewModel)
+
+    // Factory ViewModel (requires tripId parameter)
+    factory { (tripId: String) ->
+        TripDetailViewModel(
+            tripId = tripId,
+            tripRepository = get(),
+            gapDetectionService = get(),
+            bookingSyncService = get()
+        )
+    }
 }
 
 /**
