@@ -1,4 +1,4 @@
-package com.aurora.travlogue.feature.tripdetail.components.timeline
+package com.aurora.travlogue.feature.tripdetail.presentation.components.timeline
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -17,13 +17,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.aurora.travlogue.core.common.PreviewData
-import java.time.LocalDate
-import java.time.ZonedDateTime
-import java.time.format.DateTimeFormatter
+import kotlinx.datetime.Instant
+import kotlinx.datetime.LocalDate
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.toLocalDateTime
 
 /**
  * Timeline item with circular date badge
@@ -128,19 +127,19 @@ private fun CircularDateBadge(
  */
 private fun parseDateToDisplay(isoDateTime: String): Pair<String, String> {
     return try {
-        // First try parsing as ZonedDateTime (with timezone)
-        val zonedDateTime = ZonedDateTime.parse(isoDateTime)
-        val day = zonedDateTime.format(DateTimeFormatter.ofPattern("d"))
-        val weekday = zonedDateTime.format(DateTimeFormatter.ofPattern("EEE"))
-        Pair(day, weekday.uppercase())
+        val instant = Instant.parse(isoDateTime)
+        val localDateTime = instant.toLocalDateTime(TimeZone.currentSystemDefault())
+        val day = localDateTime.dayOfMonth.toString()
+        val weekday = localDateTime.dayOfWeek.name.take(3).uppercase()
+        Pair(day, weekday)
     } catch (e: Exception) {
         try {
-            // If that fails, try parsing as just date or date-time without timezone
+            // Try parsing as just a date
             val datePart = isoDateTime.substringBefore('T')
             val localDate = LocalDate.parse(datePart)
-            val day = localDate.format(DateTimeFormatter.ofPattern("d"))
-            val weekday = localDate.format(DateTimeFormatter.ofPattern("EEE"))
-            Pair(day, weekday.uppercase())
+            val day = localDate.dayOfMonth.toString()
+            val weekday = localDate.dayOfWeek.name.take(3).uppercase()
+            Pair(day, weekday)
         } catch (e2: Exception) {
             // Fallback
             Pair("--", "---")
@@ -155,67 +154,14 @@ private fun parseDateToDisplay(isoDateTime: String): Pair<String, String> {
 fun extractDate(isoDateTime: String?): String? {
     if (isoDateTime == null) return null
     return try {
-        val zonedDateTime = ZonedDateTime.parse(isoDateTime)
-        zonedDateTime.toLocalDate().toString()
+        val instant = Instant.parse(isoDateTime)
+        instant.toLocalDateTime(TimeZone.UTC).date.toString()
     } catch (e: Exception) {
         // Try parsing as just a date
         try {
             LocalDate.parse(isoDateTime.substringBefore('T')).toString()
         } catch (e2: Exception) {
             null
-        }
-    }
-}
-
-// ==================== Previews ====================
-
-@Preview(name = "Timeline Item with Date Badge", showBackground = true)
-@Composable
-private fun TimelineItemPreview() {
-    MaterialTheme {
-        TimelineItem(
-            dateTime = "2025-07-01T09:00:00+09:00",
-            showDate = true,
-            dotColor = MaterialTheme.colorScheme.primary
-        ) {
-            ActivityTimelineCard(
-                activity = PreviewData.activitySensoJi,
-                onClick = {}
-            )
-        }
-    }
-}
-
-@Preview(name = "Timeline Item without Date Badge", showBackground = true)
-@Composable
-private fun TimelineItemNoBadgePreview() {
-    MaterialTheme {
-        TimelineItem(
-            dateTime = "2025-07-01T14:00:00+09:00",
-            showDate = false,
-            dotColor = MaterialTheme.colorScheme.primary
-        ) {
-            ActivityTimelineCard(
-                activity = PreviewData.activityShibuya,
-                onClick = {}
-            )
-        }
-    }
-}
-
-@Preview(name = "WelcomeCityCard", showBackground = true)
-@Composable
-private fun WelcomeCityCardPreview() {
-    MaterialTheme {
-        TimelineItem(
-            dateTime = "2025-07-01T14:30:00+09:00",
-            showDate = true,
-            dotColor = MaterialTheme.colorScheme.primary
-        ) {
-            WelcomeCityCard(
-                location = PreviewData.locationTokyo,
-                arrivalDateTime = "2025-07-01T14:30:00+09:00"
-            )
         }
     }
 }

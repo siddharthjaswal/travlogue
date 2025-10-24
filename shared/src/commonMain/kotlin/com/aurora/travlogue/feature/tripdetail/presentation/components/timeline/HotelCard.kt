@@ -1,21 +1,22 @@
-package com.aurora.travlogue.feature.tripdetail.components.timeline
+package com.aurora.travlogue.feature.tripdetail.presentation.components.timeline
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Hotel
-import androidx.compose.material.icons.filled.Luggage
+import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.Place
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.aurora.travlogue.core.common.PreviewData
 import com.aurora.travlogue.core.domain.model.Booking
-import java.time.ZonedDateTime
-import java.time.format.DateTimeFormatter
+import kotlinx.datetime.Instant
+import kotlinx.datetime.LocalDate
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.toLocalDateTime
+import kotlin.math.abs
 
 /**
  * Hotel check-in card shown after arriving in a city
@@ -41,7 +42,7 @@ fun HotelCheckInCard(
             horizontalArrangement = Arrangement.spacedBy(12.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            // Hotel icon
+            // Hotel icon (using Home as Hotel is not available)
             Surface(
                 shape = MaterialTheme.shapes.medium,
                 color = MaterialTheme.colorScheme.tertiaryContainer,
@@ -52,7 +53,7 @@ fun HotelCheckInCard(
                     modifier = Modifier.fillMaxSize()
                 ) {
                     Icon(
-                        imageVector = Icons.Default.Hotel,
+                        imageVector = Icons.Default.Home,
                         contentDescription = null,
                         tint = MaterialTheme.colorScheme.onTertiaryContainer,
                         modifier = Modifier.size(24.dp)
@@ -156,7 +157,7 @@ fun HotelCheckOutCard(
                     modifier = Modifier.fillMaxSize()
                 ) {
                     Icon(
-                        imageVector = Icons.Default.Luggage,
+                        imageVector = Icons.Default.Place,
                         contentDescription = null,
                         tint = MaterialTheme.colorScheme.onSecondaryContainer,
                         modifier = Modifier.size(24.dp)
@@ -202,9 +203,14 @@ fun HotelCheckOutCard(
  */
 private fun formatCheckInTime(isoDateTime: String): String {
     return try {
-        val zonedDateTime = ZonedDateTime.parse(isoDateTime)
-        val time = zonedDateTime.format(DateTimeFormatter.ofPattern("h:mm a"))
-        "Check-in after $time"
+        val instant = Instant.parse(isoDateTime)
+        val localDateTime = instant.toLocalDateTime(TimeZone.currentSystemDefault())
+
+        val hour = if (localDateTime.hour == 0) 12 else if (localDateTime.hour > 12) localDateTime.hour - 12 else localDateTime.hour
+        val minute = localDateTime.minute.toString().padStart(2, '0')
+        val period = if (localDateTime.hour < 12) "AM" else "PM"
+
+        "Check-in after $hour:$minute $period"
     } catch (e: Exception) {
         "Check-in time"
     }
@@ -215,9 +221,14 @@ private fun formatCheckInTime(isoDateTime: String): String {
  */
 private fun formatCheckOutTime(isoDateTime: String): String {
     return try {
-        val zonedDateTime = ZonedDateTime.parse(isoDateTime)
-        val time = zonedDateTime.format(DateTimeFormatter.ofPattern("h:mm a"))
-        "Check-out by $time"
+        val instant = Instant.parse(isoDateTime)
+        val localDateTime = instant.toLocalDateTime(TimeZone.currentSystemDefault())
+
+        val hour = if (localDateTime.hour == 0) 12 else if (localDateTime.hour > 12) localDateTime.hour - 12 else localDateTime.hour
+        val minute = localDateTime.minute.toString().padStart(2, '0')
+        val period = if (localDateTime.hour < 12) "AM" else "PM"
+
+        "Check-out by $hour:$minute $period"
     } catch (e: Exception) {
         "Check-out time"
     }
@@ -228,9 +239,13 @@ private fun formatCheckOutTime(isoDateTime: String): String {
  */
 private fun formatStayDuration(startDateTime: String, endDateTime: String): String {
     return try {
-        val start = ZonedDateTime.parse(startDateTime)
-        val end = ZonedDateTime.parse(endDateTime)
-        val nights = java.time.temporal.ChronoUnit.DAYS.between(start.toLocalDate(), end.toLocalDate())
+        val start = Instant.parse(startDateTime)
+        val end = Instant.parse(endDateTime)
+
+        val startDate = start.toLocalDateTime(TimeZone.currentSystemDefault()).date
+        val endDate = end.toLocalDateTime(TimeZone.currentSystemDefault()).date
+
+        val nights = daysBetween(startDate, endDate)
 
         when {
             nights > 1 -> "$nights nights"
@@ -242,26 +257,11 @@ private fun formatStayDuration(startDateTime: String, endDateTime: String): Stri
     }
 }
 
-// ==================== Previews ====================
-
-@Preview(name = "Hotel Check-in Card", showBackground = true)
-@Composable
-private fun HotelCheckInCardPreview() {
-    MaterialTheme {
-        HotelCheckInCard(
-            booking = PreviewData.bookingHotel,
-            onClick = {}
-        )
-    }
-}
-
-@Preview(name = "Hotel Check-out Card", showBackground = true)
-@Composable
-private fun HotelCheckOutCardPreview() {
-    MaterialTheme {
-        HotelCheckOutCard(
-            booking = PreviewData.bookingHotel,
-            onClick = {}
-        )
-    }
+/**
+ * Calculate days between two LocalDate instances
+ */
+private fun daysBetween(start: LocalDate, end: LocalDate): Long {
+    val startEpochDays = start.toEpochDays()
+    val endEpochDays = end.toEpochDays()
+    return abs(endEpochDays - startEpochDays).toLong()
 }

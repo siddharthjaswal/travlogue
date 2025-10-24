@@ -1,26 +1,20 @@
-package com.aurora.travlogue.feature.tripdetail.components.timeline
+package com.aurora.travlogue.feature.tripdetail.presentation.components.timeline
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.DirectionsBus
-import androidx.compose.material.icons.filled.Event
+import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Place
-import androidx.compose.material.icons.filled.Restaurant
-import androidx.compose.material.icons.filled.Schedule
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.aurora.travlogue.core.common.PreviewData
 import com.aurora.travlogue.core.domain.model.Activity
 import com.aurora.travlogue.core.domain.model.ActivityType
 import com.aurora.travlogue.core.domain.model.TimeSlot
-import java.time.LocalTime
-import java.time.format.DateTimeFormatter
+import kotlinx.datetime.LocalTime
 
 /**
  * Individual activity card for timeline
@@ -85,7 +79,7 @@ fun ActivityTimelineCard(
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Icon(
-                            imageVector = Icons.Default.Schedule,
+                            imageVector = Icons.Default.Info,
                             contentDescription = null,
                             modifier = Modifier.size(12.dp),
                             tint = MaterialTheme.colorScheme.onSurfaceVariant
@@ -181,12 +175,12 @@ private fun formatActivityTime(activity: Activity): String {
     // Specific time takes priority
     if (activity.startTime != null) {
         return try {
-            val startTime = LocalTime.parse(activity.startTime)
+            val startTime = LocalTime.parse(activity.startTime!!)
             val endTime = activity.endTime?.let { LocalTime.parse(it) }
 
-            val formattedStart = startTime.format(DateTimeFormatter.ofPattern("h:mm a"))
+            val formattedStart = formatTime(startTime)
             if (endTime != null) {
-                val formattedEnd = endTime.format(DateTimeFormatter.ofPattern("h:mm a"))
+                val formattedEnd = formatTime(endTime)
                 "$formattedStart - $formattedEnd"
             } else {
                 formattedStart
@@ -201,14 +195,24 @@ private fun formatActivityTime(activity: Activity): String {
 }
 
 /**
+ * Format LocalTime to 12-hour format
+ */
+private fun formatTime(time: LocalTime): String {
+    val hour = if (time.hour == 0) 12 else if (time.hour > 12) time.hour - 12 else time.hour
+    val minute = time.minute.toString().padStart(2, '0')
+    val period = if (time.hour < 12) "AM" else "PM"
+    return "$hour:$minute $period"
+}
+
+/**
  * Get icon for activity type
  */
 private fun getActivityTypeIcon(type: ActivityType) = when (type) {
     ActivityType.ATTRACTION -> Icons.Default.Place
-    ActivityType.FOOD -> Icons.Default.Restaurant
-    ActivityType.BOOKING -> Icons.Default.Event
-    ActivityType.TRANSIT -> Icons.Default.DirectionsBus
-    ActivityType.OTHER -> Icons.Default.Event
+    ActivityType.FOOD -> Icons.Default.Place
+    ActivityType.BOOKING -> Icons.Default.Info
+    ActivityType.TRANSIT -> Icons.Default.Place
+    ActivityType.OTHER -> Icons.Default.Info
 }
 
 /**
@@ -258,50 +262,4 @@ private fun getCreativeEmptyMessage(): String {
         "Rest & recharge day"
     )
     return messages.random()
-}
-
-// ==================== Previews ====================
-
-@Preview(name = "Activity Card - Attraction", showBackground = true)
-@Composable
-private fun ActivityTimelineCardAttractionPreview() {
-    MaterialTheme {
-        ActivityTimelineCard(
-            activity = PreviewData.activitySensoJi,
-            onClick = {}
-        )
-    }
-}
-
-@Preview(name = "Activity Card - Food", showBackground = true)
-@Composable
-private fun ActivityTimelineCardFoodPreview() {
-    MaterialTheme {
-        ActivityTimelineCard(
-            activity = PreviewData.activityRamen,
-            onClick = {}
-        )
-    }
-}
-
-@Preview(name = "Activity Card - With Specific Time", showBackground = true)
-@Composable
-private fun ActivityTimelineCardWithTimePreview() {
-    MaterialTheme {
-        ActivityTimelineCard(
-            activity = PreviewData.activitySensoJi.copy(
-                startTime = "09:00",
-                endTime = "11:30"
-            ),
-            onClick = {}
-        )
-    }
-}
-
-@Preview(name = "Nothing Planned Card", showBackground = true)
-@Composable
-private fun NothingPlannedCardPreview() {
-    MaterialTheme {
-        NothingPlannedCard()
-    }
 }

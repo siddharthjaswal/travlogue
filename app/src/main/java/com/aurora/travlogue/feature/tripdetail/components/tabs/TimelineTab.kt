@@ -19,11 +19,8 @@ import com.aurora.travlogue.core.domain.model.BookingType
 import com.aurora.travlogue.core.domain.model.Gap
 import com.aurora.travlogue.core.domain.model.Location
 import com.aurora.travlogue.core.domain.model.TimeSlot
-import com.aurora.travlogue.feature.tripdetail.components.timeline.*
+import com.aurora.travlogue.feature.tripdetail.presentation.components.timeline.*
 import com.aurora.travlogue.feature.tripdetail.domain.models.DaySchedule
-import java.time.LocalDate
-import java.time.ZonedDateTime
-import java.time.format.DateTimeFormatter
 
 /**
  * Timeline tab using shared TimelineItem from shared module

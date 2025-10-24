@@ -1,23 +1,22 @@
-package com.aurora.travlogue.feature.tripdetail.components.timeline
+package com.aurora.travlogue.feature.tripdetail.presentation.components.timeline
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
-import androidx.compose.material.icons.filled.*
+import androidx.compose.material.icons.filled.Info
+import androidx.compose.material.icons.filled.Place
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.aurora.travlogue.core.common.PreviewData
 import com.aurora.travlogue.core.domain.model.Booking
 import com.aurora.travlogue.core.domain.model.BookingType
-import java.time.ZonedDateTime
-import java.time.format.DateTimeFormatter
-import java.time.temporal.ChronoUnit
+import kotlinx.datetime.Instant
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.toLocalDateTime
 
 /**
  * Card showing a booking in the timeline
@@ -187,12 +186,12 @@ fun BookingTimelineCard(
 }
 
 private fun getBookingTypeIcon(type: BookingType) = when (type) {
-    BookingType.FLIGHT -> Icons.Default.Flight
-    BookingType.HOTEL -> Icons.Default.Hotel
-    BookingType.TRAIN -> Icons.Default.Train
-    BookingType.BUS -> Icons.Default.DirectionsBus
-    BookingType.TICKET -> Icons.Default.ConfirmationNumber
-    BookingType.OTHER -> Icons.Default.Event
+    BookingType.FLIGHT -> Icons.Default.Place
+    BookingType.HOTEL -> Icons.Default.Place
+    BookingType.TRAIN -> Icons.Default.Place
+    BookingType.BUS -> Icons.Default.Place
+    BookingType.TICKET -> Icons.Default.Info
+    BookingType.OTHER -> Icons.Default.Info
 }
 
 private fun getBookingTypeDisplay(type: BookingType) = when (type) {
@@ -206,8 +205,13 @@ private fun getBookingTypeDisplay(type: BookingType) = when (type) {
 
 private fun formatTime(isoDateTime: String): String {
     return try {
-        val zonedDateTime = ZonedDateTime.parse(isoDateTime)
-        zonedDateTime.format(DateTimeFormatter.ofPattern("h:mm a"))
+        val instant = Instant.parse(isoDateTime)
+        val localDateTime = instant.toLocalDateTime(TimeZone.currentSystemDefault())
+
+        val hour = if (localDateTime.hour == 0) 12 else if (localDateTime.hour > 12) localDateTime.hour - 12 else localDateTime.hour
+        val minute = localDateTime.minute.toString().padStart(2, '0')
+        val period = if (localDateTime.hour < 12) "AM" else "PM"
+        "$hour:$minute $period"
     } catch (e: Exception) {
         isoDateTime
     }
@@ -215,11 +219,12 @@ private fun formatTime(isoDateTime: String): String {
 
 private fun calculateDuration(startDateTime: String, endDateTime: String): String? {
     return try {
-        val start = ZonedDateTime.parse(startDateTime)
-        val end = ZonedDateTime.parse(endDateTime)
+        val start = Instant.parse(startDateTime)
+        val end = Instant.parse(endDateTime)
 
-        val hours = ChronoUnit.HOURS.between(start, end)
-        val minutes = ChronoUnit.MINUTES.between(start, end) % 60
+        val durationMillis = end.toEpochMilliseconds() - start.toEpochMilliseconds()
+        val hours = durationMillis / (1000 * 60 * 60)
+        val minutes = (durationMillis / (1000 * 60)) % 60
 
         when {
             hours > 0 && minutes > 0 -> "${hours}h ${minutes}m"
@@ -229,40 +234,5 @@ private fun calculateDuration(startDateTime: String, endDateTime: String): Strin
         }
     } catch (e: Exception) {
         null
-    }
-}
-
-// ==================== Previews ====================
-
-@Preview(name = "Booking Card - Flight", showBackground = true)
-@Composable
-private fun BookingTimelineCardFlightPreview() {
-    MaterialTheme {
-        BookingTimelineCard(
-            booking = PreviewData.bookingFlight,
-            onClick = {}
-        )
-    }
-}
-
-@Preview(name = "Booking Card - Train", showBackground = true)
-@Composable
-private fun BookingTimelineCardTrainPreview() {
-    MaterialTheme {
-        BookingTimelineCard(
-            booking = PreviewData.bookingTrain,
-            onClick = {}
-        )
-    }
-}
-
-@Preview(name = "Booking Card - Hotel", showBackground = true)
-@Composable
-private fun BookingTimelineCardHotelPreview() {
-    MaterialTheme {
-        BookingTimelineCard(
-            booking = PreviewData.bookingHotel,
-            onClick = {}
-        )
     }
 }

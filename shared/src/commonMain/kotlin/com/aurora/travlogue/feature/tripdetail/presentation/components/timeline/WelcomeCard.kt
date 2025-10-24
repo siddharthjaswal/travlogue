@@ -1,19 +1,18 @@
-package com.aurora.travlogue.feature.tripdetail.components.timeline
+package com.aurora.travlogue.feature.tripdetail.presentation.components.timeline
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.WavingHand
+import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.aurora.travlogue.core.common.PreviewData
 import com.aurora.travlogue.core.domain.model.Location
-import java.time.ZonedDateTime
-import java.time.format.DateTimeFormatter
+import kotlinx.datetime.Instant
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.toLocalDateTime
 
 /**
  * Warm welcome card shown when arriving at a new city
@@ -39,7 +38,7 @@ fun WelcomeCityCard(
         ) {
             // Welcome icon
             Icon(
-                imageVector = Icons.Default.WavingHand,
+                imageVector = Icons.Default.Favorite,
                 contentDescription = "Welcome",
                 tint = MaterialTheme.colorScheme.primary,
                 modifier = Modifier.size(32.dp)
@@ -120,11 +119,20 @@ fun GoodbyeCityCard(
  */
 private fun formatWelcomeTime(isoDateTime: String, location: Location): String {
     return try {
-        val zonedDateTime = ZonedDateTime.parse(isoDateTime)
-        val time = zonedDateTime.format(DateTimeFormatter.ofPattern("h:mm a"))
-        val date = zonedDateTime.format(DateTimeFormatter.ofPattern("EEEE, MMM d"))
+        val instant = Instant.parse(isoDateTime)
+        val localDateTime = instant.toLocalDateTime(TimeZone.currentSystemDefault())
 
-        val greeting = when (zonedDateTime.hour) {
+        val hour = if (localDateTime.hour == 0) 12 else if (localDateTime.hour > 12) localDateTime.hour - 12 else localDateTime.hour
+        val minute = localDateTime.minute.toString().padStart(2, '0')
+        val period = if (localDateTime.hour < 12) "AM" else "PM"
+        val time = "$hour:$minute $period"
+
+        val dayOfWeek = localDateTime.dayOfWeek.name.lowercase().capitalize()
+        val month = localDateTime.month.name.take(3).lowercase().capitalize()
+        val day = localDateTime.dayOfMonth
+        val date = "$dayOfWeek, $month $day"
+
+        val greeting = when (localDateTime.hour) {
             in 5..11 -> "Good morning"
             in 12..16 -> "Good afternoon"
             in 17..21 -> "Good evening"
@@ -142,36 +150,21 @@ private fun formatWelcomeTime(isoDateTime: String, location: Location): String {
  */
 private fun formatGoodbyeTime(isoDateTime: String): String {
     return try {
-        val zonedDateTime = ZonedDateTime.parse(isoDateTime)
-        val time = zonedDateTime.format(DateTimeFormatter.ofPattern("h:mm a"))
-        val date = zonedDateTime.format(DateTimeFormatter.ofPattern("EEEE, MMM d"))
+        val instant = Instant.parse(isoDateTime)
+        val localDateTime = instant.toLocalDateTime(TimeZone.currentSystemDefault())
+
+        val hour = if (localDateTime.hour == 0) 12 else if (localDateTime.hour > 12) localDateTime.hour - 12 else localDateTime.hour
+        val minute = localDateTime.minute.toString().padStart(2, '0')
+        val period = if (localDateTime.hour < 12) "AM" else "PM"
+        val time = "$hour:$minute $period"
+
+        val dayOfWeek = localDateTime.dayOfWeek.name.lowercase().capitalize()
+        val month = localDateTime.month.name.take(3).lowercase().capitalize()
+        val day = localDateTime.dayOfMonth
+        val date = "$dayOfWeek, $month $day"
 
         "Time to head out at $time on $date"
     } catch (e: Exception) {
         "Departing soon"
-    }
-}
-
-// ==================== Previews ====================
-
-@Preview(name = "Welcome City Card", showBackground = true)
-@Composable
-private fun WelcomeCityCardPreview() {
-    MaterialTheme {
-        WelcomeCityCard(
-            location = PreviewData.locationTokyo,
-            arrivalDateTime = "2025-07-01T14:30:00+09:00"
-        )
-    }
-}
-
-@Preview(name = "Goodbye City Card", showBackground = true)
-@Composable
-private fun GoodbyeCityCardPreview() {
-    MaterialTheme {
-        GoodbyeCityCard(
-            location = PreviewData.locationKyoto,
-            departureDateTime = "2025-07-05T09:00:00+09:00"
-        )
     }
 }
