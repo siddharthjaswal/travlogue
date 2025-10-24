@@ -174,8 +174,23 @@ fun BookingTimelineCard(
 
             // Price (if available)
             if (booking.price != null && booking.currency != null) {
+                val formattedPrice = (booking.price * 100).toInt() / 100.0
+                val priceString = if (formattedPrice == formattedPrice.toInt().toDouble()) {
+                    "${formattedPrice.toInt()}.00"
+                } else {
+                    "%.2f".replace("%", "").let {
+                        val parts = formattedPrice.toString().split(".")
+                        if (parts.size == 2 && parts[1].length >= 2) {
+                            "${parts[0]}.${parts[1].substring(0, 2)}"
+                        } else if (parts.size == 2) {
+                            "${parts[0]}.${parts[1]}0"
+                        } else {
+                            "$formattedPrice.00"
+                        }
+                    }
+                }
                 Text(
-                    text = "${booking.currency} ${String.format("%.2f", booking.price)}",
+                    text = "${booking.currency} $priceString",
                     style = MaterialTheme.typography.bodySmall,
                     fontWeight = FontWeight.SemiBold,
                     color = MaterialTheme.colorScheme.primary

@@ -104,7 +104,7 @@ fun HotelCheckInCard(
                     horizontalAlignment = Alignment.End
                 ) {
                     Text(
-                        text = "${booking.currency} ${String.format("%.0f", booking.price)}",
+                        text = "${booking.currency} ${booking.price.toInt()}",
                         style = MaterialTheme.typography.bodyMedium,
                         fontWeight = FontWeight.SemiBold,
                         color = MaterialTheme.colorScheme.primary
