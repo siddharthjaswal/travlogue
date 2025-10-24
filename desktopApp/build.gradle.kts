@@ -32,6 +32,9 @@ kotlin {
 
                 // DateTime for date handling
                 implementation(libs.kotlinx.datetime)
+
+                // Coroutines for desktop (provides Main dispatcher)
+                implementation(libs.kotlinx.coroutines.swing)
             }
         }
     }

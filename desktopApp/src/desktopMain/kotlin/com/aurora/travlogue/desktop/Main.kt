@@ -5,13 +5,14 @@ import androidx.compose.ui.window.application
 import androidx.compose.ui.window.rememberWindowState
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
+import com.aurora.travlogue.di.platformModule
 import com.aurora.travlogue.di.sharedModule
 import org.koin.core.context.startKoin
 
 fun main() = application {
-    // Initialize Koin
+    // Initialize Koin with both shared and platform-specific modules
     startKoin {
-        modules(sharedModule)
+        modules(sharedModule, platformModule)
     }
 
     val windowState = rememberWindowState(
