@@ -13,6 +13,14 @@ struct TripDetailViewEnhanced: View {
 
     var body: some View {
         VStack(spacing: 0) {
+            // Trip Header Section (matching Android design)
+            TripHeaderSectionView(trip: trip)
+                .padding(.horizontal)
+                .padding(.vertical, 12)
+                .background(Color(.systemBackground))
+
+            Divider()
+
             // Tab Picker (matching Android tab order)
             Picker("Tab", selection: $selectedTab) {
                 Text("Timeline").tag(TripDetailTab.timeline)
@@ -40,7 +48,7 @@ struct TripDetailViewEnhanced: View {
             .tabViewStyle(.page(indexDisplayMode: .never))
         }
         .navigationTitle(trip.name)
-        .navigationBarTitleDisplayMode(.large)
+        .navigationBarTitleDisplayMode(.inline)
     }
 }
 
@@ -52,37 +60,6 @@ struct OverviewTabView: View {
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 20) {
-                // Trip Header
-                VStack(alignment: .leading, spacing: 8) {
-                    if !trip.originCity.isEmpty {
-                        HStack {
-                            Image(systemName: "location.fill")
-                            Text(trip.originCity)
-                        }
-                        .foregroundColor(.secondary)
-                    }
-
-                    if trip.dateType == .fixed {
-                        if let startDate = trip.startDate, let endDate = trip.endDate {
-                            HStack {
-                                Image(systemName: "calendar")
-                                Text("\(startDate) - \(endDate)")
-                            }
-                            .foregroundColor(.secondary)
-                        }
-                    } else {
-                        HStack {
-                            Image(systemName: "calendar.badge.clock")
-                            Text("Flexible dates")
-                        }
-                        .foregroundColor(.secondary)
-                    }
-                }
-                .padding()
-                .frame(maxWidth: .infinity, alignment: .leading)
-                .background(Color(.systemGray6))
-                .cornerRadius(12)
-
                 // Stats Section
                 HStack(spacing: 20) {
                     StatCard(icon: "mappin.and.ellipse", value: "\(viewModel.locations.count)", label: "Locations")
@@ -815,6 +792,70 @@ class TripDetailViewModelWrapper: ObservableObject {
                 }
                 try? await Task.sleep(nanoseconds: 500_000_000) // 0.5 seconds
             }
+        }
+    }
+}
+
+// MARK: - Trip Header Section
+struct TripHeaderSectionView: View {
+    let trip: Trip
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            // Origin City
+            HStack(spacing: 8) {
+                Image(systemName: "airplane.departure")
+                    .font(.system(size: 16))
+                    .foregroundColor(.blue)
+
+                Text("From \(trip.originCity)")
+                    .font(.subheadline)
+                    .foregroundColor(.secondary)
+            }
+
+            // Date Range
+            HStack(spacing: 8) {
+                Image(systemName: "calendar")
+                    .font(.system(size: 16))
+                    .foregroundColor(.blue)
+
+                Text(formatDateRange(trip: trip))
+                    .font(.subheadline)
+                    .foregroundColor(.secondary)
+            }
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+    }
+
+    private func formatDateRange(trip: Trip) -> String {
+        if trip.dateType == .fixed {
+            guard let startDate = trip.startDate,
+                  let endDate = trip.endDate else {
+                return "Dates not set"
+            }
+
+            let formatter = DateFormatter()
+            formatter.dateFormat = "yyyy-MM-dd"
+
+            guard let start = formatter.date(from: startDate),
+                  let end = formatter.date(from: endDate) else {
+                return "\(startDate) – \(endDate)"
+            }
+
+            let calendar = Calendar.current
+            let days = calendar.dateComponents([.day], from: start, to: end).day ?? 0
+            let totalDays = days + 1
+
+            let displayFormatter = DateFormatter()
+            displayFormatter.dateFormat = "MMM d, yyyy"
+
+            let formattedStart = displayFormatter.string(from: start)
+            let formattedEnd = displayFormatter.string(from: end)
+
+            return "\(formattedStart) – \(formattedEnd) · \(totalDays) \(totalDays == 1 ? "day" : "days")"
+        } else {
+            let duration = trip.flexibleDuration != nil ? " · ≈\(trip.flexibleDuration!) days" : ""
+            return trip.flexibleMonth != nil ? "~\(trip.flexibleMonth!)\(duration)" : "Flexible dates\(duration)"
         }
     }
 }
