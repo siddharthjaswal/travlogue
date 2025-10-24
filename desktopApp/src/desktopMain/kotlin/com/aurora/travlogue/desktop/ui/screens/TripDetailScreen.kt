@@ -4,6 +4,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -21,6 +22,7 @@ import com.aurora.travlogue.core.domain.model.*
 import com.aurora.travlogue.feature.tripdetail.domain.models.DaySchedule
 import com.aurora.travlogue.feature.tripdetail.presentation.TripDetailTab
 import com.aurora.travlogue.feature.tripdetail.presentation.TripDetailViewModel
+import kotlinx.datetime.toLocalDateTime
 import org.koin.compose.viewmodel.koinViewModel
 import org.koin.core.parameter.parametersOf
 
@@ -1067,7 +1069,7 @@ private fun WelcomeCityCard(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Icon(
-                imageVector = Icons.Default.WavingHand,
+                imageVector = Icons.Default.Favorite,
                 contentDescription = "Welcome",
                 tint = MaterialTheme.colorScheme.primary,
                 modifier = Modifier.size(32.dp)
@@ -1188,7 +1190,7 @@ private fun CityArrivalCard(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Icon(
-                imageVector = Icons.Default.FlightLand,
+                imageVector = Icons.Default.Place,
                 contentDescription = "Arrival",
                 tint = MaterialTheme.colorScheme.primary,
                 modifier = Modifier.size(32.dp)
@@ -1244,7 +1246,7 @@ private fun CityDepartureCard(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Icon(
-                imageVector = Icons.Default.FlightTakeoff,
+                imageVector = Icons.Default.Place,
                 contentDescription = "Departure",
                 tint = MaterialTheme.colorScheme.secondary,
                 modifier = Modifier.size(32.dp)
@@ -1300,7 +1302,7 @@ private fun OriginDepartureCard(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Icon(
-                imageVector = Icons.Default.FlightTakeoff,
+                imageVector = Icons.Default.Place,
                 contentDescription = "Departure",
                 tint = MaterialTheme.colorScheme.secondary,
                 modifier = Modifier.size(32.dp)
@@ -1399,7 +1401,7 @@ private fun HotelCheckInCard(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Icon(
-                imageVector = Icons.Default.Hotel,
+                imageVector = Icons.Default.Home,
                 contentDescription = "Check In",
                 tint = MaterialTheme.colorScheme.tertiary,
                 modifier = Modifier.size(32.dp)
@@ -1444,7 +1446,7 @@ private fun HotelCheckOutCard(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Icon(
-                imageVector = Icons.Default.Hotel,
+                imageVector = Icons.Default.Home,
                 contentDescription = "Check Out",
                 tint = MaterialTheme.colorScheme.secondary,
                 modifier = Modifier.size(32.dp)
@@ -1614,8 +1616,8 @@ private fun formatDateTime(isoDateTime: String): String {
 }
 
 private fun getTransitIcon(type: BookingType) = when (type) {
-    BookingType.FLIGHT -> Icons.Default.Flight
-    BookingType.TRAIN -> Icons.Default.Train
-    BookingType.BUS -> Icons.Default.DirectionsBus
-    else -> Icons.Default.Flight
+    BookingType.FLIGHT -> Icons.Default.Place
+    BookingType.TRAIN -> Icons.Default.Place
+    BookingType.BUS -> Icons.Default.Place
+    else -> Icons.Default.Place
 }
