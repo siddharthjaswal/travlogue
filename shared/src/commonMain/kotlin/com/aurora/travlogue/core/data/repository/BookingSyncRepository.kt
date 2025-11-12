@@ -16,13 +16,16 @@ import kotlinx.coroutines.flow.onStart
  * - Reads: Return local data immediately, sync from remote in background
  * - Writes: Save locally first, sync to remote when online
  *
+ * Uses IdMappingRepository to track UUID ↔ Int ID relationships
+ *
  * Note: Bookings in the backend are associated with TripDays and optionally Activities.
  * The local model uses tripId directly, so we need to handle this mapping.
  */
 class BookingSyncRepository(
     private val localRepository: TripRepository,
     private val apiClient: LogbookApiClient,
-    private val authManager: AuthManager
+    private val authManager: AuthManager,
+    private val idMappingRepository: IdMappingRepository
 ) {
     /**
      * Get bookings for a trip with automatic sync
@@ -104,19 +107,27 @@ class BookingSyncRepository(
 
         // 2. Try to sync deletion to backend if authenticated
         if (!authManager.isAuthenticated()) {
+            // Delete the mapping as well
+            idMappingRepository.deleteByLocalId(bookingId, EntityType.BOOKING)
             return Result.success(Unit)
         }
 
-        // Convert local ID to backend ID
-        val backendId = bookingId.toIntOrNull()
+        // Convert local ID to backend ID using ID mapping
+        val backendId = idMappingRepository.resolveToBackendId(bookingId, EntityType.BOOKING)
         if (backendId == null) {
             // Booking only exists locally, no need to sync deletion
             return Result.success(Unit)
         }
 
         return apiClient.deleteBooking(backendId).fold(
-            onSuccess = { Result.success(Unit) },
+            onSuccess = {
+                // Delete the mapping after successful backend deletion
+                idMappingRepository.deleteByLocalId(bookingId, EntityType.BOOKING)
+                Result.success(Unit)
+            },
             onFailure = { error ->
+                // Deletion failed remotely but succeeded locally
+                // Keep the mapping for retry later
                 Result.failure(Exception("Failed to delete booking remotely: ${error.message}"))
             }
         )
@@ -139,6 +150,15 @@ class BookingSyncRepository(
                     // Convert DTOs to domain models and save to local DB
                     bookingDtos.forEach { dto ->
                         val booking = dto.toDomainModel().copy(tripId = localTripId)
+                        val backendId = dto.id
+
+                        // Save the ID mapping
+                        idMappingRepository.saveMapping(
+                            localId = booking.id,
+                            backendId = backendId,
+                            entityType = EntityType.BOOKING
+                        )
+
                         // Try to update existing booking, or insert if new
                         try {
                             localRepository.updateBooking(booking)
@@ -183,7 +203,15 @@ class BookingSyncRepository(
         return apiClient.createBooking(createDto).fold(
             onSuccess = { responseDto ->
                 try {
+                    val backendId = responseDto.id
                     val syncedBooking = responseDto.toDomainModel().copy(tripId = booking.tripId)
+
+                    // Save the ID mapping UUID ↔ Int
+                    idMappingRepository.saveMapping(
+                        localId = booking.id,
+                        backendId = backendId,
+                        entityType = EntityType.BOOKING
+                    )
 
                     // Update local booking with backend ID
                     localRepository.deleteBooking(booking) // Delete old UUID-based booking
@@ -204,8 +232,8 @@ class BookingSyncRepository(
      * Sync booking update to remote
      */
     private suspend fun syncBookingUpdateToRemote(booking: Booking): Result<Booking> {
-        // Convert local ID to backend ID
-        val backendId = booking.id.toIntOrNull()
+        // Convert local ID to backend ID using ID mapping
+        val backendId = idMappingRepository.resolveToBackendId(booking.id, EntityType.BOOKING)
         if (backendId == null) {
             // Booking only exists locally
             // Can't sync without knowing tripDayId
@@ -218,6 +246,14 @@ class BookingSyncRepository(
             onSuccess = { responseDto ->
                 try {
                     val syncedBooking = responseDto.toDomainModel().copy(tripId = booking.tripId)
+
+                    // Update the ID mapping timestamp
+                    idMappingRepository.saveMapping(
+                        localId = booking.id,
+                        backendId = backendId,
+                        entityType = EntityType.BOOKING
+                    )
+
                     localRepository.updateBooking(syncedBooking)
                     Result.success(syncedBooking)
                 } catch (e: Exception) {

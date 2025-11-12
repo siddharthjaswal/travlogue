@@ -16,13 +16,16 @@ import kotlinx.coroutines.flow.onStart
  * - Reads: Return local data immediately, sync from remote in background
  * - Writes: Save locally first, sync to remote when online
  *
+ * Uses IdMappingRepository to track UUID ↔ Int ID relationships
+ *
  * Note: Activities are associated with TripDays in the backend,
  * but with Locations in the local model. We need to handle this mapping.
  */
 class ActivitySyncRepository(
     private val localRepository: TripRepository,
     private val apiClient: LogbookApiClient,
-    private val authManager: AuthManager
+    private val authManager: AuthManager,
+    private val idMappingRepository: IdMappingRepository
 ) {
     /**
      * Get activities for a location with automatic sync
@@ -108,19 +111,27 @@ class ActivitySyncRepository(
 
         // 2. Try to sync deletion to backend if authenticated
         if (!authManager.isAuthenticated()) {
+            // Delete the mapping as well
+            idMappingRepository.deleteByLocalId(activityId, EntityType.ACTIVITY)
             return Result.success(Unit)
         }
 
-        // Convert local ID to backend ID
-        val backendId = activityId.toIntOrNull()
+        // Convert local ID to backend ID using ID mapping
+        val backendId = idMappingRepository.resolveToBackendId(activityId, EntityType.ACTIVITY)
         if (backendId == null) {
             // Activity only exists locally, no need to sync deletion
             return Result.success(Unit)
         }
 
         return apiClient.deleteActivity(backendId).fold(
-            onSuccess = { Result.success(Unit) },
+            onSuccess = {
+                // Delete the mapping after successful backend deletion
+                idMappingRepository.deleteByLocalId(activityId, EntityType.ACTIVITY)
+                Result.success(Unit)
+            },
             onFailure = { error ->
+                // Deletion failed remotely but succeeded locally
+                // Keep the mapping for retry later
                 Result.failure(Exception("Failed to delete activity remotely: ${error.message}"))
             }
         )
@@ -143,6 +154,15 @@ class ActivitySyncRepository(
                     // Convert DTOs to domain models and save to local DB
                     activityDtos.forEach { dto ->
                         val activity = dto.toDomainModel(locationId)
+                        val backendId = dto.id
+
+                        // Save the ID mapping
+                        idMappingRepository.saveMapping(
+                            localId = activity.id,
+                            backendId = backendId,
+                            entityType = EntityType.ACTIVITY
+                        )
+
                         // Try to update existing activity, or insert if new
                         try {
                             localRepository.updateActivity(activity)
@@ -193,7 +213,15 @@ class ActivitySyncRepository(
         return apiClient.createActivity(createDto).fold(
             onSuccess = { responseDto ->
                 try {
+                    val backendId = responseDto.id
                     val syncedActivity = responseDto.toDomainModel(activity.locationId)
+
+                    // Save the ID mapping UUID ↔ Int
+                    idMappingRepository.saveMapping(
+                        localId = activity.id,
+                        backendId = backendId,
+                        entityType = EntityType.ACTIVITY
+                    )
 
                     // Update local activity with backend ID
                     localRepository.deleteActivityById(activity.id) // Delete old UUID-based activity
@@ -214,8 +242,8 @@ class ActivitySyncRepository(
      * Sync activity update to remote
      */
     private suspend fun syncActivityUpdateToRemote(activity: Activity, tripDayId: Int?): Result<Activity> {
-        // Convert local ID to backend ID
-        val backendId = activity.id.toIntOrNull()
+        // Convert local ID to backend ID using ID mapping
+        val backendId = idMappingRepository.resolveToBackendId(activity.id, EntityType.ACTIVITY)
         if (backendId == null) {
             // Activity only exists locally, create it on backend instead
             return if (tripDayId != null) {
@@ -231,6 +259,14 @@ class ActivitySyncRepository(
             onSuccess = { responseDto ->
                 try {
                     val syncedActivity = responseDto.toDomainModel(activity.locationId)
+
+                    // Update the ID mapping timestamp
+                    idMappingRepository.saveMapping(
+                        localId = activity.id,
+                        backendId = backendId,
+                        entityType = EntityType.ACTIVITY
+                    )
+
                     localRepository.updateActivity(syncedActivity)
                     Result.success(syncedActivity)
                 } catch (e: Exception) {

@@ -58,8 +58,8 @@ val sharedModule = module {
 
     // Sync Repositories (NEW - preferred for all operations)
     single { TripSyncRepository(get(), get(), get(), get()) } // Trip sync (local + remote + ID mapping)
-    single { ActivitySyncRepository(get(), get(), get()) } // Activity sync
-    single { BookingSyncRepository(get(), get(), get()) } // Booking sync
+    single { ActivitySyncRepository(get(), get(), get(), get()) } // Activity sync (now with ID mapping)
+    single { BookingSyncRepository(get(), get(), get(), get()) } // Booking sync (now with ID mapping)
 
     // Domain Services
     singleOf(::GapDetectionService)

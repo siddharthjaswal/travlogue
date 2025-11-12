@@ -7,7 +7,7 @@
 
 ---
 
-## 📊 Overall Progress: 65% Complete
+## 📊 Overall Progress: 70% Complete
 
 ### Milestone Overview
 
@@ -17,7 +17,7 @@
 | **Phase 2** | ✅ Complete | 100% | Repository Layer & Offline-First |
 | **Phase 3A** | ✅ Complete | 100% | Activity & Booking Sync |
 | **Phase 3B** | ✅ Complete | 100% | ID Mapping Infrastructure |
-| **Phase 3C** | 🚧 In Progress | 30% | Full Sync & Conflict Resolution |
+| **Phase 3C** | 🚧 In Progress | 60% | Full Sync & Conflict Resolution |
 | **Phase 4** | ⏳ Pending | 0% | OAuth & UI Integration |
 | **Phase 5** | ⏳ Pending | 0% | Background Sync & Polish |
 
@@ -125,15 +125,23 @@ isSynced(uuid, EntityType.TRIP) → Boolean
 
 ## 🚧 In Progress
 
-### Phase 3C: Full Sync & Conflict Resolution (30% 🚧)
+### Phase 3C: Full Sync & Conflict Resolution (60% 🚧)
 
 **Target Completion**: TBD
 **Current Focus**: Completing the sync layer
 
+#### Completed Tasks
+
+**High Priority**:
+- ✅ **Update Activity/BookingSync** to use ID mapping (similar to TripSync) - DONE
+  - Updated ActivitySyncRepository to use IdMappingRepository
+  - Updated BookingSyncRepository to use IdMappingRepository
+  - All CRUD operations now track UUID ↔ Int mappings
+  - Consistent offline-first pattern across all entities
+
 #### Remaining Tasks
 
 **High Priority**:
-- [ ] **Update Activity/BookingSync** to use ID mapping (similar to TripSync)
 - [ ] **Complete SyncService.syncAll()** with actual Activity/Booking sync
 - [ ] **Implement TripDay entity** in local model
 - [ ] **Add sync queue table** for failed operations
@@ -326,5 +334,5 @@ isSynced(uuid, EntityType.TRIP) → Boolean
 
 ---
 
-*Last Updated: 2025-11-12 after Phase 3B completion*
+*Last Updated: 2025-11-12 after Activity/Booking ID Mapping integration*
 *Next Update: After Phase 3C completion*
