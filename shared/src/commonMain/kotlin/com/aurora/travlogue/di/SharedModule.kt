@@ -1,7 +1,9 @@
 package com.aurora.travlogue.di
 
+import com.aurora.travlogue.core.auth.AuthManager
 import com.aurora.travlogue.core.data.local.DatabaseDriverFactory
 import com.aurora.travlogue.core.data.local.TravlogueDb
+import com.aurora.travlogue.core.data.remote.LogbookApiClient
 import com.aurora.travlogue.core.data.remote.TravlogueApiClient
 import com.aurora.travlogue.core.data.remote.createHttpClient
 import com.aurora.travlogue.core.data.repository.TripRepository
@@ -24,9 +26,26 @@ val sharedModule = module {
     // Database
     single { TravlogueDb(get()) }
 
-    // API Client
+    // Legacy API Client (to be phased out)
     single { createHttpClient(enableLogging = true) }
     single { TravlogueApiClient(get()) }
+
+    // New Logbook API Client (integrated with backend)
+    single {
+        LogbookApiClient(
+            tokenStorage = get(),
+            enableLogging = true
+        )
+    }
+
+    // Auth Manager
+    single {
+        AuthManager(
+            googleAuthProvider = get(),
+            tokenStorage = get(),
+            apiClient = get()
+        )
+    }
 
     // Repositories
     single { TripRepository(get()) }
