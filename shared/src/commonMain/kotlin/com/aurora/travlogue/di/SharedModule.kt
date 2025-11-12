@@ -7,8 +7,10 @@ import com.aurora.travlogue.core.data.remote.LogbookApiClient
 import com.aurora.travlogue.core.data.remote.TravlogueApiClient
 import com.aurora.travlogue.core.data.remote.createHttpClient
 import com.aurora.travlogue.core.data.repository.TripRepository
+import com.aurora.travlogue.core.data.repository.TripSyncRepository
 import com.aurora.travlogue.core.domain.service.BookingSyncService
 import com.aurora.travlogue.core.domain.service.GapDetectionService
+import com.aurora.travlogue.core.domain.service.SyncService
 import com.aurora.travlogue.core.domain.usecase.*
 import com.aurora.travlogue.feature.createtrip.presentation.CreateTripViewModel
 import com.aurora.travlogue.feature.home.presentation.HomeViewModel
@@ -48,11 +50,13 @@ val sharedModule = module {
     }
 
     // Repositories
-    single { TripRepository(get()) }
+    single { TripRepository(get()) } // Local repository
+    single { TripSyncRepository(get(), get(), get()) } // Sync repository (wraps local + remote)
 
     // Domain Services
     singleOf(::GapDetectionService)
     singleOf(::BookingSyncService)
+    single { SyncService(get(), get()) } // New sync service
 
     // Use Cases
     singleOf(::GetAllTripsUseCase)
