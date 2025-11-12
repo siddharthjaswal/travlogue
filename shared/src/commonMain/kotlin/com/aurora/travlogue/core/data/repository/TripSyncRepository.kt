@@ -17,12 +17,13 @@ import kotlinx.coroutines.flow.onStart
  * - Writes: Save locally first, sync to remote when online
  * - Conflicts: Last-write-wins strategy (for now)
  *
- * This wraps the existing TripRepository (local) and LogbookApiClient (remote)
+ * Uses IdMappingRepository to track UUID ↔ Int ID relationships
  */
 class TripSyncRepository(
     private val localRepository: TripRepository,
     private val apiClient: LogbookApiClient,
-    private val authManager: AuthManager
+    private val authManager: AuthManager,
+    private val idMappingRepository: IdMappingRepository
 ) {
     /**
      * Get all trips with automatic sync
@@ -104,22 +105,27 @@ class TripSyncRepository(
 
         // 2. Try to sync deletion to backend if authenticated
         if (!authManager.isAuthenticated()) {
+            // Delete the mapping as well
+            idMappingRepository.deleteByLocalId(tripId, EntityType.TRIP)
             return Result.success(Unit)
         }
 
-        // Convert local ID to backend ID (need to track this mapping)
-        // For now, try to parse as Int
-        val backendId = tripId.toIntOrNull()
+        // Convert local ID to backend ID using ID mapping
+        val backendId = idMappingRepository.resolveToBackendId(tripId, EntityType.TRIP)
         if (backendId == null) {
             // Trip only exists locally, no need to sync deletion
             return Result.success(Unit)
         }
 
         return apiClient.deleteTrip(backendId).fold(
-            onSuccess = { Result.success(Unit) },
+            onSuccess = {
+                // Delete the mapping after successful backend deletion
+                idMappingRepository.deleteByLocalId(tripId, EntityType.TRIP)
+                Result.success(Unit)
+            },
             onFailure = { error ->
                 // Deletion failed remotely but succeeded locally
-                // Mark for retry later
+                // Keep the mapping for retry later
                 Result.failure(Exception("Failed to delete trip remotely: ${error.message}"))
             }
         )
@@ -139,6 +145,15 @@ class TripSyncRepository(
                     // Convert DTOs to domain models and save to local DB
                     tripDtos.forEach { dto ->
                         val trip = dto.toDomainModel()
+                        val backendId = dto.id
+
+                        // Save the ID mapping
+                        idMappingRepository.saveMapping(
+                            localId = trip.id,
+                            backendId = backendId,
+                            entityType = EntityType.TRIP
+                        )
+
                         // Try to update existing trip, or insert if new
                         try {
                             localRepository.updateTrip(trip)
@@ -165,13 +180,22 @@ class TripSyncRepository(
             return Result.failure(Exception("Not authenticated"))
         }
 
-        // Convert local ID to backend ID
-        val backendId = tripId.toIntOrNull() ?: return Result.success(Unit)
+        // Convert local ID to backend ID using ID mapping
+        val backendId = idMappingRepository.resolveToBackendId(tripId, EntityType.TRIP)
+            ?: return Result.success(Unit) // Trip only exists locally
 
         return apiClient.getTrip(backendId).fold(
             onSuccess = { tripDto ->
                 try {
                     val trip = tripDto.toDomainModel()
+
+                    // Update the ID mapping
+                    idMappingRepository.saveMapping(
+                        localId = trip.id,
+                        backendId = backendId,
+                        entityType = EntityType.TRIP
+                    )
+
                     try {
                         localRepository.updateTrip(trip)
                     } catch (e: Exception) {
@@ -197,7 +221,15 @@ class TripSyncRepository(
         return apiClient.createTrip(createDto).fold(
             onSuccess = { responseDto ->
                 try {
+                    val backendId = responseDto.id
                     val syncedTrip = responseDto.toDomainModel()
+
+                    // Save the ID mapping UUID ↔ Int
+                    idMappingRepository.saveMapping(
+                        localId = trip.id,
+                        backendId = backendId,
+                        entityType = EntityType.TRIP
+                    )
 
                     // Update local trip with backend ID
                     localRepository.deleteTripById(trip.id) // Delete old UUID-based trip
@@ -220,8 +252,8 @@ class TripSyncRepository(
      * Sync trip update to remote
      */
     private suspend fun syncTripUpdateToRemote(trip: Trip): Result<Trip> {
-        // Convert local ID to backend ID
-        val backendId = trip.id.toIntOrNull()
+        // Convert local ID to backend ID using ID mapping
+        val backendId = idMappingRepository.resolveToBackendId(trip.id, EntityType.TRIP)
         if (backendId == null) {
             // Trip only exists locally, create it on backend instead
             return syncTripToRemote(trip)
@@ -233,6 +265,14 @@ class TripSyncRepository(
             onSuccess = { responseDto ->
                 try {
                     val syncedTrip = responseDto.toDomainModel()
+
+                    // Update the ID mapping timestamp
+                    idMappingRepository.saveMapping(
+                        localId = trip.id,
+                        backendId = backendId,
+                        entityType = EntityType.TRIP
+                    )
+
                     localRepository.updateTrip(syncedTrip)
                     Result.success(syncedTrip)
                 } catch (e: Exception) {

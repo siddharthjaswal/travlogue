@@ -1,0 +1,110 @@
+-- ID Mapping table for tracking local UUID ↔ backend Int ID relationships
+-- This is critical for offline-first sync to work properly
+
+CREATE TABLE IF NOT EXISTS id_mappings (
+    local_id TEXT NOT NULL,           -- Local UUID (e.g., "550e8400-e29b-41d4-a716-446655440000")
+    backend_id INTEGER NOT NULL,      -- Backend integer ID (e.g., 123)
+    entity_type TEXT NOT NULL,        -- Entity type: 'trip', 'activity', 'booking', 'trip_day'
+    created_at INTEGER NOT NULL,      -- Timestamp when mapping was created
+    updated_at INTEGER NOT NULL,      -- Timestamp when mapping was last updated
+    PRIMARY KEY (local_id, entity_type)
+);
+
+-- Index for fast backend_id lookups
+CREATE INDEX IF NOT EXISTS idx_id_mappings_backend_id
+ON id_mappings(backend_id, entity_type);
+
+-- Index for fast entity_type queries
+CREATE INDEX IF NOT EXISTS idx_id_mappings_entity_type
+ON id_mappings(entity_type);
+
+-- Queries
+
+-- Insert or replace a mapping
+insertOrReplace:
+INSERT OR REPLACE INTO id_mappings (local_id, backend_id, entity_type, created_at, updated_at)
+VALUES (?, ?, ?, ?, ?);
+
+-- Get backend ID from local ID
+getBackendId:
+SELECT backend_id
+FROM id_mappings
+WHERE local_id = ? AND entity_type = ?;
+
+-- Get local ID from backend ID
+getLocalId:
+SELECT local_id
+FROM id_mappings
+WHERE backend_id = ? AND entity_type = ?;
+
+-- Get mapping by local ID
+getMappingByLocalId:
+SELECT *
+FROM id_mappings
+WHERE local_id = ? AND entity_type = ?;
+
+-- Get mapping by backend ID
+getMappingByBackendId:
+SELECT *
+FROM id_mappings
+WHERE backend_id = ? AND entity_type = ?;
+
+-- Get all mappings for an entity type
+getAllMappingsForType:
+SELECT *
+FROM id_mappings
+WHERE entity_type = ?
+ORDER BY updated_at DESC;
+
+-- Delete mapping by local ID
+deleteByLocalId:
+DELETE FROM id_mappings
+WHERE local_id = ? AND entity_type = ?;
+
+-- Delete mapping by backend ID
+deleteByBackendId:
+DELETE FROM id_mappings
+WHERE backend_id = ? AND entity_type = ?;
+
+-- Check if mapping exists for local ID
+existsByLocalId:
+SELECT COUNT(*) > 0
+FROM id_mappings
+WHERE local_id = ? AND entity_type = ?;
+
+-- Check if mapping exists for backend ID
+existsByBackendId:
+SELECT COUNT(*) > 0
+FROM id_mappings
+WHERE backend_id = ? AND entity_type = ?;
+
+-- Get all local IDs that don't have backend mappings
+-- (these are pending sync)
+getAllLocalOnlyIds:
+SELECT DISTINCT local_id
+FROM (
+    -- Get all trip IDs
+    SELECT id as local_id, 'trip' as entity_type FROM trips
+    UNION ALL
+    -- Get all activity IDs
+    SELECT id as local_id, 'activity' as entity_type FROM activities
+    UNION ALL
+    -- Get all booking IDs
+    SELECT id as local_id, 'booking' as entity_type FROM bookings
+) AS all_entities
+WHERE NOT EXISTS (
+    SELECT 1
+    FROM id_mappings
+    WHERE id_mappings.local_id = all_entities.local_id
+    AND id_mappings.entity_type = all_entities.entity_type
+);
+
+-- Count mappings by entity type
+countMappingsByType:
+SELECT entity_type, COUNT(*) as count
+FROM id_mappings
+GROUP BY entity_type;
+
+-- Delete all mappings (for testing/reset)
+deleteAll:
+DELETE FROM id_mappings;
