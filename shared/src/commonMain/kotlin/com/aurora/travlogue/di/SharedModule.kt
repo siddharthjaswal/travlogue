@@ -6,6 +6,8 @@ import com.aurora.travlogue.core.data.local.TravlogueDb
 import com.aurora.travlogue.core.data.remote.LogbookApiClient
 import com.aurora.travlogue.core.data.remote.TravlogueApiClient
 import com.aurora.travlogue.core.data.remote.createHttpClient
+import com.aurora.travlogue.core.data.repository.ActivitySyncRepository
+import com.aurora.travlogue.core.data.repository.BookingSyncRepository
 import com.aurora.travlogue.core.data.repository.TripRepository
 import com.aurora.travlogue.core.data.repository.TripSyncRepository
 import com.aurora.travlogue.core.domain.service.BookingSyncService
@@ -50,8 +52,12 @@ val sharedModule = module {
     }
 
     // Repositories
-    single { TripRepository(get()) } // Local repository
-    single { TripSyncRepository(get(), get(), get()) } // Sync repository (wraps local + remote)
+    single { TripRepository(get()) } // Local repository (legacy, for direct local access)
+
+    // Sync Repositories (NEW - preferred for all operations)
+    single { TripSyncRepository(get(), get(), get()) } // Trip sync (local + remote coordination)
+    single { ActivitySyncRepository(get(), get(), get()) } // Activity sync
+    single { BookingSyncRepository(get(), get(), get()) } // Booking sync
 
     // Domain Services
     singleOf(::GapDetectionService)

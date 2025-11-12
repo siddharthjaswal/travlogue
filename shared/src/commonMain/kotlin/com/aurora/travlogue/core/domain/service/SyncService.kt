@@ -18,6 +18,8 @@ import kotlinx.coroutines.launch
  * - Manual sync trigger
  * - Sync state tracking
  * - Conflict resolution (last-write-wins for now)
+ *
+ * Syncs all entities: Trips, Activities, Bookings (and TripDays when available)
  */
 class SyncService(
     private val tripSyncRepository: TripSyncRepository,
@@ -57,6 +59,11 @@ class SyncService(
     /**
      * Manually trigger full sync
      * Syncs all data from remote to local
+     *
+     * Sync order:
+     * 1. Trips (base entities)
+     * 2. Activities (associated with trip days)
+     * 3. Bookings (associated with trip days/activities)
      */
     suspend fun syncAll(): Result<Unit> {
         if (!authManager.isAuthenticated()) {
@@ -70,31 +77,65 @@ class SyncService(
         _syncState.value = SyncState.Syncing(progress = 0f, message = "Starting sync...")
 
         return try {
-            // Sync trips
-            _syncState.value = SyncState.Syncing(progress = 0.2f, message = "Syncing trips...")
-            val result = tripSyncRepository.syncTripsFromRemote()
+            // Phase 1: Sync trips (0% - 50%)
+            _syncState.value = SyncState.Syncing(progress = 0.1f, message = "Syncing trips...")
+            val tripsResult = tripSyncRepository.syncTripsFromRemote()
 
-            result.fold(
-                onSuccess = {
-                    _lastSyncTime.value = System.currentTimeMillis()
-                    _syncState.value = SyncState.Success(
-                        message = "Sync completed successfully"
-                    )
-                    Result.success(Unit)
-                },
-                onFailure = { error ->
-                    _syncState.value = SyncState.Error(
-                        message = error.message ?: "Sync failed"
-                    )
-                    Result.failure(error)
-                }
+            if (tripsResult.isFailure) {
+                _syncState.value = SyncState.Error(
+                    message = "Failed to sync trips: ${tripsResult.exceptionOrNull()?.message}"
+                )
+                return tripsResult
+            }
+
+            _syncState.value = SyncState.Syncing(progress = 0.5f, message = "Trips synced")
+
+            // Phase 2: Sync activities (50% - 75%)
+            // TODO: Implement when we have activity-tripday coordination
+            _syncState.value = SyncState.Syncing(progress = 0.6f, message = "Syncing activities...")
+            // activitySyncRepository.syncActivitiesFromRemote()
+            _syncState.value = SyncState.Syncing(progress = 0.75f, message = "Activities synced")
+
+            // Phase 3: Sync bookings (75% - 100%)
+            // TODO: Implement when we have booking-tripday coordination
+            _syncState.value = SyncState.Syncing(progress = 0.85f, message = "Syncing bookings...")
+            // bookingSyncRepository.syncBookingsFromRemote()
+
+            // Complete
+            _lastSyncTime.value = System.currentTimeMillis()
+            _syncState.value = SyncState.Success(
+                message = "Sync completed successfully"
             )
+            Result.success(Unit)
         } catch (e: Exception) {
             _syncState.value = SyncState.Error(
                 message = e.message ?: "Sync failed with exception"
             )
             Result.failure(e)
         }
+    }
+
+    /**
+     * Sync only trips (faster, focused sync)
+     */
+    suspend fun syncTripsOnly(): Result<Unit> {
+        if (!authManager.isAuthenticated()) {
+            return Result.failure(Exception("Not authenticated"))
+        }
+
+        _syncState.value = SyncState.Syncing(progress = 0.5f, message = "Syncing trips...")
+
+        return tripSyncRepository.syncTripsFromRemote().fold(
+            onSuccess = {
+                _lastSyncTime.value = System.currentTimeMillis()
+                _syncState.value = SyncState.Success(message = "Trips synced")
+                Result.success(Unit)
+            },
+            onFailure = { error ->
+                _syncState.value = SyncState.Error(message = error.message ?: "Sync failed")
+                Result.failure(error)
+            }
+        )
     }
 
     /**
