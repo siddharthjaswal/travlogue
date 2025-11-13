@@ -7,7 +7,7 @@
 
 ---
 
-## 📊 Overall Progress: 80% Complete
+## 📊 Overall Progress: 85% Complete
 
 ### Milestone Overview
 
@@ -18,7 +18,8 @@
 | **Phase 3A** | ✅ Complete | 100% | Activity & Booking Sync |
 | **Phase 3B** | ✅ Complete | 100% | ID Mapping Infrastructure |
 | **Phase 3C** | ✅ Complete | 100% | Full Sync & Conflict Resolution |
-| **Phase 4** | ⏳ Pending | 0% | OAuth & UI Integration |
+| **Phase 4A** | ✅ Complete | 100% | ViewModel Integration with Sync |
+| **Phase 4B** | ⏳ Pending | 0% | OAuth UI Implementation |
 | **Phase 5** | ⏳ Pending | 0% | Background Sync & Polish |
 
 ---
@@ -170,27 +171,79 @@ isSynced(uuid, EntityType.TRIP) → Boolean
 
 ---
 
+### Phase 4A: ViewModel Integration with Sync (100% ✅)
+
+**Completed**: 2025-11-13
+**Commit**: `a701198`
+**Files**: 4 files modified, 163 insertions(+), 46 deletions(-)
+
+#### Deliverables
+- ✅ **HomeViewModel** updated to use TripSyncRepository + SyncService
+- ✅ **CreateTripViewModel** updated to use TripSyncRepository
+- ✅ **TripDetailViewModel** updated to use ActivitySyncRepository + BookingSyncRepository
+- ✅ **Koin DI** updated for all ViewModels with new dependencies
+- ✅ **Sync state tracking** in HomeViewModel (isSyncing, syncProgress, syncMessage)
+- ✅ **Pull-to-refresh support** via refreshTrips() method
+- ✅ **Automatic sync monitoring** on auth state changes
+
+**Key Features**:
+- All ViewModels now use sync repositories for offline-first operations
+- Automatic background sync when user authenticates
+- Visual sync indicators ready for UI implementation
+- Optimistic UI updates across all CRUD operations
+- HomeViewModel exposes syncState for real-time sync progress
+
+**Architecture**:
+```kotlin
+HomeViewModel(TripSyncRepository, SyncService)
+CreateTripViewModel(TripSyncRepository)
+TripDetailViewModel(TripRepository, ActivitySyncRepository, BookingSyncRepository, ...)
+```
+
+---
+
 ## ⏳ Pending Work
 
-### Phase 4: OAuth & UI Integration (0% ⏳)
+### Phase 4B: OAuth UI Implementation (0% ⏳)
 
-**Estimated Duration**: 2-3 weeks
+**Estimated Duration**: 1-2 weeks
 
-#### Tasks
+#### Current Status
+- ✅ GoogleAuthProvider interface defined
+- ✅ AndroidGoogleAuthProvider with helper methods (getSignInIntent, handleSignInResult)
+- ✅ IOSGoogleAuthProvider stub with implementation notes
+- ✅ Platform modules configured in Koin DI
+- ✅ AuthManager ready for OAuth integration
+
+#### Remaining Tasks
 - [ ] **Android Google Sign-In** Activity implementation
+  - Create SignInActivity that launches Google Sign-In intent
+  - Handle onActivityResult and send ID token to backend
+  - Integrate with AuthManager for token management
 - [ ] **iOS Google Sign-In** ViewController implementation
+  - Create SignInViewController using GIDSignIn SDK
+  - Handle sign-in completion and send ID token to backend
+  - Integrate with AuthManager for token management
 - [ ] **OAuth error handling** and edge cases
-- [ ] **Update ViewModels** to use sync repositories
-- [ ] **Add sync indicators** to UI (loading, success, error states)
-- [ ] **Pull-to-refresh** implementation
+- [ ] **UI sync indicators** (loading, success, error states)
 - [ ] **Offline indicator** in UI
 - [ ] **Manual testing** of auth flow end-to-end
 
 #### Deliverables
 - Working Google OAuth on Android & iOS
-- ViewModels using TripSyncRepository, ActivitySyncRepository, BookingSyncRepository
 - UI showing sync state with visual feedback
 - Comprehensive error handling
+
+#### Implementation Notes
+**Android**:
+- Use `AndroidGoogleAuthProvider.getSignInIntent()` to launch sign-in
+- Use `AndroidGoogleAuthProvider.handleSignInResult()` to process result
+- Send ID token to `/auth/google` endpoint via AuthManager
+
+**iOS**:
+- Implement native Swift code using GIDSignIn SDK
+- Call iOS GoogleAuthProvider from shared KMP code
+- Send ID token to `/auth/google` endpoint via AuthManager
 
 ---
 
@@ -224,18 +277,23 @@ isSynced(uuid, EntityType.TRIP) → Boolean
 - **Phase 2**: 1,828 lines (7 files)
 - **Phase 3A**: 558 lines (4 files)
 - **Phase 3B**: 381 lines (4 files)
-- **Total**: **5,122 lines** across **32 files**
+- **Phase 3C**: ~500 lines (TripDay entity + sync coordination)
+- **Phase 4A**: 163 insertions, 46 deletions (4 files)
+- **Total**: **5,785+ lines** across **36+ files**
 
 ### Commits
 1. `8c8400c` - Phase 1: API Integration Foundation
 2. `30c52c9` - Phase 2: Repository Layer & Offline-First Sync
 3. `e37581b` - Phase 3A: Activity & Booking Sync Repositories
 4. `f1e1d6b` - Phase 3B: ID Mapping Infrastructure
+5. `0829b23` - Phase 3C: TripDay entity and sync coordination
+6. `b8f3bef` - Phase 3C: Complete multi-entity sync
+7. `a701198` - Phase 4A: ViewModel integration with sync repositories
 
 ### Branch Status
 - **Branch**: `kmp-migration`
-- **Commits ahead**: 5
-- **Status**: Ready for continued development
+- **Commits ahead**: 12
+- **Status**: Ready for Phase 4B (OAuth UI implementation)
 
 ---
 
@@ -248,6 +306,8 @@ isSynced(uuid, EntityType.TRIP) → Boolean
 4. ✅ **Optimistic UI** with immediate local updates
 5. ✅ **Automatic token refresh** for seamless authentication
 6. ✅ **Platform-specific secure storage** (EncryptedPrefs/Keychain)
+7. ✅ **ViewModel integration** with sync repositories (Phase 4A)
+8. ✅ **Sync state tracking** ready for UI implementation
 
 ### Infrastructure
 - ✅ Production API live at https://api.travlogue.in
@@ -336,5 +396,5 @@ isSynced(uuid, EntityType.TRIP) → Boolean
 
 ---
 
-*Last Updated: 2025-11-13 after completing Phase 3C (Full Sync & Conflict Resolution)*
-*Next Update: After starting Phase 4 (OAuth & UI Integration)*
+*Last Updated: 2025-11-13 after completing Phase 4A (ViewModel Integration)*
+*Next Update: After implementing Phase 4B (OAuth UI)*
