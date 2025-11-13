@@ -9,6 +9,7 @@ import com.aurora.travlogue.core.data.remote.createHttpClient
 import com.aurora.travlogue.core.data.repository.ActivitySyncRepository
 import com.aurora.travlogue.core.data.repository.BookingSyncRepository
 import com.aurora.travlogue.core.data.repository.IdMappingRepository
+import com.aurora.travlogue.core.data.repository.TripDaySyncRepository
 import com.aurora.travlogue.core.data.repository.TripRepository
 import com.aurora.travlogue.core.data.repository.TripSyncRepository
 import com.aurora.travlogue.core.domain.service.BookingSyncService
@@ -58,6 +59,7 @@ val sharedModule = module {
 
     // Sync Repositories (NEW - preferred for all operations)
     single { TripSyncRepository(get(), get(), get(), get()) } // Trip sync (local + remote + ID mapping)
+    single { TripDaySyncRepository(get(), get(), get(), get()) } // TripDay sync (bridges trips with days)
     single { ActivitySyncRepository(get(), get(), get(), get()) } // Activity sync (now with ID mapping)
     single { BookingSyncRepository(get(), get(), get(), get()) } // Booking sync (now with ID mapping)
 
