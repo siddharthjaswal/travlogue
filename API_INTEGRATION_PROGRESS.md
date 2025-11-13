@@ -7,7 +7,7 @@
 
 ---
 
-## 📊 Overall Progress: 95% Complete
+## 📊 Overall Progress: 97% Complete
 
 ### Milestone Overview
 
@@ -21,7 +21,8 @@
 | **Phase 4A** | ✅ Complete | 100% | ViewModel Integration with Sync |
 | **Phase 4B** | ✅ Complete | 100% | OAuth UI Implementation (Android) |
 | **Phase 4C** | ✅ Complete | 100% | Auth Navigation & Sync Indicators |
-| **Phase 5** | ⏳ Pending | 0% | Background Sync & Polish |
+| **Phase 5A** | ✅ Complete | 100% | Background Sync Infrastructure (Android) |
+| **Phase 5B** | ⏳ Pending | 0% | Testing & Final Polish |
 
 ---
 
@@ -301,6 +302,83 @@ val startDestination = when (authState) {
 
 ---
 
+### Phase 5A: Background Sync Infrastructure - Android (100% ✅)
+
+**Completed**: 2025-11-13
+**Commit**: `0cbc7ef`
+**Files**: 7 files changed, 395 insertions(+)
+
+#### Deliverables
+- ✅ **WorkManager** integration for periodic background sync
+- ✅ **NetworkConnectivityMonitor** for real-time network state tracking
+- ✅ **SyncWorker** with smart retry logic
+- ✅ **SyncScheduler** with battery and data optimization
+- ✅ **Android DI module** for sync infrastructure
+- ✅ **Automatic sync scheduling** on app start
+
+**Background Sync Features**:
+- Periodic sync every 6 hours
+- Network connectivity validation before sync
+- Battery optimization: requires battery not low
+- Smart retry logic for network failures (max 3 retries)
+- WiFi-only option for data savings (configurable)
+- Charging-only option for battery savings (configurable)
+- Integration with existing SyncService
+
+**Network Monitoring**:
+```kotlin
+class NetworkConnectivityMonitor {
+    val isConnected: Flow<Boolean> // Real-time connectivity state
+    fun isCurrentlyConnected(): Boolean
+    fun isConnectedViaWifi(): Boolean
+    fun isConnectedViaCellular(): Boolean
+}
+```
+
+**Sync Worker**:
+```kotlin
+class SyncWorker : CoroutineWorker {
+    - Checks network before sync
+    - Calls SyncService.syncAll()
+    - Handles failures with retry logic
+    - Network errors → retry (max 3x)
+    - Other errors → fail permanently
+    - Outputs sync status and timestamp
+}
+```
+
+**Sync Scheduler**:
+```kotlin
+class SyncScheduler {
+    fun schedulePeriodicSync(
+        intervalHours: Long = 6,
+        requireWifi: Boolean = false,
+        requireCharging: Boolean = false
+    )
+    fun triggerImmediateSync() // User-initiated
+    fun cancelPeriodicSync()
+    fun getSyncWorkStatus(): Flow<WorkInfo?>
+}
+```
+
+**Battery & Data Optimization**:
+- `setRequiresBatteryNotLow(true)` - Skip sync when battery is low
+- `setRequiredNetworkType(CONNECTED)` - Sync on any network (default)
+- `setRequiredNetworkType(UNMETERED)` - WiFi-only sync (optional)
+- `setRequiresCharging(true)` - Sync only when charging (optional)
+- Flex interval: 15 minutes for system optimization
+
+**File Structure**:
+- `app/core/sync/NetworkConnectivityMonitor.kt` - Network state tracking (NEW)
+- `app/core/sync/SyncWorker.kt` - Background sync worker (NEW)
+- `app/core/sync/SyncScheduler.kt` - WorkManager scheduling (NEW)
+- `app/di/AndroidAppModule.kt` - Android DI module (NEW)
+- `app/App.kt` - Initialize sync on app start (UPDATED)
+- `gradle/libs.versions.toml` - WorkManager dependencies (UPDATED)
+- `app/build.gradle.kts` - WorkManager dependencies (UPDATED)
+
+---
+
 ## ⏳ Pending Work
 
 ### Phase 4D: iOS OAuth Implementation (0% ⏳)
@@ -338,15 +416,23 @@ val startDestination = when (authState) {
 
 ---
 
-### Phase 5: Background Sync & Polish (0% ⏳)
+### Phase 5B: Testing & Final Polish (0% ⏳)
 
 **Estimated Duration**: 1-2 weeks
 
-#### Tasks
-- [ ] **WorkManager** (Android) periodic background sync
+#### Remaining Tasks
+
+**Android Background Sync** ✅ Complete (Phase 5A)
+- [x] WorkManager periodic background sync
+- [x] Network connectivity monitoring (ConnectivityManager)
+- [x] Battery/data optimization constraints
+- [x] Smart retry logic
+- [x] Automatic scheduling on app start
+
+**iOS Background Sync** (Pending iOS team)
 - [ ] **BackgroundTasks** (iOS) periodic background sync
-- [ ] **Network connectivity monitoring** (ConnectivityManager/NWPathMonitor)
-- [ ] **Battery/data optimization** respect system restrictions
+- [ ] **NWPathMonitor** for iOS network monitoring
+- [ ] **iOS battery/data optimization** respect system restrictions
 - [ ] **Configurable sync interval** (user preference)
 - [ ] **Unit tests** for sync repositories
 - [ ] **Integration tests** for sync flows
@@ -372,7 +458,8 @@ val startDestination = when (authState) {
 - **Phase 4A**: 163 insertions, 46 deletions (4 files)
 - **Phase 4B**: 283 insertions, 16 deletions (5 files)
 - **Phase 4C**: 588 insertions, 16 deletions (4 files + 1 doc)
-- **Total**: **6,656+ lines** across **45+ files**
+- **Phase 5A**: 395 insertions, 1 deletion (7 files)
+- **Total**: **7,051+ lines** across **52+ files**
 
 ### Commits
 1. `8c8400c` - Phase 1: API Integration Foundation
@@ -386,11 +473,13 @@ val startDestination = when (authState) {
 9. `0b68f89` - Phase 4B: Android Google Sign-In implementation
 10. `67d79a0` - Phase 4B: Update progress tracker
 11. `4a56bf5` - Phase 4C: Auth navigation, sync indicators, iOS guide
+12. `b37b6c6` - Phase 4C: Update progress tracker
+13. `0cbc7ef` - Phase 5A: Background sync infrastructure (Android)
 
 ### Branch Status
 - **Branch**: `kmp-migration`
-- **Commits ahead**: 17
-- **Status**: Ready for Phase 4D (iOS native OAuth implementation) & Phase 5 (Background sync)
+- **Commits ahead**: 18
+- **Status**: Ready for Phase 4D (iOS OAuth) & Phase 5B (Testing & Polish)
 
 ---
 
@@ -403,8 +492,12 @@ val startDestination = when (authState) {
 4. ✅ **Optimistic UI** with immediate local updates
 5. ✅ **Automatic token refresh** for seamless authentication
 6. ✅ **Platform-specific secure storage** (EncryptedPrefs/Keychain)
-7. ✅ **ViewModel integration** with sync repositories (Phase 4A)
-8. ✅ **Sync state tracking** ready for UI implementation
+7. ✅ **ViewModel integration** with sync repositories
+8. ✅ **Background sync infrastructure** with WorkManager (Android)
+9. ✅ **Network-aware sync** with connectivity monitoring
+10. ✅ **Battery/data optimization** for responsible background operations
+11. ✅ **Complete OAuth flow** with Google Sign-In (Android)
+12. ✅ **Auth-aware navigation** with sync indicators in UI
 
 ### Infrastructure
 - ✅ Production API live at https://api.travlogue.in
