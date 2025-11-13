@@ -137,6 +137,10 @@ private fun DomainActivityType.toBackendType(): com.aurora.travlogue.core.data.r
         DomainActivityType.ENTERTAINMENT -> com.aurora.travlogue.core.data.remote.dto.ActivityType.ENTERTAINMENT
         DomainActivityType.SHOPPING -> com.aurora.travlogue.core.data.remote.dto.ActivityType.SHOPPING
         DomainActivityType.RELAXATION -> com.aurora.travlogue.core.data.remote.dto.ActivityType.RELAXATION
+        DomainActivityType.ATTRACTION -> com.aurora.travlogue.core.data.remote.dto.ActivityType.SIGHTSEEING
+        DomainActivityType.FOOD -> com.aurora.travlogue.core.data.remote.dto.ActivityType.DINING
+        DomainActivityType.BOOKING -> com.aurora.travlogue.core.data.remote.dto.ActivityType.ACCOMMODATION
+        DomainActivityType.TRANSIT -> com.aurora.travlogue.core.data.remote.dto.ActivityType.TRANSPORTATION
         DomainActivityType.OTHER -> com.aurora.travlogue.core.data.remote.dto.ActivityType.OTHER
     }
 }

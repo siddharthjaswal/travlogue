@@ -23,6 +23,11 @@ enum class TimeSlot {
 }
 
 enum class ActivityType {
+    SIGHTSEEING,
+    DINING,
+    ENTERTAINMENT,
+    SHOPPING,
+    RELAXATION,
     ATTRACTION,
     FOOD,
     BOOKING,

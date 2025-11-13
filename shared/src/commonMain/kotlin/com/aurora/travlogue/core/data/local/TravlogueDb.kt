@@ -11,9 +11,11 @@ class TravlogueDb(driverFactory: DatabaseDriverFactory) {
 
     // Query accessors
     val tripQueries get() = database.tripQueries
+    val tripDayQueries get() = database.tripDayQueries
     val locationQueries get() = database.locationQueries
     val activityQueries get() = database.activityQueries
     val bookingQueries get() = database.bookingQueries
     val gapQueries get() = database.gapQueries
     val transitOptionQueries get() = database.transitOptionQueries
+    val idMappingQueries get() = database.idMappingQueries
 }

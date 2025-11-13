@@ -42,6 +42,7 @@ firebaseConfigKtx = "22.1.0"
 mapsCompose = "6.12.1"
 places = "5.0.0"
 playServicesMaps = "19.2.0"
+playServicesAuth = "21.3.0"
 roomVersion = "2.8.2"
 mockito = "5.20.0"
 gson = "2.13.2"
@@ -56,6 +57,7 @@ archCoreTesting = "2.2.0"
 robolectric = "4.14.1"
 workManager = "2.10.0"
 datastore = "1.1.1"
+androidxSecurity = "1.1.0-alpha06"
 
 [libraries]
 
@@ -95,6 +97,9 @@ androidx-work-testing = { group = "androidx.work", name = "work-testing", versio
 #DataStore
 androidx-datastore-preferences = { group = "androidx.datastore", name = "datastore-preferences", version.ref = "datastore" }
 
+#Security
+androidx-security-crypto = { group = "androidx.security", name = "security-crypto", version.ref = "androidxSecurity" }
+
 #Hilt
 androidx-hilt-navigation-compose = { group = "androidx.hilt", name = "hilt-navigation-compose", version.ref = "hiltExt" }
 hilt-android = { group = "com.google.dagger", name = "hilt-android", version.ref = "hilt" }
@@ -130,6 +135,7 @@ android-firebase-analytics = { group = "com.google.firebase", name = "firebase-a
 maps-compose = { module = "com.google.maps.android:maps-compose", version.ref = "mapsCompose" }
 places = { module = "com.google.android.libraries.places:places", version.ref = "places" }
 play-services-maps = { module = "com.google.android.gms:play-services-maps", version.ref = "playServicesMaps" }
+play-services-auth = { module = "com.google.android.gms:play-services-auth", version.ref = "playServicesAuth" }
 
 #Room
 androidx-room-runtime = { group = "androidx.room", name = "room-runtime", version.ref = "roomVersion" }
@@ -179,6 +185,7 @@ ktor-client-cio = { group = "io.ktor", name = "ktor-client-cio", version.ref = "
 ktor-client-content-negotiation = { group = "io.ktor", name = "ktor-client-content-negotiation", version.ref = "ktor" }
 ktor-client-serialization = { group = "io.ktor", name = "ktor-serialization-kotlinx-json", version.ref = "ktor" }
 ktor-client-logging = { group = "io.ktor", name = "ktor-client-logging", version.ref = "ktor" }
+ktor-client-auth = { group = "io.ktor", name = "ktor-client-auth", version.ref = "ktor" }
 
 #Koin
 koin-core = { group = "io.insert-koin", name = "koin-core", version.ref = "koin" }

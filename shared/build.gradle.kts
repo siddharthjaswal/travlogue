@@ -59,6 +59,7 @@ kotlin {
             implementation(libs.ktor.client.content.negotiation)
             implementation(libs.ktor.client.serialization)
             implementation(libs.ktor.client.logging)
+            implementation(libs.ktor.client.auth)
 
             // Logging
             implementation(libs.kermit)
@@ -82,6 +83,8 @@ kotlin {
             implementation(libs.sqldelight.android)
             implementation(libs.ktor.client.okhttp)
             implementation(libs.koin.android)
+            implementation(libs.play.services.auth)
+            implementation(libs.androidx.security.crypto)
         }
 
         // iOS Main
