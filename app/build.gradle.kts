@@ -28,11 +28,18 @@ android {
         // Google OAuth Client ID
         // TODO: Get from google-services.json or set via gradle properties
         buildConfigField("String", "GOOGLE_OAUTH_CLIENT_ID", "\"YOUR_GOOGLE_CLIENT_ID\"")
+
+        // API Configuration
+        buildConfigField("String", "API_BASE_URL", "\"https://api.travlogue.in\"")
+        buildConfigField("String", "API_ENVIRONMENT", "\"production\"")
     }
 
     buildTypes {
         debug {
             isDebuggable = true
+            // Override API URL for development (localhost via Android emulator)
+            buildConfigField("String", "API_BASE_URL", "\"http://10.0.2.2:8000\"")
+            buildConfigField("String", "API_ENVIRONMENT", "\"development\"")
         }
         release {
             isMinifyEnabled = true
@@ -41,6 +48,7 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
+            // Production API URL (already set in defaultConfig)
         }
     }
     compileOptions {
@@ -167,6 +175,9 @@ dependencies {
 
     // WorkManager
     implementation(libs.androidx.work.runtime.ktx)
+
+    // DataStore
+    implementation(libs.androidx.datastore.preferences)
 
     // Firebase
     implementation(platform(libs.android.firebase.bom))

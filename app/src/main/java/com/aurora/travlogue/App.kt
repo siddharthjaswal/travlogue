@@ -1,6 +1,8 @@
 package com.aurora.travlogue
 
 import android.app.Application
+import androidx.lifecycle.lifecycleScope
+import com.aurora.travlogue.core.preferences.AppPreferences
 import com.aurora.travlogue.core.sync.SyncScheduler
 import com.aurora.travlogue.di.androidAppModule
 import com.aurora.travlogue.di.platformModule
@@ -11,6 +13,10 @@ import com.google.firebase.remoteconfig.FirebaseRemoteConfig
 import com.google.firebase.remoteconfig.remoteConfig
 import com.google.firebase.remoteconfig.remoteConfigSettings
 import dagger.hilt.android.HiltAndroidApp
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.launch
 import org.koin.android.ext.android.inject
 import org.koin.android.ext.koin.androidContext
 import org.koin.android.ext.koin.androidLogger
@@ -22,6 +28,10 @@ import timber.log.Timber
 class App : Application() {
 
     private val syncScheduler: SyncScheduler by inject()
+    private val appPreferences: AppPreferences by inject()
+
+    // Application scope for coroutines
+    private val applicationScope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
 
     override fun onCreate() {
         super.onCreate()
@@ -48,17 +58,29 @@ class App : Application() {
     }
 
     /**
-     * Schedule periodic background sync
-     * Runs every 6 hours when network is available and battery is not low
+     * Schedule periodic background sync using user preferences
+     * Default: 6 hours when network is available and battery is not low
      */
     private fun initializeBackgroundSync() {
         Timber.d("Initializing background sync")
-        syncScheduler.schedulePeriodicSync(
-            intervalHours = 6,
-            requireWifi = false,    // Sync on any network
-            requireCharging = false  // Sync even when not charging
-        )
-        Timber.i("Background sync initialized successfully")
+
+        applicationScope.launch {
+            // Read preferences
+            val intervalHours = appPreferences.getSyncIntervalHours()
+            val requireWifi = appPreferences.getRequireWifiForSync()
+            val requireCharging = appPreferences.getRequireChargingForSync()
+
+            Timber.d("Sync config: interval=${intervalHours}h, wifi=$requireWifi, charging=$requireCharging")
+
+            // Schedule sync with user preferences
+            syncScheduler.schedulePeriodicSync(
+                intervalHours = intervalHours,
+                requireWifi = requireWifi,
+                requireCharging = requireCharging
+            )
+
+            Timber.i("Background sync initialized successfully")
+        }
     }
 
     private fun initializePlacesApi() {
