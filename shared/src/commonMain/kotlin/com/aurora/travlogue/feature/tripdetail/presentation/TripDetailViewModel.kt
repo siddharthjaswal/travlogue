@@ -2,6 +2,8 @@ package com.aurora.travlogue.feature.tripdetail.presentation
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.aurora.travlogue.core.data.repository.ActivitySyncRepository
+import com.aurora.travlogue.core.data.repository.BookingSyncRepository
 import com.aurora.travlogue.core.data.repository.TripRepository
 import com.aurora.travlogue.core.domain.model.*
 import com.aurora.travlogue.core.domain.service.BookingSyncService
@@ -23,10 +25,14 @@ import kotlinx.datetime.plus
 /**
  * TripDetailViewModel - KMP version
  * Manages trip detail screen state and business logic
+ *
+ * Updated to use sync repositories for Activity and Booking operations
  */
 class TripDetailViewModel(
     private val tripId: String,
     private val tripRepository: TripRepository,
+    private val activitySyncRepository: ActivitySyncRepository,
+    private val bookingSyncRepository: BookingSyncRepository,
     private val gapDetectionService: GapDetectionService,
     private val bookingSyncService: BookingSyncService
 ) : ViewModel() {
@@ -214,8 +220,16 @@ class TripDetailViewModel(
                     startTime = startTime,
                     endTime = endTime
                 )
-                tripRepository.insertActivity(activity)
-                _uiEvents.emit(TripDetailUiEvent.ShowSnackbar("Activity added successfully"))
+                // Use ActivitySyncRepository for offline-first sync
+                val result = activitySyncRepository.createActivity(activity, tripDayId = null)
+                result.fold(
+                    onSuccess = {
+                        _uiEvents.emit(TripDetailUiEvent.ShowSnackbar("Activity added successfully"))
+                    },
+                    onFailure = { error ->
+                        _uiEvents.emit(TripDetailUiEvent.ShowError(error.message ?: "Failed to add activity"))
+                    }
+                )
             } catch (e: Exception) {
                 _uiEvents.emit(TripDetailUiEvent.ShowError(e.message ?: "Failed to add activity"))
             }
@@ -225,8 +239,16 @@ class TripDetailViewModel(
     fun updateActivity(activity: Activity) {
         viewModelScope.launch {
             try {
-                tripRepository.updateActivity(activity)
-                _uiEvents.emit(TripDetailUiEvent.ShowSnackbar("Activity updated successfully"))
+                // Use ActivitySyncRepository for offline-first sync
+                val result = activitySyncRepository.updateActivity(activity)
+                result.fold(
+                    onSuccess = {
+                        _uiEvents.emit(TripDetailUiEvent.ShowSnackbar("Activity updated successfully"))
+                    },
+                    onFailure = { error ->
+                        _uiEvents.emit(TripDetailUiEvent.ShowError(error.message ?: "Failed to update activity"))
+                    }
+                )
             } catch (e: Exception) {
                 _uiEvents.emit(TripDetailUiEvent.ShowError(e.message ?: "Failed to update activity"))
             }
@@ -236,8 +258,16 @@ class TripDetailViewModel(
     fun deleteActivity(activityId: String) {
         viewModelScope.launch {
             try {
-                tripRepository.deleteActivityById(activityId)
-                _uiEvents.emit(TripDetailUiEvent.ShowSnackbar("Activity deleted successfully"))
+                // Use ActivitySyncRepository for offline-first sync
+                val result = activitySyncRepository.deleteActivity(activityId)
+                result.fold(
+                    onSuccess = {
+                        _uiEvents.emit(TripDetailUiEvent.ShowSnackbar("Activity deleted successfully"))
+                    },
+                    onFailure = { error ->
+                        _uiEvents.emit(TripDetailUiEvent.ShowError(error.message ?: "Failed to delete activity"))
+                    }
+                )
             } catch (e: Exception) {
                 _uiEvents.emit(TripDetailUiEvent.ShowError(e.message ?: "Failed to delete activity"))
             }
@@ -331,16 +361,24 @@ class TripDetailViewModel(
                     notes = notes,
                     imageUri = null
                 )
-                tripRepository.insertBooking(booking)
 
-                // Sync booking times with location arrival/departure times
-                val updatedLocations = bookingSyncService.syncBookingsWithLocations(
-                    _uiState.value.locations,
-                    _uiState.value.bookings + booking
+                // Use BookingSyncRepository for offline-first sync
+                val result = bookingSyncRepository.createBooking(booking, tripDayId = null, activityId = null)
+                result.fold(
+                    onSuccess = { createdBooking ->
+                        // Sync booking times with location arrival/departure times
+                        val updatedLocations = bookingSyncService.syncBookingsWithLocations(
+                            _uiState.value.locations,
+                            _uiState.value.bookings + createdBooking
+                        )
+                        updatedLocations.forEach { tripRepository.updateLocation(it) }
+
+                        _uiEvents.emit(TripDetailUiEvent.ShowSnackbar("Booking added successfully"))
+                    },
+                    onFailure = { error ->
+                        _uiEvents.emit(TripDetailUiEvent.ShowError(error.message ?: "Failed to add booking"))
+                    }
                 )
-                updatedLocations.forEach { tripRepository.updateLocation(it) }
-
-                _uiEvents.emit(TripDetailUiEvent.ShowSnackbar("Booking added successfully"))
             } catch (e: Exception) {
                 _uiEvents.emit(TripDetailUiEvent.ShowError(e.message ?: "Failed to add booking"))
             }
@@ -350,16 +388,23 @@ class TripDetailViewModel(
     fun updateBooking(booking: Booking) {
         viewModelScope.launch {
             try {
-                tripRepository.updateBooking(booking)
+                // Use BookingSyncRepository for offline-first sync
+                val result = bookingSyncRepository.updateBooking(booking)
+                result.fold(
+                    onSuccess = {
+                        // Sync booking times with location arrival/departure times
+                        val updatedLocations = bookingSyncService.syncBookingsWithLocations(
+                            _uiState.value.locations,
+                            _uiState.value.bookings
+                        )
+                        updatedLocations.forEach { tripRepository.updateLocation(it) }
 
-                // Sync booking times with location arrival/departure times
-                val updatedLocations = bookingSyncService.syncBookingsWithLocations(
-                    _uiState.value.locations,
-                    _uiState.value.bookings
+                        _uiEvents.emit(TripDetailUiEvent.ShowSnackbar("Booking updated successfully"))
+                    },
+                    onFailure = { error ->
+                        _uiEvents.emit(TripDetailUiEvent.ShowError(error.message ?: "Failed to update booking"))
+                    }
                 )
-                updatedLocations.forEach { tripRepository.updateLocation(it) }
-
-                _uiEvents.emit(TripDetailUiEvent.ShowSnackbar("Booking updated successfully"))
             } catch (e: Exception) {
                 _uiEvents.emit(TripDetailUiEvent.ShowError(e.message ?: "Failed to update booking"))
             }
@@ -369,17 +414,24 @@ class TripDetailViewModel(
     fun deleteBooking(booking: Booking) {
         viewModelScope.launch {
             try {
-                tripRepository.deleteBooking(booking)
+                // Use BookingSyncRepository for offline-first sync
+                val result = bookingSyncRepository.deleteBooking(booking.id)
+                result.fold(
+                    onSuccess = {
+                        // Sync booking times with location arrival/departure times
+                        // This will clear arrival/departure times if no other bookings reference the location
+                        val updatedLocations = bookingSyncService.syncBookingsWithLocations(
+                            _uiState.value.locations,
+                            _uiState.value.bookings.filter { it.id != booking.id }
+                        )
+                        updatedLocations.forEach { tripRepository.updateLocation(it) }
 
-                // Sync booking times with location arrival/departure times
-                // This will clear arrival/departure times if no other bookings reference the location
-                val updatedLocations = bookingSyncService.syncBookingsWithLocations(
-                    _uiState.value.locations,
-                    _uiState.value.bookings.filter { it.id != booking.id }
+                        _uiEvents.emit(TripDetailUiEvent.ShowSnackbar("Booking deleted successfully"))
+                    },
+                    onFailure = { error ->
+                        _uiEvents.emit(TripDetailUiEvent.ShowError(error.message ?: "Failed to delete booking"))
+                    }
                 )
-                updatedLocations.forEach { tripRepository.updateLocation(it) }
-
-                _uiEvents.emit(TripDetailUiEvent.ShowSnackbar("Booking deleted successfully"))
             } catch (e: Exception) {
                 _uiEvents.emit(TripDetailUiEvent.ShowError(e.message ?: "Failed to delete booking"))
             }

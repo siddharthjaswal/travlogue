@@ -76,8 +76,8 @@ val sharedModule = module {
     singleOf(::DetectTripGapsUseCase)
 
     // ViewModels
-    viewModelOf(::HomeViewModel)
-    viewModelOf(::CreateTripViewModel)
+    single { HomeViewModel(get(), get()) } // Updated to use TripSyncRepository + SyncService
+    single { CreateTripViewModel(get()) } // Updated to use TripSyncRepository
     viewModelOf(::MockViewModel)
 
     // Factory ViewModel (requires tripId parameter)
@@ -85,6 +85,8 @@ val sharedModule = module {
         TripDetailViewModel(
             tripId = tripId,
             tripRepository = get(),
+            activitySyncRepository = get(),
+            bookingSyncRepository = get(),
             gapDetectionService = get(),
             bookingSyncService = get()
         )

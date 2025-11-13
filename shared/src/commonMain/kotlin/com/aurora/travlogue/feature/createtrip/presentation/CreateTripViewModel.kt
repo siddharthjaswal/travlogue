@@ -3,7 +3,7 @@ package com.aurora.travlogue.feature.createtrip.presentation
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.aurora.travlogue.core.common.DateTimeUtils.toIsoString
-import com.aurora.travlogue.core.data.repository.TripRepository
+import com.aurora.travlogue.core.data.repository.TripSyncRepository
 import com.aurora.travlogue.core.domain.model.DateType
 import com.aurora.travlogue.core.domain.model.Trip
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -18,9 +18,11 @@ import kotlinx.datetime.LocalDate
 /**
  * CreateTripViewModel - KMP version
  * Manages the create trip screen state
+ *
+ * Updated to use TripSyncRepository for offline-first sync
  */
 class CreateTripViewModel(
-    private val tripRepository: TripRepository
+    private val tripSyncRepository: TripSyncRepository
 ) : ViewModel() {
 
     // UI State
@@ -112,10 +114,18 @@ class CreateTripViewModel(
                         state.flexibleDuration.toIntOrNull() else null
                 )
 
-                tripRepository.insertTrip(trip)
+                // Use TripSyncRepository for offline-first creation
+                val result = tripSyncRepository.createTrip(trip)
 
-                _uiState.update { it.copy(isLoading = false, isSuccess = true) }
-                _uiEvents.emit(CreateTripUiEvent.TripCreatedSuccess)
+                result.fold(
+                    onSuccess = {
+                        _uiState.update { it.copy(isLoading = false, isSuccess = true) }
+                        _uiEvents.emit(CreateTripUiEvent.TripCreatedSuccess)
+                    },
+                    onFailure = { error ->
+                        throw error
+                    }
+                )
 
             } catch (e: Exception) {
                 _uiState.update {
