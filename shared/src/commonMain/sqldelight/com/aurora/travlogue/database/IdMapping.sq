@@ -83,14 +83,11 @@ WHERE backend_id = ? AND entity_type = ?;
 getAllLocalOnlyIds:
 SELECT DISTINCT local_id
 FROM (
-    -- Get all trip IDs
-    SELECT id as local_id, 'trip' as entity_type FROM trips
+    SELECT id AS local_id, 'trip' AS entity_type FROM trips
     UNION ALL
-    -- Get all activity IDs
-    SELECT id as local_id, 'activity' as entity_type FROM activities
+    SELECT id AS local_id, 'activity' AS entity_type FROM activities
     UNION ALL
-    -- Get all booking IDs
-    SELECT id as local_id, 'booking' as entity_type FROM bookings
+    SELECT id AS local_id, 'booking' AS entity_type FROM bookings
 ) AS all_entities
 WHERE NOT EXISTS (
     SELECT 1
@@ -101,7 +98,7 @@ WHERE NOT EXISTS (
 
 -- Count mappings by entity type
 countMappingsByType:
-SELECT entity_type, COUNT(*) as count
+SELECT entity_type, COUNT(*) AS count
 FROM id_mappings
 GROUP BY entity_type;
 
