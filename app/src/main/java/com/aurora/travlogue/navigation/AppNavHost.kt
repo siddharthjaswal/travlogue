@@ -9,6 +9,7 @@ import androidx.navigation.toRoute
 import com.aurora.travlogue.feature.createtrip.presentation.CreateTripScreen
 import com.aurora.travlogue.feature.home.presentation.HomeScreen
 import com.aurora.travlogue.feature.mock.presentation.MockScreen
+import com.aurora.travlogue.feature.signin.presentation.SignInScreen
 import com.aurora.travlogue.feature.tripdetail.presentation.TripDetailScreen
 
 /**
@@ -69,6 +70,24 @@ fun AppNavHost(
                 },
                 onNavigateToTrip = { tripId ->
                     navController.navigate(TripDetail(tripId = tripId))
+                }
+            )
+        }
+
+        // Sign in screen - Google OAuth authentication
+        composable<SignIn> {
+            SignInScreen(
+                onSignInSuccess = {
+                    // Navigate to home and clear back stack
+                    navController.navigate(Home) {
+                        popUpTo(navController.graph.findStartDestination().id) {
+                            inclusive = true
+                        }
+                        launchSingleTop = true
+                    }
+                },
+                onNavigateBack = {
+                    navController.navigateUp()
                 }
             )
         }

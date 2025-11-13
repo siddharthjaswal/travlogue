@@ -23,7 +23,8 @@ import kotlin.coroutines.resume
  */
 class AndroidGoogleAuthProvider(
     private val context: Context,
-    private val serverClientId: String
+    private val serverClientId: String,
+    private val apiClient: com.aurora.travlogue.core.data.remote.LogbookApiClient
 ) : GoogleAuthProvider {
 
     private val googleSignInClient: GoogleSignInClient by lazy {
@@ -36,20 +37,27 @@ class AndroidGoogleAuthProvider(
         GoogleSignIn.getClient(context, gso)
     }
 
+    /**
+     * Sign in with Google
+     *
+     * This should be called AFTER getting the Google ID token from handleSignInResult()
+     * It sends the ID token to the backend for validation and JWT token exchange
+     */
     override suspend fun signIn(): Result<AuthUserResponse> {
-        // Note: This is a simplified implementation
-        // In a real app, you would:
-        // 1. Launch the Google Sign-In intent from an Activity
-        // 2. Get the ID token from the GoogleSignInAccount
-        // 3. Send the ID token to your backend
-        // 4. Backend validates the token with Google and returns JWT tokens
+        // Get the last signed-in account (should have ID token from recent sign-in)
+        val account = GoogleSignIn.getLastSignedInAccount(context)
+        val idToken = account?.idToken
 
-        return Result.failure(
-            NotImplementedError(
-                "Google Sign-In requires Activity context and intent handling. " +
-                "Implement this in your Android Activity using googleSignInClient.signInIntent"
+        if (idToken == null) {
+            return Result.failure(
+                IllegalStateException(
+                    "No ID token available. Call getSignInIntent() and handleSignInResult() first"
+                )
             )
-        )
+        }
+
+        // Send ID token to backend for validation and JWT exchange
+        return apiClient.authenticateWithGoogle(idToken)
     }
 
     /**
@@ -88,13 +96,27 @@ class AndroidGoogleAuthProvider(
 
     /**
      * Get the sign-in intent to launch from an Activity
-     * Call this from your Activity and start the intent with startActivityForResult
+     * Call this from your Activity/Composable and start the intent with ActivityResultLauncher
+     *
+     * Usage in Compose:
+     * ```
+     * val launcher = rememberLauncherForActivityResult(StartActivityForResult()) { result ->
+     *     // Handle result with handleSignInResult()
+     * }
+     * launcher.launch(googleAuthProvider.getSignInIntent())
+     * ```
      */
     fun getSignInIntent() = googleSignInClient.signInIntent
 
     /**
      * Handle sign-in result from Activity
-     * Call this from your Activity's onActivityResult
+     * Call this from your ActivityResultLauncher callback
+     *
+     * This extracts the GoogleSignInAccount from the intent result.
+     * After this, call signIn() on AuthManager to send the ID token to the backend.
+     *
+     * @param data The intent data from ActivityResult
+     * @return Result containing GoogleSignInAccount with ID token, or error
      */
     suspend fun handleSignInResult(data: android.content.Intent?): Result<GoogleSignInAccount> {
         return try {
@@ -102,7 +124,7 @@ class AndroidGoogleAuthProvider(
             val account = task.getResult(ApiException::class.java)
             Result.success(account)
         } catch (e: ApiException) {
-            Result.failure(e)
+            Result.failure(Exception("Google Sign-In failed: ${e.statusCode} - ${e.message}"))
         }
     }
 }

@@ -20,7 +20,8 @@ actual val platformModule = module {
     single<GoogleAuthProvider> {
         AndroidGoogleAuthProvider(
             context = get(),
-            serverClientId = "YOUR_GOOGLE_CLIENT_ID" // TODO: Move to BuildConfig or settings
+            serverClientId = "YOUR_GOOGLE_CLIENT_ID", // TODO: Move to BuildConfig or settings
+            apiClient = get() // LogbookApiClient for backend auth
         )
     }
 }

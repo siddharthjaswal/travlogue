@@ -54,3 +54,11 @@ data class TripPlan(
  */
 @Serializable
 object Mock : AppDestination
+
+/**
+ * Sign in screen destination
+ * Shows Google Sign-In UI for user authentication
+ * No arguments required
+ */
+@Serializable
+object SignIn : AppDestination
