@@ -1,0 +1,130 @@
+-- TripDay table for storing trip day information
+-- Bridges backend TripDay concept with local Location entity
+
+CREATE TABLE IF NOT EXISTS trip_days (
+    id TEXT NOT NULL PRIMARY KEY,
+    trip_id TEXT NOT NULL,
+    date TEXT NOT NULL,
+    day_number INTEGER NOT NULL,
+    day_type TEXT NOT NULL DEFAULT 'SIGHTSEEING',
+    title TEXT,
+    notes TEXT,
+    country TEXT,
+    city TEXT,
+    transit_details TEXT, -- JSON string of List<TransitDetail>
+    location_id TEXT, -- Link to local Location (optional)
+    created_at TEXT,
+    updated_at TEXT,
+    FOREIGN KEY (trip_id) REFERENCES trips(id) ON DELETE CASCADE,
+    FOREIGN KEY (location_id) REFERENCES locations(id) ON DELETE SET NULL
+);
+
+-- Index for fast trip-based queries
+CREATE INDEX IF NOT EXISTS idx_trip_days_trip_id
+ON trip_days(trip_id);
+
+-- Index for fast date queries
+CREATE INDEX IF NOT EXISTS idx_trip_days_date
+ON trip_days(date);
+
+-- Index for location lookups
+CREATE INDEX IF NOT EXISTS idx_trip_days_location_id
+ON trip_days(location_id);
+
+-- Unique constraint: one day number per trip per date
+CREATE UNIQUE INDEX IF NOT EXISTS idx_trip_days_unique_day
+ON trip_days(trip_id, day_number);
+
+-- Queries
+
+-- Insert or replace trip day
+insertOrReplace:
+INSERT OR REPLACE INTO trip_days (
+    id, trip_id, date, day_number, day_type, title, notes,
+    country, city, transit_details, location_id, created_at, updated_at
+)
+VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+
+-- Get trip day by ID
+getTripDayById:
+SELECT *
+FROM trip_days
+WHERE id = ?;
+
+-- Get all trip days for a trip
+getTripDaysForTrip:
+SELECT *
+FROM trip_days
+WHERE trip_id = ?
+ORDER BY day_number ASC;
+
+-- Get trip day by trip and day number
+getTripDayByDayNumber:
+SELECT *
+FROM trip_days
+WHERE trip_id = ? AND day_number = ?;
+
+-- Get trip day by date
+getTripDayByDate:
+SELECT *
+FROM trip_days
+WHERE trip_id = ? AND date = ?;
+
+-- Get trip day by location ID
+getTripDayByLocationId:
+SELECT *
+FROM trip_days
+WHERE location_id = ?
+LIMIT 1;
+
+-- Update trip day
+updateTripDay:
+UPDATE trip_days
+SET date = ?,
+    day_number = ?,
+    day_type = ?,
+    title = ?,
+    notes = ?,
+    country = ?,
+    city = ?,
+    transit_details = ?,
+    location_id = ?,
+    updated_at = ?
+WHERE id = ?;
+
+-- Delete trip day by ID
+deleteTripDayById:
+DELETE FROM trip_days
+WHERE id = ?;
+
+-- Delete all trip days for a trip
+deleteTripDaysForTrip:
+DELETE FROM trip_days
+WHERE trip_id = ?;
+
+-- Count trip days for a trip
+countTripDaysForTrip:
+SELECT COUNT(*)
+FROM trip_days
+WHERE trip_id = ?;
+
+-- Get trip days within date range
+getTripDaysInDateRange:
+SELECT *
+FROM trip_days
+WHERE trip_id = ?
+  AND date >= ?
+  AND date <= ?
+ORDER BY date ASC;
+
+-- Check if trip day exists
+tripDayExists:
+SELECT COUNT(*) > 0
+FROM trip_days
+WHERE id = ?;
+
+-- Get all trip days (for sync)
+getAllTripDays:
+SELECT *
+FROM trip_days
+ORDER BY trip_id, day_number ASC;
