@@ -66,7 +66,7 @@ val sharedModule = module {
     // Domain Services
     singleOf(::GapDetectionService)
     singleOf(::BookingSyncService)
-    single { SyncService(get(), get(), get(), get()) } // Enhanced sync service with Activity/Booking support
+    single { SyncService(get(), get(), get(), get(), get()) } // Full multi-entity sync: Trip/TripDay/Activity/Booking
 
     // Use Cases
     singleOf(::GetAllTripsUseCase)
