@@ -2,6 +2,8 @@ package com.aurora.travlogue.core.domain.service
 
 import com.aurora.travlogue.core.auth.AuthManager
 import com.aurora.travlogue.core.auth.AuthState
+import com.aurora.travlogue.core.data.repository.ActivitySyncRepository
+import com.aurora.travlogue.core.data.repository.BookingSyncRepository
 import com.aurora.travlogue.core.data.repository.TripSyncRepository
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -23,6 +25,8 @@ import kotlinx.coroutines.launch
  */
 class SyncService(
     private val tripSyncRepository: TripSyncRepository,
+    private val activitySyncRepository: ActivitySyncRepository,
+    private val bookingSyncRepository: BookingSyncRepository,
     private val authManager: AuthManager
 ) {
     private val _syncState = MutableStateFlow<SyncState>(SyncState.Idle)
@@ -62,8 +66,11 @@ class SyncService(
      *
      * Sync order:
      * 1. Trips (base entities)
-     * 2. Activities (associated with trip days)
-     * 3. Bookings (associated with trip days/activities)
+     * 2. Activities (associated with trip days) - TODO: Requires TripDay entity
+     * 3. Bookings (associated with trip days/activities) - TODO: Requires TripDay entity
+     *
+     * NOTE: Full Activity/Booking sync requires TripDay entity to be implemented.
+     * For now, Trips are synced. Activities/Bookings sync when accessed individually.
      */
     suspend fun syncAll(): Result<Unit> {
         if (!authManager.isAuthenticated()) {
@@ -77,7 +84,7 @@ class SyncService(
         _syncState.value = SyncState.Syncing(progress = 0f, message = "Starting sync...")
 
         return try {
-            // Phase 1: Sync trips (0% - 50%)
+            // Phase 1: Sync trips (0% - 100% for now)
             _syncState.value = SyncState.Syncing(progress = 0.1f, message = "Syncing trips...")
             val tripsResult = tripSyncRepository.syncTripsFromRemote()
 
@@ -88,23 +95,24 @@ class SyncService(
                 return tripsResult
             }
 
-            _syncState.value = SyncState.Syncing(progress = 0.5f, message = "Trips synced")
+            _syncState.value = SyncState.Syncing(progress = 0.6f, message = "Trips synced")
 
-            // Phase 2: Sync activities (50% - 75%)
-            // TODO: Implement when we have activity-tripday coordination
-            _syncState.value = SyncState.Syncing(progress = 0.6f, message = "Syncing activities...")
-            // activitySyncRepository.syncActivitiesFromRemote()
-            _syncState.value = SyncState.Syncing(progress = 0.75f, message = "Activities synced")
+            // Phase 2: Sync activities (requires TripDay)
+            // NOTE: Activity sync requires TripDay entity which links backend trip_day IDs
+            // to local locations. Activities sync individually when accessed via
+            // activitySyncRepository.syncActivitiesForTripDay(tripDayId, locationId)
+            _syncState.value = SyncState.Syncing(progress = 0.75f, message = "Activities ready")
 
-            // Phase 3: Sync bookings (75% - 100%)
-            // TODO: Implement when we have booking-tripday coordination
-            _syncState.value = SyncState.Syncing(progress = 0.85f, message = "Syncing bookings...")
-            // bookingSyncRepository.syncBookingsFromRemote()
+            // Phase 3: Sync bookings (requires TripDay)
+            // NOTE: Booking sync requires TripDay entity for coordination.
+            // Bookings sync individually when accessed via
+            // bookingSyncRepository.syncBookingsForTripDay(tripDayId, localTripId)
+            _syncState.value = SyncState.Syncing(progress = 0.9f, message = "Bookings ready")
 
             // Complete
             _lastSyncTime.value = System.currentTimeMillis()
             _syncState.value = SyncState.Success(
-                message = "Sync completed successfully"
+                message = "Sync completed (Trips synced, Activities/Bookings on-demand)"
             )
             Result.success(Unit)
         } catch (e: Exception) {

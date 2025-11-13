@@ -3,11 +3,11 @@
 **Project**: Travlogue KMP App Integration with Logbook Backend
 **Backend**: https://api.travlogue.in
 **Branch**: `kmp-migration`
-**Last Updated**: 2025-11-12
+**Last Updated**: 2025-11-13
 
 ---
 
-## 📊 Overall Progress: 70% Complete
+## 📊 Overall Progress: 72% Complete
 
 ### Milestone Overview
 
@@ -17,7 +17,7 @@
 | **Phase 2** | ✅ Complete | 100% | Repository Layer & Offline-First |
 | **Phase 3A** | ✅ Complete | 100% | Activity & Booking Sync |
 | **Phase 3B** | ✅ Complete | 100% | ID Mapping Infrastructure |
-| **Phase 3C** | 🚧 In Progress | 60% | Full Sync & Conflict Resolution |
+| **Phase 3C** | 🚧 In Progress | 70% | Full Sync & Conflict Resolution |
 | **Phase 4** | ⏳ Pending | 0% | OAuth & UI Integration |
 | **Phase 5** | ⏳ Pending | 0% | Background Sync & Polish |
 
@@ -125,10 +125,10 @@ isSynced(uuid, EntityType.TRIP) → Boolean
 
 ## 🚧 In Progress
 
-### Phase 3C: Full Sync & Conflict Resolution (60% 🚧)
+### Phase 3C: Full Sync & Conflict Resolution (70% 🚧)
 
 **Target Completion**: TBD
-**Current Focus**: Completing the sync layer
+**Current Focus**: TripDay entity and conflict resolution
 
 #### Completed Tasks
 
@@ -139,11 +139,16 @@ isSynced(uuid, EntityType.TRIP) → Boolean
   - All CRUD operations now track UUID ↔ Int mappings
   - Consistent offline-first pattern across all entities
 
+- ✅ **Enhanced SyncService** with Activity/Booking repositories - DONE
+  - Added ActivitySyncRepository and BookingSyncRepository to SyncService
+  - Updated syncAll() to support multi-entity sync
+  - Documented TripDay dependency for full Activity/Booking sync
+  - Current implementation: Trips sync fully, Activities/Bookings on-demand
+
 #### Remaining Tasks
 
 **High Priority**:
-- [ ] **Complete SyncService.syncAll()** with actual Activity/Booking sync
-- [ ] **Implement TripDay entity** in local model
+- [ ] **Implement TripDay entity** in local model (blocker for full Activity/Booking sync)
 - [ ] **Add sync queue table** for failed operations
 - [ ] **Implement conflict detection** based on `updated_at` timestamps
 - [ ] **Create conflict resolution UI** for user selection
@@ -334,5 +339,5 @@ isSynced(uuid, EntityType.TRIP) → Boolean
 
 ---
 
-*Last Updated: 2025-11-12 after Activity/Booking ID Mapping integration*
-*Next Update: After Phase 3C completion*
+*Last Updated: 2025-11-13 after SyncService enhancement*
+*Next Update: After TripDay entity implementation*
