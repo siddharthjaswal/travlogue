@@ -1,5 +1,6 @@
 package com.aurora.travlogue.di
 
+import com.aurora.travlogue.BuildConfig
 import com.aurora.travlogue.core.auth.AndroidGoogleAuthProvider
 import com.aurora.travlogue.core.auth.GoogleAuthProvider
 import com.aurora.travlogue.core.data.local.AndroidTokenStorage
@@ -20,7 +21,7 @@ actual val platformModule = module {
     single<GoogleAuthProvider> {
         AndroidGoogleAuthProvider(
             context = get(),
-            serverClientId = "YOUR_GOOGLE_CLIENT_ID", // TODO: Move to BuildConfig or settings
+            serverClientId = BuildConfig.GOOGLE_OAUTH_CLIENT_ID,
             apiClient = get() // LogbookApiClient for backend auth
         )
     }

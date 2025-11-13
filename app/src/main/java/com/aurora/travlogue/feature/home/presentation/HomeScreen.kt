@@ -3,33 +3,41 @@ package com.aurora.travlogue.feature.home.presentation
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.CloudOff
 import androidx.compose.material.icons.filled.Science
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.aurora.travlogue.core.domain.model.Trip
 import com.aurora.travlogue.core.domain.model.TripMockData
+import com.aurora.travlogue.core.sync.NetworkConnectivityMonitor
 import com.aurora.travlogue.feature.home.components.EmptyState
 import com.aurora.travlogue.feature.home.components.TripList
+import org.koin.compose.koinInject
 import org.koin.compose.viewmodel.koinViewModel
 
 @Composable
 fun HomeScreen(
     viewModel: HomeViewModel = koinViewModel(),
+    networkMonitor: NetworkConnectivityMonitor = koinInject(),
     onNavigateToCreateTrip: () -> Unit,
     onNavigateToPlan: (String) -> Unit,
     onNavigateToMock: () -> Unit = {}
 ) {
     val trips by viewModel.allTrips.collectAsState()
     val uiState by viewModel.uiState.collectAsState()
+    val isConnected by networkMonitor.isConnected.collectAsState(initial = true)
 
     HomeScreenContent(
         trips = trips,
         uiState = uiState,
+        isConnected = isConnected,
         onNavigateToCreateTrip = onNavigateToCreateTrip,
         onNavigateToPlan = onNavigateToPlan,
         onDeleteTrip = { viewModel.deleteTrip(it) },
@@ -45,6 +53,7 @@ private fun HomeScreenWithTripsPreview() {
         HomeScreenContent(
             trips = TripMockData.sampleTrips,
             uiState = com.aurora.travlogue.feature.home.presentation.HomeUiState(),
+            isConnected = true,
             onNavigateToCreateTrip = {},
             onNavigateToPlan = {},
             onDeleteTrip = {},
@@ -61,6 +70,24 @@ private fun HomeScreenEmptyPreview() {
         HomeScreenContent(
             trips = emptyList(),
             uiState = com.aurora.travlogue.feature.home.presentation.HomeUiState(),
+            isConnected = true,
+            onNavigateToCreateTrip = {},
+            onNavigateToPlan = {},
+            onDeleteTrip = {},
+            onNavigateToMock = {},
+            onRefresh = {}
+        )
+    }
+}
+
+@Preview(showBackground = true, name = "Home Screen - Offline")
+@Composable
+private fun HomeScreenOfflinePreview() {
+    MaterialTheme {
+        HomeScreenContent(
+            trips = TripMockData.sampleTrips,
+            uiState = com.aurora.travlogue.feature.home.presentation.HomeUiState(),
+            isConnected = false,
             onNavigateToCreateTrip = {},
             onNavigateToPlan = {},
             onDeleteTrip = {},
@@ -75,6 +102,7 @@ private fun HomeScreenEmptyPreview() {
 private fun HomeScreenContent(
     trips: List<Trip>,
     uiState: com.aurora.travlogue.feature.home.presentation.HomeUiState,
+    isConnected: Boolean,
     onNavigateToCreateTrip: () -> Unit,
     onNavigateToPlan: (String) -> Unit,
     onDeleteTrip: (Trip) -> Unit,
@@ -84,7 +112,39 @@ private fun HomeScreenContent(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("My Trips") },
+                title = {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        Text("My Trips")
+                        // Offline indicator badge
+                        if (!isConnected) {
+                            Surface(
+                                color = MaterialTheme.colorScheme.errorContainer,
+                                shape = MaterialTheme.shapes.small
+                            ) {
+                                Row(
+                                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+                                    horizontalArrangement = Arrangement.spacedBy(4.dp),
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Default.CloudOff,
+                                        contentDescription = "Offline",
+                                        tint = MaterialTheme.colorScheme.onErrorContainer,
+                                        modifier = Modifier.size(16.dp)
+                                    )
+                                    Text(
+                                        text = "Offline",
+                                        style = MaterialTheme.typography.labelSmall,
+                                        color = MaterialTheme.colorScheme.onErrorContainer
+                                    )
+                                }
+                            }
+                        }
+                    }
+                },
                 actions = {
                     // Mock data generator icon (for testing)
                     IconButton(onClick = onNavigateToMock) {

@@ -24,6 +24,10 @@ android {
         vectorDrawables {
             useSupportLibrary = true
         }
+
+        // Google OAuth Client ID
+        // TODO: Get from google-services.json or set via gradle properties
+        buildConfigField("String", "GOOGLE_OAUTH_CLIENT_ID", "\"YOUR_GOOGLE_CLIENT_ID\"")
     }
 
     buildTypes {
