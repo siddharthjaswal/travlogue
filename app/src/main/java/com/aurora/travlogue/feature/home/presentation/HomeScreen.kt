@@ -25,13 +25,16 @@ fun HomeScreen(
     onNavigateToMock: () -> Unit = {}
 ) {
     val trips by viewModel.allTrips.collectAsState()
+    val uiState by viewModel.uiState.collectAsState()
 
     HomeScreenContent(
         trips = trips,
+        uiState = uiState,
         onNavigateToCreateTrip = onNavigateToCreateTrip,
         onNavigateToPlan = onNavigateToPlan,
         onDeleteTrip = { viewModel.deleteTrip(it) },
-        onNavigateToMock = onNavigateToMock
+        onNavigateToMock = onNavigateToMock,
+        onRefresh = { viewModel.refreshTrips() }
     )
 }
 
@@ -41,10 +44,12 @@ private fun HomeScreenWithTripsPreview() {
     MaterialTheme {
         HomeScreenContent(
             trips = TripMockData.sampleTrips,
+            uiState = com.aurora.travlogue.feature.home.presentation.HomeUiState(),
             onNavigateToCreateTrip = {},
             onNavigateToPlan = {},
             onDeleteTrip = {},
-            onNavigateToMock = {}
+            onNavigateToMock = {},
+            onRefresh = {}
         )
     }
 }
@@ -55,10 +60,12 @@ private fun HomeScreenEmptyPreview() {
     MaterialTheme {
         HomeScreenContent(
             trips = emptyList(),
+            uiState = com.aurora.travlogue.feature.home.presentation.HomeUiState(),
             onNavigateToCreateTrip = {},
             onNavigateToPlan = {},
             onDeleteTrip = {},
-            onNavigateToMock = {}
+            onNavigateToMock = {},
+            onRefresh = {}
         )
     }
 }
@@ -67,10 +74,12 @@ private fun HomeScreenEmptyPreview() {
 @Composable
 private fun HomeScreenContent(
     trips: List<Trip>,
+    uiState: com.aurora.travlogue.feature.home.presentation.HomeUiState,
     onNavigateToCreateTrip: () -> Unit,
     onNavigateToPlan: (String) -> Unit,
     onDeleteTrip: (Trip) -> Unit,
-    onNavigateToMock: () -> Unit = {}
+    onNavigateToMock: () -> Unit = {},
+    onRefresh: () -> Unit
 ) {
     Scaffold(
         topBar = {
@@ -104,19 +113,57 @@ private fun HomeScreenContent(
             }
         }
     ) { paddingValues ->
-        Box(
+        Column(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
         ) {
-            if (trips.isEmpty()) {
-                EmptyState(onCreateTrip = onNavigateToCreateTrip)
-            } else {
-                TripList(
-                    trips = trips,
-                    onTripClick = onNavigateToPlan,
-                    onDeleteTrip = onDeleteTrip
+            // Sync indicator
+            if (uiState.isSyncing) {
+                LinearProgressIndicator(
+                    progress = { uiState.syncProgress },
+                    modifier = Modifier.fillMaxWidth()
                 )
+                if (uiState.syncMessage != null) {
+                    Text(
+                        text = uiState.syncMessage,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
+                    )
+                }
+            }
+
+            // Error message
+            if (uiState.error != null) {
+                Surface(
+                    color = MaterialTheme.colorScheme.errorContainer,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text(
+                        text = uiState.error,
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onErrorContainer,
+                        modifier = Modifier.padding(16.dp)
+                    )
+                }
+            }
+
+            // Trip list
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .weight(1f)
+            ) {
+                if (trips.isEmpty()) {
+                    EmptyState(onCreateTrip = onNavigateToCreateTrip)
+                } else {
+                    TripList(
+                        trips = trips,
+                        onTripClick = onNavigateToPlan,
+                        onDeleteTrip = onDeleteTrip
+                    )
+                }
             }
         }
     }

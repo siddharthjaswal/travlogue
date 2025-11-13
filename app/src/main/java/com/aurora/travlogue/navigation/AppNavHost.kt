@@ -17,14 +17,16 @@ import com.aurora.travlogue.feature.tripdetail.presentation.TripDetailScreen
  * Uses type-safe navigation with Kotlin Serialization
  *
  * @param navController The navigation controller for managing navigation
+ * @param startDestination The initial destination (defaults to Home, can be SignIn for unauthenticated users)
  */
 @Composable
 fun AppNavHost(
-    navController: NavHostController
+    navController: NavHostController,
+    startDestination: AppDestination = Home
 ) {
     NavHost(
         navController = navController,
-        startDestination = Home // Type-safe! No more strings
+        startDestination = startDestination // Auth-aware start destination
     ) {
         // Home screen - no arguments
         composable<Home> {
