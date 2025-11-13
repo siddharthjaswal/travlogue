@@ -1,6 +1,8 @@
 package com.aurora.travlogue
 
 import android.app.Application
+import com.aurora.travlogue.core.sync.SyncScheduler
+import com.aurora.travlogue.di.androidAppModule
 import com.aurora.travlogue.di.platformModule
 import com.aurora.travlogue.di.sharedModule
 import com.google.firebase.Firebase
@@ -9,6 +11,7 @@ import com.google.firebase.remoteconfig.FirebaseRemoteConfig
 import com.google.firebase.remoteconfig.remoteConfig
 import com.google.firebase.remoteconfig.remoteConfigSettings
 import dagger.hilt.android.HiltAndroidApp
+import org.koin.android.ext.android.inject
 import org.koin.android.ext.koin.androidContext
 import org.koin.android.ext.koin.androidLogger
 import org.koin.core.context.startKoin
@@ -17,6 +20,9 @@ import timber.log.Timber
 
 @HiltAndroidApp
 class App : Application() {
+
+    private val syncScheduler: SyncScheduler by inject()
+
     override fun onCreate() {
         super.onCreate()
 
@@ -28,7 +34,7 @@ class App : Application() {
         startKoin {
             androidLogger(if (BuildConfig.DEBUG) Level.ERROR else Level.NONE)
             androidContext(this@App)
-            modules(platformModule, sharedModule)
+            modules(platformModule, sharedModule, androidAppModule)
         }
 
         FirebaseApp.initializeApp(this)
@@ -37,6 +43,22 @@ class App : Application() {
 
         initializePlacesApi()
 
+        // Initialize background sync
+        initializeBackgroundSync()
+    }
+
+    /**
+     * Schedule periodic background sync
+     * Runs every 6 hours when network is available and battery is not low
+     */
+    private fun initializeBackgroundSync() {
+        Timber.d("Initializing background sync")
+        syncScheduler.schedulePeriodicSync(
+            intervalHours = 6,
+            requireWifi = false,    // Sync on any network
+            requireCharging = false  // Sync even when not charging
+        )
+        Timber.i("Background sync initialized successfully")
     }
 
     private fun initializePlacesApi() {

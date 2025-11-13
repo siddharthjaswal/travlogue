@@ -161,6 +161,9 @@ dependencies {
     implementation(libs.gson)
     implementation(libs.kotlinx.datetime)
 
+    // WorkManager
+    implementation(libs.androidx.work.runtime.ktx)
+
     // Firebase
     implementation(platform(libs.android.firebase.bom))
     implementation(libs.android.firebase.config)
