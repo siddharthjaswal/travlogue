@@ -34,6 +34,19 @@ class LogbookApiClient(
     // ==================== Auth APIs ====================
 
     /**
+     * Authenticate with Google using ID token
+     * Sends Google ID token to backend for validation and JWT token exchange
+     */
+    suspend fun authenticateWithGoogle(idToken: String): Result<AuthUserResponse> {
+        return safeApiCall {
+            httpClient.post("$BASE_URL/auth/google") {
+                contentType(ContentType.Application.Json)
+                setBody(mapOf("idToken" to idToken))
+            }.body()
+        }
+    }
+
+    /**
      * Refresh access token using refresh token
      */
     suspend fun refreshToken(): Result<TokenRefreshResponse> {

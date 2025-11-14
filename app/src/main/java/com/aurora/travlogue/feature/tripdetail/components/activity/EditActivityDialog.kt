@@ -606,6 +606,11 @@ private fun EditActivityBottomActionBarPreview() {
 
 private fun getActivityTypeDisplay(type: ActivityType): String {
     return when (type) {
+        ActivityType.SIGHTSEEING -> "👁️ Sightseeing"
+        ActivityType.DINING -> "🍴 Dining"
+        ActivityType.ENTERTAINMENT -> "🎭 Entertainment"
+        ActivityType.SHOPPING -> "🛍️ Shopping"
+        ActivityType.RELAXATION -> "🧘 Relaxation"
         ActivityType.ATTRACTION -> "🎨 Attraction"
         ActivityType.FOOD -> "🍴 Food & Dining"
         ActivityType.BOOKING -> "🎫 Booking"

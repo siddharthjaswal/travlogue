@@ -184,9 +184,9 @@ private fun HomeScreenContent(
                     progress = { uiState.syncProgress },
                     modifier = Modifier.fillMaxWidth()
                 )
-                if (uiState.syncMessage != null) {
+                uiState.syncMessage?.let { message ->
                     Text(
-                        text = uiState.syncMessage,
+                        text = message,
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
@@ -195,13 +195,13 @@ private fun HomeScreenContent(
             }
 
             // Error message
-            if (uiState.error != null) {
+            uiState.error?.let { error ->
                 Surface(
                     color = MaterialTheme.colorScheme.errorContainer,
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     Text(
-                        text = uiState.error,
+                        text = error,
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onErrorContainer,
                         modifier = Modifier.padding(16.dp)

@@ -73,7 +73,7 @@ fun Activity.toCreateDto(
         contactPhone = null,
         contactEmail = null,
         status = ActivityStatus.PLANNED,
-        notes = description.ifEmpty { null },
+        notes = description?.ifEmpty { null },
         displayOrder = displayOrder
     )
 }
@@ -103,7 +103,7 @@ fun Activity.toUpdateDto(
         contactPhone = null,
         contactEmail = null,
         status = null,
-        notes = description.ifEmpty { null },
+        notes = description?.ifEmpty { null },
         displayOrder = displayOrder
     )
 }

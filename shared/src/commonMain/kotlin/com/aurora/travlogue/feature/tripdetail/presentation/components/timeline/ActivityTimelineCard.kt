@@ -208,6 +208,11 @@ private fun formatTime(time: LocalTime): String {
  * Get icon for activity type
  */
 private fun getActivityTypeIcon(type: ActivityType) = when (type) {
+    ActivityType.SIGHTSEEING -> Icons.Default.Place
+    ActivityType.DINING -> Icons.Default.Place
+    ActivityType.ENTERTAINMENT -> Icons.Default.Info
+    ActivityType.SHOPPING -> Icons.Default.Place
+    ActivityType.RELAXATION -> Icons.Default.Info
     ActivityType.ATTRACTION -> Icons.Default.Place
     ActivityType.FOOD -> Icons.Default.Place
     ActivityType.BOOKING -> Icons.Default.Info
@@ -220,6 +225,11 @@ private fun getActivityTypeIcon(type: ActivityType) = when (type) {
  */
 @Composable
 private fun getActivityTypeColor(type: ActivityType) = when (type) {
+    ActivityType.SIGHTSEEING -> MaterialTheme.colorScheme.primaryContainer
+    ActivityType.DINING -> MaterialTheme.colorScheme.tertiaryContainer
+    ActivityType.ENTERTAINMENT -> MaterialTheme.colorScheme.secondaryContainer
+    ActivityType.SHOPPING -> MaterialTheme.colorScheme.primaryContainer
+    ActivityType.RELAXATION -> MaterialTheme.colorScheme.surfaceVariant
     ActivityType.ATTRACTION -> MaterialTheme.colorScheme.primaryContainer
     ActivityType.FOOD -> MaterialTheme.colorScheme.tertiaryContainer
     ActivityType.BOOKING -> MaterialTheme.colorScheme.secondaryContainer
@@ -231,6 +241,11 @@ private fun getActivityTypeColor(type: ActivityType) = when (type) {
  * Get display text for activity type
  */
 private fun getActivityTypeDisplay(type: ActivityType) = when (type) {
+    ActivityType.SIGHTSEEING -> "Sightseeing"
+    ActivityType.DINING -> "Dining"
+    ActivityType.ENTERTAINMENT -> "Entertainment"
+    ActivityType.SHOPPING -> "Shopping"
+    ActivityType.RELAXATION -> "Relaxation"
     ActivityType.ATTRACTION -> "Attraction"
     ActivityType.FOOD -> "Dining"
     ActivityType.BOOKING -> "Booking"

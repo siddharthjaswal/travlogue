@@ -5,6 +5,8 @@ import com.aurora.travlogue.core.data.remote.LogbookApiClient
 import com.aurora.travlogue.core.data.remote.mapper.toDomainModel
 import com.aurora.travlogue.core.data.remote.mapper.toCreateDto
 import com.aurora.travlogue.core.data.remote.mapper.toUpdateDto
+import com.aurora.travlogue.core.data.remote.mapper.toJson
+import com.aurora.travlogue.core.data.remote.mapper.parseTransitDetails
 import com.aurora.travlogue.core.domain.model.TripDay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
@@ -84,7 +86,7 @@ class TripDaySyncRepository(
                 notes = tripDay.notes,
                 country = tripDay.country,
                 city = tripDay.city,
-                transit_details = com.aurora.travlogue.core.data.remote.mapper.toJson(tripDay.transitDetails),
+                transit_details = tripDay.transitDetails.toJson(),
                 location_id = tripDay.locationId,
                 created_at = tripDay.createdAt,
                 updated_at = tripDay.updatedAt
@@ -124,7 +126,7 @@ class TripDaySyncRepository(
                 notes = tripDay.notes,
                 country = tripDay.country,
                 city = tripDay.city,
-                transit_details = com.aurora.travlogue.core.data.remote.mapper.toJson(tripDay.transitDetails),
+                transit_details = tripDay.transitDetails.toJson(),
                 location_id = tripDay.locationId,
                 updated_at = System.currentTimeMillis().toString(),
                 id = tripDay.id
@@ -219,7 +221,7 @@ class TripDaySyncRepository(
                             notes = tripDay.notes,
                             country = tripDay.country,
                             city = tripDay.city,
-                            transit_details = com.aurora.travlogue.core.data.remote.mapper.toJson(tripDay.transitDetails),
+                            transit_details = tripDay.transitDetails.toJson(),
                             location_id = tripDay.locationId,
                             created_at = tripDay.createdAt,
                             updated_at = tripDay.updatedAt
@@ -277,7 +279,7 @@ class TripDaySyncRepository(
                         notes = tripDay.notes,
                         country = tripDay.country,
                         city = tripDay.city,
-                        transit_details = com.aurora.travlogue.core.data.remote.mapper.toJson(tripDay.transitDetails),
+                        transit_details = tripDay.transitDetails.toJson(),
                         location_id = tripDay.locationId,
                         created_at = tripDay.createdAt,
                         updated_at = tripDay.updatedAt
@@ -323,7 +325,7 @@ class TripDaySyncRepository(
                         notes = syncedTripDay.notes,
                         country = syncedTripDay.country,
                         city = syncedTripDay.city,
-                        transit_details = com.aurora.travlogue.core.data.remote.mapper.toJson(syncedTripDay.transitDetails),
+                        transit_details = syncedTripDay.transitDetails.toJson(),
                         location_id = syncedTripDay.locationId,
                         created_at = syncedTripDay.createdAt,
                         updated_at = syncedTripDay.updatedAt
@@ -376,7 +378,7 @@ class TripDaySyncRepository(
                         notes = syncedTripDay.notes,
                         country = syncedTripDay.country,
                         city = syncedTripDay.city,
-                        transit_details = com.aurora.travlogue.core.data.remote.mapper.toJson(syncedTripDay.transitDetails),
+                        transit_details = syncedTripDay.transitDetails.toJson(),
                         location_id = syncedTripDay.locationId,
                         created_at = syncedTripDay.createdAt,
                         updated_at = syncedTripDay.updatedAt
@@ -415,7 +417,7 @@ private fun com.aurora.travlogue.database.Trip_days.toDomainModel(): TripDay {
         notes = notes,
         country = country,
         city = city,
-        transitDetails = com.aurora.travlogue.core.data.remote.mapper.parseTransitDetails(transit_details),
+        transitDetails = transit_details.parseTransitDetails(),
         locationId = location_id,
         createdAt = created_at,
         updatedAt = updated_at

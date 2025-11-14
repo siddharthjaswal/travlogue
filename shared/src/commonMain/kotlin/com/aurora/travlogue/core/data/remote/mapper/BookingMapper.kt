@@ -75,10 +75,10 @@ fun Booking.toCreateDto(tripDayId: Int? = null, activityId: Int? = null): Bookin
         confirmationNumber = confirmationNumber,
         bookingReference = confirmationNumber, // Use same value
         cost = price,
-        currency = currency,
+        currency = currency ?: "USD",
         bookingDate = date,
         bookingTime = time,
-        location = fromLocation,
+        location = fromLocation ?: "", // Handle nullable fromLocation
         locationAddress = null, // Not in local model
         contactPhone = null,
         contactEmail = null,

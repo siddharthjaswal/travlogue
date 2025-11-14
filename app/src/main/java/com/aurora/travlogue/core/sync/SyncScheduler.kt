@@ -7,6 +7,7 @@ import androidx.work.NetworkType
 import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkInfo
 import androidx.work.WorkManager
+import androidx.work.await
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import timber.log.Timber
@@ -52,8 +53,8 @@ class SyncScheduler(private val context: Context) {
         val syncRequest = PeriodicWorkRequestBuilder<SyncWorker>(
             intervalHours,
             TimeUnit.HOURS,
-            flexTimeInterval = 15, // Allow 15 minute flex for optimization
-            flexTimeUnit = TimeUnit.MINUTES
+            15, // Allow 15 minute flex for optimization
+            TimeUnit.MINUTES
         )
             .setConstraints(constraints)
             .addTag(TAG_SYNC)
@@ -118,7 +119,7 @@ class SyncScheduler(private val context: Context) {
      * Check if periodic sync is currently scheduled
      */
     suspend fun isPeriodicSyncScheduled(): Boolean {
-        val workInfos = workManager.getWorkInfosForUniqueWork(SyncWorker.WORK_NAME).await()
+        val workInfos = workManager.getWorkInfosForUniqueWork(SyncWorker.WORK_NAME).get()
         return workInfos.any { !it.state.isFinished }
     }
 
@@ -126,7 +127,7 @@ class SyncScheduler(private val context: Context) {
      * Get the last sync timestamp from work data
      */
     suspend fun getLastSyncTimestamp(): Long? {
-        val workInfos = workManager.getWorkInfosForUniqueWork(SyncWorker.WORK_NAME).await()
+        val workInfos = workManager.getWorkInfosForUniqueWork(SyncWorker.WORK_NAME).get()
         return workInfos.firstOrNull()?.outputData?.getLong(SyncWorker.KEY_TIMESTAMP, -1)
             ?.takeIf { it != -1L }
     }
