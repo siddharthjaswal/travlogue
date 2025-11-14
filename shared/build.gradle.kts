@@ -114,6 +114,13 @@ android {
 
     defaultConfig {
         minSdk = libs.versions.min.sdk.version.get().toInt()
+
+        // Google OAuth Client ID (same as app module)
+        buildConfigField("String", "GOOGLE_OAUTH_CLIENT_ID", "\"YOUR_GOOGLE_CLIENT_ID\"")
+    }
+
+    buildFeatures {
+        buildConfig = true
     }
 
     compileOptions {
