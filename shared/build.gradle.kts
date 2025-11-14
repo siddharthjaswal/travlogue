@@ -116,7 +116,12 @@ android {
         minSdk = libs.versions.min.sdk.version.get().toInt()
 
         // Google OAuth Client ID (same as app module)
-        buildConfigField("String", "GOOGLE_OAUTH_CLIENT_ID", "\"YOUR_GOOGLE_CLIENT_ID\"")
+        // Will read from gradle.properties or use placeholder
+        buildConfigField(
+            "String",
+            "GOOGLE_OAUTH_CLIENT_ID",
+            "\"${project.findProperty("GOOGLE_OAUTH_CLIENT_ID") ?: "YOUR_GOOGLE_CLIENT_ID"}\""
+        )
     }
 
     buildFeatures {

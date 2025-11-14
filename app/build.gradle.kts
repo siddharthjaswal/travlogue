@@ -26,8 +26,13 @@ android {
         }
 
         // Google OAuth Client ID
-        // TODO: Get from google-services.json or set via gradle properties
-        buildConfigField("String", "GOOGLE_OAUTH_CLIENT_ID", "\"YOUR_GOOGLE_CLIENT_ID\"")
+        // TODO: Replace with your actual OAuth Client ID from Google Cloud Console
+        // Get it from: https://console.cloud.google.com/apis/credentials
+        buildConfigField(
+            "String",
+            "GOOGLE_OAUTH_CLIENT_ID",
+            "\"${project.findProperty("GOOGLE_OAUTH_CLIENT_ID") ?: "YOUR_GOOGLE_CLIENT_ID"}\""
+        )
 
         // API Configuration
         buildConfigField("String", "API_BASE_URL", "\"https://api.travlogue.in\"")
