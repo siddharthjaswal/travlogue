@@ -51,10 +51,17 @@ class AuthManager(
      * Sign in with Google
      */
     suspend fun signInWithGoogle(): Result<UserDto> {
+        println("🔐 AuthManager: signInWithGoogle() called")
         _authState.value = AuthState.Loading
 
-        return googleAuthProvider.signIn().fold(
+        println("🔐 Calling googleAuthProvider.signIn()...")
+        val result = googleAuthProvider.signIn()
+
+        return result.fold(
             onSuccess = { authResponse ->
+                println("🔐 ✅ AuthManager: Authentication successful!")
+                println("🔐 User: ${authResponse.user.email}")
+
                 // Save tokens
                 tokenStorage.saveAccessToken(authResponse.accessToken)
                 tokenStorage.saveRefreshToken(authResponse.refreshToken)
@@ -66,6 +73,8 @@ class AuthManager(
                 Result.success(authResponse.user)
             },
             onFailure = { error ->
+                println("🔐 ❌ AuthManager: Authentication failed: ${error.message}")
+                println("🔐 Full error: ${error.stackTraceToString()}")
                 _authState.value = AuthState.Error(error.message ?: "Authentication failed")
                 Result.failure(error)
             }

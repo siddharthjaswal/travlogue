@@ -42,9 +42,9 @@ android {
     buildTypes {
         debug {
             isDebuggable = true
-            // Override API URL for development (localhost via Android emulator)
-            buildConfigField("String", "API_BASE_URL", "\"http://10.0.2.2:8000\"")
-            buildConfigField("String", "API_ENVIRONMENT", "\"development\"")
+            // Use production API for debug builds (no staging environment available)
+            buildConfigField("String", "API_BASE_URL", "\"https://api.travlogue.in/api/v1\"")
+            buildConfigField("String", "API_ENVIRONMENT", "\"production\"")
         }
         release {
             isMinifyEnabled = true

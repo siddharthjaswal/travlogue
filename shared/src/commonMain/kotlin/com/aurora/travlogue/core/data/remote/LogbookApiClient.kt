@@ -507,6 +507,7 @@ fun createHttpClient(
         install(HttpTimeout) {
             requestTimeoutMillis = LogbookApiClient.TIMEOUT_MILLIS
             connectTimeoutMillis = LogbookApiClient.TIMEOUT_MILLIS
+            socketTimeoutMillis = LogbookApiClient.TIMEOUT_MILLIS  // Socket read/write timeout
         }
 
         // Default request configuration

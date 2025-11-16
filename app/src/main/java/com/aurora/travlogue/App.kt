@@ -6,7 +6,7 @@ import com.aurora.travlogue.core.preferences.AppPreferences
 import com.aurora.travlogue.core.sync.SyncScheduler
 import com.aurora.travlogue.di.androidAppModule
 import com.aurora.travlogue.di.platformModule
-import com.aurora.travlogue.di.sharedModule
+import com.aurora.travlogue.di.createSharedModule
 import com.google.firebase.Firebase
 import com.google.firebase.FirebaseApp
 import com.google.firebase.remoteconfig.FirebaseRemoteConfig
@@ -44,7 +44,9 @@ class App : Application() {
         startKoin {
             androidLogger(if (BuildConfig.DEBUG) Level.ERROR else Level.NONE)
             androidContext(this@App)
-            modules(platformModule, sharedModule, androidAppModule)
+            // Pass API base URL from BuildConfig (debug = production, release = production)
+            // The Android-specific Ktor logger is provided by platformModule
+            modules(platformModule, createSharedModule(BuildConfig.API_BASE_URL), androidAppModule)
         }
 
         FirebaseApp.initializeApp(this)

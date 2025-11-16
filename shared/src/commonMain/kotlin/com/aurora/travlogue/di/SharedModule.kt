@@ -23,12 +23,17 @@ import com.aurora.travlogue.feature.tripdetail.presentation.TripDetailViewModel
 import org.koin.compose.viewmodel.dsl.viewModelOf
 import org.koin.core.module.Module
 import org.koin.core.module.dsl.singleOf
+import org.koin.core.qualifier.named
 import org.koin.dsl.module
 
 /**
- * Koin DI module for shared KMP code
+ * Creates shared KMP DI module with configurable API base URL
+ *
+ * @param apiBaseUrl Base URL for the Logbook API (e.g., "http://10.0.2.2:8000/api/v1" for local dev)
  */
-val sharedModule = module {
+fun createSharedModule(
+    apiBaseUrl: String = "https://api.travlogue.in/api/v1"
+) = module {
     // Database
     single { TravlogueDb(get()) }
 
@@ -40,7 +45,9 @@ val sharedModule = module {
     single {
         LogbookApiClient(
             tokenStorage = get(),
-            enableLogging = true
+            baseUrl = apiBaseUrl,
+            enableLogging = true,
+            logger = getOrNull(named("ktorLogger")) // Platform-specific logger (Android uses AndroidKtorLogger)
         )
     }
 

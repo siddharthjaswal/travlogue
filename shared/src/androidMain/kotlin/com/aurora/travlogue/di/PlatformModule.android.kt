@@ -6,6 +6,8 @@ import com.aurora.travlogue.core.auth.GoogleAuthProvider
 import com.aurora.travlogue.core.data.local.AndroidTokenStorage
 import com.aurora.travlogue.core.data.local.DatabaseDriverFactory
 import com.aurora.travlogue.core.data.local.TokenStorage
+import com.aurora.travlogue.core.data.remote.AndroidKtorLogger
+import org.koin.core.qualifier.named
 import org.koin.dsl.module
 
 /**
@@ -16,6 +18,9 @@ actual val platformModule = module {
 
     // Token Storage
     single<TokenStorage> { AndroidTokenStorage(get()) }
+
+    // Ktor Logger (Android-specific for HTTP logging)
+    single(named("ktorLogger")) { AndroidKtorLogger() as io.ktor.client.plugins.logging.Logger }
 
     // Google Auth Provider (concrete type)
     single {
