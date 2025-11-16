@@ -461,12 +461,30 @@ fun createHttpClient(
             })
         }
 
-        // Authentication with Bearer token
+        // Custom interceptor to add Authorization header from TokenStorage
+        // This ensures the Bearer token is always fresh for each request
+        install(io.ktor.client.plugins.api.createClientPlugin("AuthTokenPlugin") {
+            onRequest { request, _ ->
+                // Get current access token from storage
+                val accessToken = tokenStorage.getAccessToken()
+                if (accessToken != null) {
+                    request.headers.append(HttpHeaders.Authorization, "Bearer $accessToken")
+                    println("🔑 Added Authorization header to request: ${request.url}")
+                } else {
+                    println("⚠️ No access token available for request: ${request.url}")
+                }
+            }
+        })
+
+        // Authentication with Bearer token (for token refresh functionality)
         install(Auth) {
             bearer {
                 loadTokens {
+                    println("🔄 Auth.loadTokens() called")
                     val accessToken = tokenStorage.getAccessToken()
                     val refreshToken = tokenStorage.getRefreshToken()
+                    println("🔄 Access token: ${if (accessToken != null) "present (${accessToken.take(20)}...)" else "null"}")
+                    println("🔄 Refresh token: ${if (refreshToken != null) "present" else "null"}")
                     if (accessToken != null && refreshToken != null) {
                         BearerTokens(accessToken, refreshToken)
                     } else {
@@ -475,6 +493,7 @@ fun createHttpClient(
                 }
 
                 refreshTokens {
+                    println("🔄 Auth.refreshTokens() called")
                     val refreshToken = tokenStorage.getRefreshToken()
                         ?: return@refreshTokens null
 
@@ -486,9 +505,11 @@ fun createHttpClient(
 
                         // Save new access token
                         tokenStorage.saveAccessToken(response.accessToken)
+                        println("🔄 ✅ Token refresh successful")
 
                         BearerTokens(response.accessToken, refreshToken)
                     } catch (e: Exception) {
+                        println("🔄 ❌ Token refresh failed: ${e.message}")
                         null
                     }
                 }
