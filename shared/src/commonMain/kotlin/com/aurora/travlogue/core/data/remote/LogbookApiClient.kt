@@ -20,15 +20,16 @@ import kotlinx.serialization.json.Json
  */
 class LogbookApiClient(
     private val tokenStorage: TokenStorage,
-    private val enableLogging: Boolean = false
+    private val baseUrl: String = "https://api.travlogue.in/api/v1",
+    private val enableLogging: Boolean = false,
+    private val logger: io.ktor.client.plugins.logging.Logger? = null
 ) {
     companion object {
-        const val BASE_URL = "https://api.travlogue.in/api/v1"
-        const val TIMEOUT_MILLIS = 30_000L
+        const val TIMEOUT_MILLIS = 60_000L  // Increased to 60 seconds for Google OAuth verification
     }
 
     private val httpClient: HttpClient by lazy {
-        createHttpClient(tokenStorage, enableLogging)
+        createHttpClient(tokenStorage, baseUrl, enableLogging, logger)
     }
 
     // ==================== Auth APIs ====================
@@ -38,12 +39,26 @@ class LogbookApiClient(
      * Sends Google ID token to backend for validation and JWT token exchange
      */
     suspend fun authenticateWithGoogle(idToken: String): Result<AuthUserResponse> {
-        return safeApiCall {
-            httpClient.post("$BASE_URL/auth/google") {
+        println("🌐 LogbookApiClient: authenticateWithGoogle() called")
+        println("🌐 API URL: $baseUrl/auth/google")
+        println("🌐 ID Token (first 50 chars): ${idToken.take(50)}")
+
+        val result = safeApiCall {
+            println("🌐 Making HTTP POST request...")
+            val response = httpClient.post("$baseUrl/auth/google") {
                 contentType(ContentType.Application.Json)
                 setBody(mapOf("idToken" to idToken))
-            }.body()
+            }.body<AuthUserResponse>()
+            println("🌐 HTTP request completed successfully!")
+            response
         }
+
+        result.fold(
+            onSuccess = { println("🌐 ✅ Authentication successful") },
+            onFailure = { error -> println("🌐 ❌ Authentication failed: ${error.message}") }
+        )
+
+        return result
     }
 
     /**
@@ -54,7 +69,7 @@ class LogbookApiClient(
             val refreshToken = tokenStorage.getRefreshToken()
                 ?: return Result.failure(Exception("No refresh token available"))
 
-            val response: TokenRefreshResponse = httpClient.post("$BASE_URL/auth/refresh") {
+            val response: TokenRefreshResponse = httpClient.post("$baseUrl/auth/refresh") {
                 contentType(ContentType.Application.Json)
                 setBody(TokenRefreshRequest(refreshToken))
             }.body()
@@ -72,7 +87,7 @@ class LogbookApiClient(
      */
     suspend fun getMe(): Result<UserDto> {
         return safeApiCall {
-            httpClient.get("$BASE_URL/auth/me").body()
+            httpClient.get("$baseUrl/auth/me").body()
         }
     }
 
@@ -82,7 +97,7 @@ class LogbookApiClient(
     suspend fun logout(): Result<Unit> {
         return try {
             // Call logout endpoint
-            httpClient.post("$BASE_URL/auth/logout")
+            httpClient.post("$baseUrl/auth/logout")
             // Clear local tokens
             tokenStorage.clearTokens()
             Result.success(Unit)
@@ -100,7 +115,7 @@ class LogbookApiClient(
      */
     suspend fun getMyProfile(): Result<UserDto> {
         return safeApiCall {
-            httpClient.get("$BASE_URL/users/me").body()
+            httpClient.get("$baseUrl/users/me").body()
         }
     }
 
@@ -109,7 +124,7 @@ class LogbookApiClient(
      */
     suspend fun updateMyProfile(update: UserUpdateDto): Result<UserDto> {
         return safeApiCall {
-            httpClient.put("$BASE_URL/users/me") {
+            httpClient.put("$baseUrl/users/me") {
                 contentType(ContentType.Application.Json)
                 setBody(update)
             }.body()
@@ -127,7 +142,7 @@ class LogbookApiClient(
         statusFilter: TripStatus? = null
     ): Result<List<TripListResponseDto>> {
         return safeApiCall {
-            httpClient.get("$BASE_URL/trips/") {
+            httpClient.get("$baseUrl/trips/") {
                 parameter("skip", skip)
                 parameter("limit", limit)
                 statusFilter?.let { parameter("status_filter", it.name.lowercase()) }
@@ -140,7 +155,7 @@ class LogbookApiClient(
      */
     suspend fun getTrip(tripId: Int): Result<TripResponseDto> {
         return safeApiCall {
-            httpClient.get("$BASE_URL/trips/$tripId").body()
+            httpClient.get("$baseUrl/trips/$tripId").body()
         }
     }
 
@@ -149,7 +164,7 @@ class LogbookApiClient(
      */
     suspend fun createTrip(trip: TripCreateDto): Result<TripResponseDto> {
         return safeApiCall {
-            httpClient.post("$BASE_URL/trips/") {
+            httpClient.post("$baseUrl/trips/") {
                 contentType(ContentType.Application.Json)
                 setBody(trip)
             }.body()
@@ -161,7 +176,7 @@ class LogbookApiClient(
      */
     suspend fun updateTrip(tripId: Int, update: TripUpdateDto): Result<TripResponseDto> {
         return safeApiCall {
-            httpClient.put("$BASE_URL/trips/$tripId") {
+            httpClient.put("$baseUrl/trips/$tripId") {
                 contentType(ContentType.Application.Json)
                 setBody(update)
             }.body()
@@ -173,7 +188,7 @@ class LogbookApiClient(
      */
     suspend fun deleteTrip(tripId: Int): Result<Unit> {
         return safeApiCall {
-            httpClient.delete("$BASE_URL/trips/$tripId")
+            httpClient.delete("$baseUrl/trips/$tripId")
             Unit
         }
     }
@@ -187,7 +202,7 @@ class LogbookApiClient(
         limit: Int = 100
     ): Result<List<TripListResponseDto>> {
         return safeApiCall {
-            httpClient.get("$BASE_URL/trips/search") {
+            httpClient.get("$baseUrl/trips/search") {
                 parameter("q", query)
                 parameter("skip", skip)
                 parameter("limit", limit)
@@ -209,7 +224,7 @@ class LogbookApiClient(
         limit: Int = 100
     ): Result<List<TripDayListResponseDto>> {
         return safeApiCall {
-            httpClient.get("$BASE_URL/trip-days/") {
+            httpClient.get("$baseUrl/trip-days/") {
                 parameter("trip_id", tripId)
                 dayType?.let { parameter("day_type", it) }
                 startDate?.let { parameter("start_date", it) }
@@ -225,7 +240,7 @@ class LogbookApiClient(
      */
     suspend fun getTripDay(tripDayId: Int): Result<TripDayResponseDto> {
         return safeApiCall {
-            httpClient.get("$BASE_URL/trip-days/$tripDayId").body()
+            httpClient.get("$baseUrl/trip-days/$tripDayId").body()
         }
     }
 
@@ -234,7 +249,7 @@ class LogbookApiClient(
      */
     suspend fun createTripDay(tripDay: TripDayCreateDto): Result<TripDayResponseDto> {
         return safeApiCall {
-            httpClient.post("$BASE_URL/trip-days/") {
+            httpClient.post("$baseUrl/trip-days/") {
                 contentType(ContentType.Application.Json)
                 setBody(tripDay)
             }.body()
@@ -246,7 +261,7 @@ class LogbookApiClient(
      */
     suspend fun updateTripDay(tripDayId: Int, update: TripDayUpdateDto): Result<TripDayResponseDto> {
         return safeApiCall {
-            httpClient.put("$BASE_URL/trip-days/$tripDayId") {
+            httpClient.put("$baseUrl/trip-days/$tripDayId") {
                 contentType(ContentType.Application.Json)
                 setBody(update)
             }.body()
@@ -258,7 +273,7 @@ class LogbookApiClient(
      */
     suspend fun deleteTripDay(tripDayId: Int): Result<Unit> {
         return safeApiCall {
-            httpClient.delete("$BASE_URL/trip-days/$tripDayId")
+            httpClient.delete("$baseUrl/trip-days/$tripDayId")
             Unit
         }
     }
@@ -276,7 +291,7 @@ class LogbookApiClient(
         limit: Int = 100
     ): Result<List<ActivityListResponseDto>> {
         return safeApiCall {
-            httpClient.get("$BASE_URL/activities/trip-day/$tripDayId") {
+            httpClient.get("$baseUrl/activities/trip-day/$tripDayId") {
                 parameter("skip", skip)
                 parameter("limit", limit)
                 activityType?.let { parameter("activity_type", it.name.lowercase()) }
@@ -290,7 +305,7 @@ class LogbookApiClient(
      */
     suspend fun getActivity(activityId: Int): Result<ActivityResponseDto> {
         return safeApiCall {
-            httpClient.get("$BASE_URL/activities/$activityId").body()
+            httpClient.get("$baseUrl/activities/$activityId").body()
         }
     }
 
@@ -299,7 +314,7 @@ class LogbookApiClient(
      */
     suspend fun createActivity(activity: ActivityCreateDto): Result<ActivityResponseDto> {
         return safeApiCall {
-            httpClient.post("$BASE_URL/activities/") {
+            httpClient.post("$baseUrl/activities/") {
                 contentType(ContentType.Application.Json)
                 setBody(activity)
             }.body()
@@ -311,7 +326,7 @@ class LogbookApiClient(
      */
     suspend fun updateActivity(activityId: Int, update: ActivityUpdateDto): Result<ActivityResponseDto> {
         return safeApiCall {
-            httpClient.put("$BASE_URL/activities/$activityId") {
+            httpClient.put("$baseUrl/activities/$activityId") {
                 contentType(ContentType.Application.Json)
                 setBody(update)
             }.body()
@@ -323,7 +338,7 @@ class LogbookApiClient(
      */
     suspend fun deleteActivity(activityId: Int): Result<Unit> {
         return safeApiCall {
-            httpClient.delete("$BASE_URL/activities/$activityId")
+            httpClient.delete("$baseUrl/activities/$activityId")
             Unit
         }
     }
@@ -333,7 +348,7 @@ class LogbookApiClient(
      */
     suspend fun reorderActivities(tripDayId: Int, activityOrder: List<Int>): Result<List<ActivityListResponseDto>> {
         return safeApiCall {
-            httpClient.post("$BASE_URL/activities/trip-day/$tripDayId/reorder") {
+            httpClient.post("$baseUrl/activities/trip-day/$tripDayId/reorder") {
                 contentType(ContentType.Application.Json)
                 setBody(activityOrder)
             }.body()
@@ -353,7 +368,7 @@ class LogbookApiClient(
         limit: Int = 100
     ): Result<List<BookingListResponseDto>> {
         return safeApiCall {
-            httpClient.get("$BASE_URL/bookings/trip-day/$tripDayId") {
+            httpClient.get("$baseUrl/bookings/trip-day/$tripDayId") {
                 parameter("skip", skip)
                 parameter("limit", limit)
                 bookingType?.let { parameter("booking_type", it.name.lowercase()) }
@@ -367,7 +382,7 @@ class LogbookApiClient(
      */
     suspend fun getBooking(bookingId: Int): Result<BookingResponseDto> {
         return safeApiCall {
-            httpClient.get("$BASE_URL/bookings/$bookingId").body()
+            httpClient.get("$baseUrl/bookings/$bookingId").body()
         }
     }
 
@@ -376,7 +391,7 @@ class LogbookApiClient(
      */
     suspend fun createBooking(booking: BookingCreateDto): Result<BookingResponseDto> {
         return safeApiCall {
-            httpClient.post("$BASE_URL/bookings/") {
+            httpClient.post("$baseUrl/bookings/") {
                 contentType(ContentType.Application.Json)
                 setBody(booking)
             }.body()
@@ -388,7 +403,7 @@ class LogbookApiClient(
      */
     suspend fun updateBooking(bookingId: Int, update: BookingUpdateDto): Result<BookingResponseDto> {
         return safeApiCall {
-            httpClient.put("$BASE_URL/bookings/$bookingId") {
+            httpClient.put("$baseUrl/bookings/$bookingId") {
                 contentType(ContentType.Application.Json)
                 setBody(update)
             }.body()
@@ -400,7 +415,7 @@ class LogbookApiClient(
      */
     suspend fun deleteBooking(bookingId: Int): Result<Unit> {
         return safeApiCall {
-            httpClient.delete("$BASE_URL/bookings/$bookingId")
+            httpClient.delete("$baseUrl/bookings/$bookingId")
             Unit
         }
     }
@@ -431,7 +446,9 @@ class LogbookApiClient(
  */
 fun createHttpClient(
     tokenStorage: TokenStorage,
-    enableLogging: Boolean = false
+    baseUrl: String,
+    enableLogging: Boolean = false,
+    logger: io.ktor.client.plugins.logging.Logger? = null
 ): HttpClient {
     return HttpClient {
         // Content negotiation for JSON
@@ -462,7 +479,7 @@ fun createHttpClient(
                         ?: return@refreshTokens null
 
                     try {
-                        val response: TokenRefreshResponse = client.post("${LogbookApiClient.BASE_URL}/auth/refresh") {
+                        val response: TokenRefreshResponse = client.post("$baseUrl/auth/refresh") {
                             contentType(ContentType.Application.Json)
                             setBody(TokenRefreshRequest(refreshToken))
                         }.body()
@@ -481,8 +498,8 @@ fun createHttpClient(
         // Logging
         if (enableLogging) {
             install(Logging) {
-                logger = Logger.DEFAULT
-                level = LogLevel.INFO
+                this.logger = logger ?: io.ktor.client.plugins.logging.Logger.DEFAULT
+                level = LogLevel.ALL  // Log everything: request/response headers, body, etc.
             }
         }
 
