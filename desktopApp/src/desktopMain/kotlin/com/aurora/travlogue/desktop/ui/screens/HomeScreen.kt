@@ -30,6 +30,7 @@ fun HomeScreen(
     onNavigateToTripDetail: (String) -> Unit,
     viewModel: HomeViewModel = koinViewModel()
 ) {
+    val trips by viewModel.allTrips.collectAsState()
     val uiState by viewModel.uiState.collectAsState()
     var tripToDelete by remember { mutableStateOf<Trip?>(null) }
     var showDeleteDialog by remember { mutableStateOf(false) }
@@ -44,7 +45,7 @@ fun HomeScreen(
                         Text("Mock")
                     }
                     // Refresh button
-                    IconButton(onClick = { viewModel.retryLoading() }) {
+                    IconButton(onClick = { viewModel.refreshTrips() }) {
                         Icon(Icons.Default.Refresh, "Refresh")
                     }
                 }
@@ -62,11 +63,6 @@ fun HomeScreen(
                 .padding(paddingValues)
         ) {
             when {
-                uiState.isLoading -> {
-                    CircularProgressIndicator(
-                        modifier = Modifier.align(Alignment.Center)
-                    )
-                }
                 uiState.error != null -> {
                     Column(
                         modifier = Modifier.align(Alignment.Center),
@@ -78,12 +74,12 @@ fun HomeScreen(
                             color = MaterialTheme.colorScheme.error
                         )
                         Spacer(modifier = Modifier.height(16.dp))
-                        Button(onClick = { viewModel.retryLoading() }) {
+                        Button(onClick = { viewModel.refreshTrips() }) {
                             Text("Retry")
                         }
                     }
                 }
-                uiState.trips.isEmpty() -> {
+                trips.isEmpty() -> {
                     // Empty state
                     Column(
                         modifier = Modifier.align(Alignment.Center),
@@ -116,7 +112,7 @@ fun HomeScreen(
                         verticalArrangement = Arrangement.spacedBy(12.dp)
                     ) {
                         items(
-                            items = uiState.trips,
+                            items = trips,
                             key = { it.id }
                         ) { trip ->
                             TripCard(

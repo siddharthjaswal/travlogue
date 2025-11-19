@@ -42,7 +42,6 @@ class HomeViewModel(
     }
 
     init {
-        loadTrips()
         startSyncMonitoring()
     }
 
@@ -63,30 +62,6 @@ class HomeViewModel(
                             is SyncState.Error -> state.message
                             else -> null
                         }
-                    )
-                }
-            }
-        }
-    }
-
-    private fun loadTrips() {
-        viewModelScope.launch {
-            _uiState.update { it.copy(isLoading = true) }
-            try {
-                tripSyncRepository.getAllTrips(forceRefresh = false).collect { trips ->
-                    _uiState.update {
-                        it.copy(
-                            trips = trips,
-                            isLoading = false,
-                            error = null
-                        )
-                    }
-                }
-            } catch (e: Exception) {
-                _uiState.update {
-                    it.copy(
-                        isLoading = false,
-                        error = e.message ?: "Failed to load trips"
                     )
                 }
             }
@@ -138,10 +113,9 @@ class HomeViewModel(
 
 /**
  * UI State for Home screen
+ * Note: Trips are managed separately in allTrips StateFlow
  */
 data class HomeUiState(
-    val trips: List<Trip> = emptyList(),
-    val isLoading: Boolean = false,
     val isSyncing: Boolean = false,
     val syncProgress: Float = 0f,
     val syncMessage: String? = null,
